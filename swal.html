@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test All SweetAlert Types</title>
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
+<body>
+    <h2>Test All SweetAlert Types</h2>
+
+    <button onclick="showSuccessAlert()">Show Success Alert</button>
+    <button onclick="showErrorAlert()">Show Error Alert</button>
+    <button onclick="showWarningAlert()">Show Warning Alert</button>
+    <button onclick="showInfoAlert()">Show Info Alert</button>
+    <button onclick="showQuestionAlert()">Show Question Alert</button>
+    <button onclick="showCustomAlert()">Show Custom Alert</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.js"></script>
+
+    <script>
+        // Success Alert
+        function showSuccessAlert() {
+            Swal.fire({
+                title: 'Success!',
+                text: 'This is a success message.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Error Alert
+        function showErrorAlert() {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong!',
+                icon: 'error',
+                confirmButtonText: 'Try Again'
+            });
+        }
+
+        // Warning Alert
+        function showWarningAlert() {
+            Swal.fire({
+                title: 'Warning!',
+                text: 'This is a warning message.',
+                icon: 'warning',
+                confirmButtonText: 'I Understand'
+            });
+        }
+
+        // Info Alert
+        function showInfoAlert() {
+            Swal.fire({
+                title: 'Info!',
+                text: 'This is an informational message.',
+                icon: 'info',
+                confirmButtonText: 'Got it!'
+            });
+        }
+
+        // Question Alert
+        function showQuestionAlert() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to continue?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Continue',
+                cancelButtonText: 'No, Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('You clicked "Yes"', '', 'success');
+                } else {
+                    Swal.fire('You clicked "No"', '', 'info');
+                }
+            });
+        }
+
+        // Custom Alert (with HTML content)
+        function showCustomAlert() {
+            Swal.fire({
+                title: 'Custom HTML Alert',
+                html: '<p style="color: #ff6347;">This alert has custom HTML content!</p>',
+                icon: 'info',
+                confirmButtonText: 'Got it!',
+                showCancelButton: true,
+                cancelButtonText: 'Close'
+            });
+        }
+    </script>
+</body>
+</html>

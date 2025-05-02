@@ -1,0 +1,50 @@
+// {
+//   "name": "John Doe",
+//   "gender": "Male",
+//   "dob": "1985-07-15",
+//   "maritalStatus": "Single",
+//   "occupation": "Software Engineer",
+//   "mobileNumber": "+1234567890",
+//   "email": "johndoe@example.com",
+//   "type": "pwd",
+//   "nextOfKin": {
+//     "name": "Jane Doe",
+//     "mobileNumber": "+0987654321",
+//     "relationship": "Sister"
+//   },
+//   "address": {
+//     "county": "Nairobi",
+//     "subcounty": "Westlands"
+//   },
+//   "educationLevel": "Bachelor's Degree",
+//   "password": "securepassword123"
+// }
+// http://localhost/pwd/register.php?
+// // name=sam&
+// // email=samson%40gmail.com&
+// // dob=2025-04-27&
+// // gender=Male&
+// // occupation=Software+developer&
+// // mobileNumber=%2B254707726836&
+// // type=pwd&
+// // maritalStatus=single&
+// // educationLevel=Bachelor&
+// // nextOfKinName=Jane+Doe&
+// // nextOfKinMobile=%2B254707726836&
+// // nextOfKinRelationship=Parent&
+// // county=Nairobi&
+// // subcounty=Starehe&
+// // password=1234&
+// // password-confirm=1234&agree=on
+
+{
+
+    "id_number": "MO123456",
+    "name": "Dr. Alice Smith",
+    "email": "alice.smith@hospital.com",
+    "mobileNumber": "0701234567",
+    "password": "medOfficerPass456",
+    "type": "medical-officer"
+
+}
+
