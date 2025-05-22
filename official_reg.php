@@ -1,362 +1,373 @@
 <?php
 include 'files/register_officials.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>Official Registration — PWD County</title>
-
-  <!-- General CSS Files -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Custom CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWD County - Official Portal</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
-    :root {
-      /* --primary: #4361ee; */
-       --primary: rgb(25, 140, 83);
-      --primary-light: #e6f0ff;
-      --secondary: #3f37c9;
-      --accent: #4cc9f0;
-      --dark: #1a1a2e;
-      --light: #f8f9fa;
-      --success: rgb(67, 181, 82);
+    .bg-overlay {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      height: 100%;
     }
 
-    body {
-      background-color: #f5f7fb;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      height: 100vh;
+    .bg-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom right, #0f2921, #1a3a2e);
+      opacity: 0.95;
     }
 
     .auth-container {
-      height: 100%;
+      min-height: 100vh;
     }
 
-    .auth-image {
-      background: linear-gradient(rgba(0, 181, 115, 0.7), rgba(0, 255, 132, 0.7)),
-        url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80');
-      background-size: cover;
-      background-position: center;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      height: auto;
       padding: 3rem;
     }
 
-    .auth-image-content {
-      max-width: 500px;
-    }
-
-    .auth-form {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 3rem;
-      background-color: white;
-      height: 100%;
-      overflow-y: auto;
-    }
-
-    .auth-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-      margin-bottom: 2rem;
-    }
-
-    .auth-logo i {
-      font-size: 2.2rem;
-    }
-
-    .form-section {
-      margin-bottom: 2rem;
-    }
-
-    .section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--primary-light);
-    }
-
-    .form-control {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      border: 1px solid #e0e0e0;
-      transition: all 0.3s;
-    }
-
-    .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 0.25rem rgba(9, 161, 95, 0.15);
-    }
-
-    .form-label {
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 0.5rem;
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background-color: rgba(34, 197, 94, 0.2);
     }
 
     .btn-primary {
-      background-color: var(--success);
-      border: none;
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s;
+      background-color: #166534;
+      border-color: #14532d;
     }
 
     .btn-primary:hover {
-      background-color: var(--secondary);
-      transform: translateY(-2px);
+      background-color: #14532d;
+      border-color: #134827;
     }
 
-    .input-group-text {
-      background-color: var(--success-light);
-      border: 1px solid #e0e0e0;
-      color: var(--primary);
+    .nav-tabs .nav-link {
+      color: #6c757d;
+      border: none;
+      padding: 0.5rem 1rem;
     }
 
-    .footer-link {
-      color: var(--success);
-      text-decoration: none;
+    .nav-tabs .nav-link.active {
+      color: #166534;
       font-weight: 500;
+      border-bottom: 2px solid #166534;
     }
 
-    .password-toggle {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #999;
+    .form-control:focus {
+      border-color: #86efac;
+      box-shadow: 0 0 0 0.25rem rgba(34, 197, 94, 0.25);
     }
 
-    .password-toggle:hover {
-      color: var(--primary);
-    }
-
-    .password-container {
-      position: relative;
-    }
-
-    @media (max-width: 992px) {
-      .auth-image {
-        display: none;
-      }
-
-      .auth-form {
-        padding: 2rem;
-      }
+    .badge-icon {
+      width: 80px;
+      height: 80px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container-fluid auth-container">
-    <div class="row g-0 h-100 ">
-      <!-- Image Section -->
-      <div class="col-lg-6 d-none d-lg-block auth-image ">
-        <div class="auth-image-content p-4">
-          <h2 class="mb-4">Join Our Team of Professionals</h2>
-          <p class="mb-4">As an official of PWD County, you'll be part of a dedicated team working to improve services
-            for persons with disabilities across our communities.</p>
-          <ul class="list-unstyled">
-            <li class="mb-3"><i class="fas fa-check-circle me-2"></i> Streamlined registration process</li>
-            <li class="mb-3"><i class="fas fa-check-circle me-2"></i> Secure access to all resources</li>
-            <li class="mb-3"><i class="fas fa-check-circle me-2"></i> Direct communication channels</li>
-          </ul>
+  <div class="container-fluid auth-container p-0">
+    <div class="row g-0">
+      <!-- Left Side - Official Registration Benefits -->
+      <div class="col-lg-6 d-none d-lg-block d-none d-lg-flex">
+        <div class="bg-overlay h-100"
+          style="background-image: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+          <div class="content-wrapper d-flex flex-column h-100 text-white">
+            <div class="text-center mb-5">
+              <div
+                class="badge-icon rounded-circle bg-success d-flex align-items-center justify-content-center mx-auto mb-3">
+                <i class="fas fa-id-card-alt text-white fs-3"></i>
+              </div>
+              <h1 class="display-5 fw-bold mb-3">Official Registration Portal</h1>
+              <p class="lead opacity-75">Streamlined access for government officials and service providers</p>
+            </div>
+
+            <div class="mb-auto">
+              <h3 class="h4 mb-4">Benefits of Official Registration:</h3>
+
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="feature-icon rounded-circle d-flex align-items-center justify-content-center mb-3">
+                    <i class="fas fa-bolt text-success fs-4"></i>
+                  </div>
+                  <h4 class="h5">Quick Verification</h4>
+                  <p class="small opacity-75">Fast-tracked approval process for qualified officials</p>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="feature-icon rounded-circle d-flex align-items-center justify-content-center mb-3">
+                    <i class="fas fa-chart-line text-success fs-4"></i>
+                  </div>
+                  <h4 class="h5">Performance Analytics</h4>
+                  <p class="small opacity-75">Track service delivery metrics and impact</p>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="feature-icon rounded-circle d-flex align-items-center justify-content-center mb-3">
+                    <i class="fas fa-users-cog text-success fs-4"></i>
+                  </div>
+                  <h4 class="h5">Case Management</h4>
+                  <p class="small opacity-75">Efficient tools for managing beneficiary cases</p>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="feature-icon rounded-circle d-flex align-items-center justify-content-center mb-3">
+                    <i class="fas fa-file-alt text-success fs-4"></i>
+                  </div>
+                  <h4 class="h5">Documentation</h4>
+                  <p class="small opacity-75">Secure digital record-keeping system</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="mt-auto pt-4">
+              <div class="d-grid gap-2">
+                <button class="btn btn-outline-light btn-lg">
+                  <i class="fas fa-file-signature me-2"></i> Register as Official
+                </button>
+              </div>
+              <div class="text-center small mt-3 opacity-75">
+                Already registered? <a href="#" class="text-white fw-bold">Verify your status</a>
+              </div>
+            </div> -->
+          </div>
         </div>
       </div>
 
-      <!-- Form Section -->
-      <div class="col-lg-6 auth-form p-4">
-        <div class="p-5"></div>
-        <div class="p-5"></div>
-        <div class="p-5"></div>
-        <div class="p-5"></div>
-
-        <a href="#" class="auth-logo pt-4">
-          <i class="fas fa-wheelchair"></i>
-          <span>PWD County</span>
-        </a>
-
-        <h4 class="mb-4">Official Registration</h4>
-
-        <form id="registerForm" action="" method="POST">
-          <!-- Personal Information Section -->
-          <div class="form-section">
-            <h6 class="section-title">Personal Information</h6>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label for="name" class="form-label">Full Name</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-user"></i></span>
-                  <input id="name" type="text" class="form-control" name="name" required placeholder="Your full name">
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <label for="id_number" class="form-label">National ID</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
-                  <input id="id_number" type="text" class="form-control" name="id_number" required
-                    placeholder="National ID number">
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <label for="email" class="form-label">Email Address</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                  <input id="email" type="email" class="form-control" name="email" required
-                    placeholder="example@domain.com">
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <label for="mobileNumber" class="form-label">Mobile Number</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                  <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" required
-                    placeholder="0712345678">
-                </div>
-              </div>
-            </div>
+      <!-- Right Side - Login Form -->
+      <div class="col-lg-6 d-flex align-items-center">
+        <div class="p-4 p-md-5 w-100">
+          <div class="text-center mb-5">
+            <h2 class="fw-bold mb-2">Official Login</h2>
+            <p class="text-muted">Access the PWD County management system</p>
           </div>
 
-          <!-- Professional Information Section -->
-          <div class="form-section">
-            <h6 class="section-title">Professional Information</h6>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label for="license_id" class="form-label">License ID</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                  <input id="license_id" type="text" class="form-control" name="license_id" required
-                    placeholder="Enter your license ID">
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <label for="type" class="form-label">Official Type</label>
-                <select class="form-select" name="type" id="type" required>
-                  <option value="">Select your role</option>
-                  <option value="health_officer">Health Officer</option>
-                  <option value="medical_officer">Medical Officer</option>
-                  <option value="county_officer">County Officer</option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label for="specialisation" class="form-label">Specialisation</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-user-md"></i></span>
-                  <input id="specialisation" type="text" class="form-control" name="specialisation" required
-                    placeholder="Your specialisation">
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <label for="department" class="form-label">Department</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-building"></i></span>
-                  <input id="department" type="text" class="form-control" name="department" required
-                    placeholder="Your department">
-                </div>
-              </div>
-
-              <div class="col-12">
-                <label for="county_id" class="form-label">County</label>
-                <select class="form-select" name="county_id" required>
-                  <option value="">Select your county</option>
-                  <?php
-                  include 'files/db_connect.php';
-                  $counties = mysqli_query($conn, "SELECT id, county_name FROM counties ORDER BY county_name");
-                  while ($row = mysqli_fetch_assoc($counties)) {
-                    echo "<option value='" . $row['id'] . "'>" . htmlspecialchars($row['county_name']) . "</option>";
-                  }
-                  ?>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Account Security Section -->
-          <div class="form-section">
-            <h6 class="section-title">Account Security</h6>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label for="password" class="form-label">Password</label>
-                <div class="password-container">
+          <form id="registerForm" action="" method="POST">
+            <!-- Personal Information Section -->
+            <div class="form-section">
+              <h6 class="section-title">Personal Information</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="name" class="form-label">Full Name</label>
                   <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                    <input id="password" type="password" class="form-control" name="password" required
-                      placeholder="Create password">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input id="name" type="text" class="form-control" name="name" required placeholder="Your full name">
                   </div>
-                  <i class="password-toggle fas fa-eye" onclick="togglePassword('password')"></i>
                 </div>
-                <small class="text-muted">Minimum 8 characters</small>
-              </div>
 
-              <div class="col-md-6">
-                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                <div class="password-container">
+                <div class="col-md-6">
+                  <label for="id_number" class="form-label">National ID</label>
                   <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                    <input id="confirmPassword" type="password" class="form-control" name="confirmPassword" required
-                      placeholder="Confirm password">
+                    <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                    <input id="id_number" type="text" class="form-control" name="id_number" required
+                      placeholder="National ID number">
                   </div>
-                  <i class="password-toggle fas fa-eye" onclick="togglePassword('confirmPassword')"></i>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="email" class="form-label">Email Address</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input id="email" type="email" class="form-control" name="email" required
+                      placeholder="example@domain.com">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="mobileNumber" class="form-label">Mobile Number</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                    <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" required
+                      placeholder="0712345678">
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="mt-4">
-            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
-              <i class="fas fa-user-plus me-2"></i> Complete Registration
-            </button>
-          </div>
-        </form>
+            <form id="registerForm" action="" method="POST">
+              <!-- Personal Information Section -->
+              <div class="form-section">
+                <h6 class="section-title">Personal Information</h6>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label for="name" class="form-label">Full Name</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+                      <input id="name" type="text" class="form-control" name="name" required
+                        placeholder="Your full name">
+                    </div>
+                  </div>
 
-        <div class="text-center mt-4">
-          <p class="mb-0">Already registered? <a href="login.php" class="footer-link">Sign in here</a></p>
-        </div>
+                  <div class="col-md-6">
+                    <label for="id_number" class="form-label">National ID</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                      <input id="id_number" type="text" class="form-control" name="id_number" required
+                        placeholder="National ID number">
+                    </div>
+                  </div>
 
-        <div class="text-center mt-4 text-muted small">
-          &copy; PWD County <span id="year"></span>. All rights reserved.
+                  <div class="col-md-6">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                      <input id="email" type="email" class="form-control" name="email" required
+                        placeholder="example@domain.com">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="mobileNumber" class="form-label">Mobile Number</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                      <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" required
+                        placeholder="0712345678">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Professional Information Section -->
+              <div class="form-section">
+                <h6 class="section-title">Professional Information</h6>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label for="license_id" class="form-label">License ID</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                      <input id="license_id" type="text" class="form-control" name="license_id" required
+                        placeholder="Enter your license ID">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="type" class="form-label">Official Type</label>
+                    <select class="form-control" name="type" id="type" required>
+                      <option value="">Select your role</option>
+                      <option value="health_officer">Health Officer</option>
+                      <option value="medical_officer">Medical Officer</option>
+                      <option value="county_officer">County Officer</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="specialisation" class="form-label">Specialisation</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-user-md"></i></span>
+                      <input id="specialisation" type="text" class="form-control" name="specialisation" required
+                        placeholder="Your specialisation">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="department" class="form-label">Department</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-building"></i></span>
+                      <input id="department" type="text" class="form-control" name="department" required
+                        placeholder="Your department">
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <label for="county_id" class="form-label">County</label>
+                    <select class="form-control" name="county_id" required>
+                      <option value="">Select your county</option>
+                      <?php
+                      include 'files/db_connect.php';
+                      $counties = mysqli_query($conn, "SELECT id, county_name FROM counties ORDER BY county_name");
+                      while ($row = mysqli_fetch_assoc($counties)) {
+                        echo "<option value='" . $row['id'] . "'>" . htmlspecialchars($row['county_name']) . "</option>";
+                      }
+                      ?>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Security Section -->
+              <div class="form-section">
+                <h6 class="section-title">Account Security</h6>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="password-container">
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input id="password" type="password" class="form-control" name="password" required
+                          placeholder="Create password">
+                      </div>
+                      <i class="password-toggle fas fa-eye" onclick="togglePassword('password')"></i>
+                    </div>
+                    <small class="text-muted">Minimum 8 characters</small>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <div class="password-container">
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input id="confirmPassword" type="password" class="form-control" name="confirmPassword" required
+                          placeholder="Confirm password">
+                      </div>
+                      <i class="password-toggle fas fa-eye" onclick="togglePassword('confirmPassword')"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 text-center">
+                <button type="submit" class="btn btn-primary px-5">
+                  <i class="fas fa-user-plus me-2"></i> Complete Registration
+                </button>
+              </div>
+
+
+              <div class="text-center small text-muted mt-4 card bg-secondary btn-lg text-light">
+                <p class="card-header text-light font-weight-bold"><b>For security reasons, please</b>:</p>
+                <ul class="list-inline mb-0 justify-content-around py-3">
+                  <li class="list-inline-item text-light"><i class="fas fa-shield-alt  me-1"></i> Use strong passwords
+                  </li>
+                  <li class="list-inline-item text-light"><i class="fas fa-lock  me-1"></i> Log out after session</li>
+                  <li class="list-inline-item text-light"><i class="fas fa-sync-alt me-1"></i> Update credentials
+                    regularly</li>
+                </ul>
+              </div>
+            </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Set current year
-    document.getElementById('year').textContent = new Date().getFullYear();
+    // Initialize datepicker
+    flatpickr(".datepicker", {
+      dateFormat: "Y-m-d",
+      maxDate: "today"
+    });
 
-    // Password toggle function
+    // Password toggle
     function togglePassword(fieldId) {
       const field = document.getElementById(fieldId);
-      const icon = field.nextElementSibling || field.parentElement.nextElementSibling;
+      const icon = field.nextElementSibling;
 
       if (field.type === 'password') {
         field.type = 'text';
@@ -367,49 +378,14 @@ include 'files/register_officials.php';
       }
     }
 
-    // Handle URL parameters for alerts
-    document.addEventListener('DOMContentLoaded', function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const status = urlParams.get('status');
+    // Form validation
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('password2').value;
 
-      if (status === 'empty') {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Missing Information',
-          text: 'Please fill in all required fields.',
-          confirmButtonColor: '#4361ee'
-        });
-      } else if (status === 'pass_mismatch') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Password Mismatch',
-          text: 'The passwords you entered do not match.',
-          confirmButtonColor: '#4361ee'
-        });
-      } else if (status === 'exists') {
-        Swal.fire({
-          icon: 'info',
-          title: 'Account Exists',
-          text: 'A user with this license ID or email already exists.',
-          confirmButtonColor: '#4361ee'
-        });
-      } else if (status === 'success') {
-        Swal.fire({
-          title: 'Registration Successful!',
-          text: 'Your official account has been created.',
-          icon: 'success',
-          confirmButtonText: 'Proceed to Login',
-          confirmButtonColor: '#4361ee'
-        }).then(() => {
-          window.location.href = 'login.php';
-        });
-      } else if (status === 'fail') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: 'Could not save your information. Please try again.',
-          confirmButtonColor: '#4361ee'
-        });
+      if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match');
       }
     });
   </script>

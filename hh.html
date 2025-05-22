@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to PWD County</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary-color: #3498db;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-hero {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.85), rgba(39, 174, 96, 0.9)),
+                url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+        }
+
+        .auth-hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            opacity: 0.9;
+            z-index: 0;
+        }
+
+        .auth-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            background-color: white;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        .auth-title {
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-subtitle {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #95a5a6;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: none;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(46, 204, 113, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #95a5a6;
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-icon {
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        @media (max-width: 992px) {
+            .auth-container {
+                flex-direction: column;
+            }
+
+            .auth-hero {
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .auth-form {
+                padding: 2rem;
+            }
+
+            .feature-list li {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid p-0">
+        <div class="auth-container">
+            <!-- Left side with image and overlay -->
+            <div class="auth-hero d-none d-lg-flex">
+                <div class="auth-hero-content">
+                    <h1 class="display-4 fw-bold mb-4">Welcome to PWD County</h1>
+                    <p class="lead mb-5">Join our community to access disability services and support programs designed
+                        for you.</p>
+
+                    <ul class="feature-list">
+                        <li>
+                            <span class="feature-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </span>
+                            <span>Secure and confidential services</span>
+                        </li>
+                        <li>
+                            <span class="feature-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </span>
+                            <span>Personalized healthcare support</span>
+                        </li>
+                        <li>
+                            <span class="feature-icon">
+                                <i class="fas fa-clock"></i>
+                            </span>
+                            <span>Quick and easy registration</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right side with login form -->
+            <div class="auth-form">
+                <div class="logo">PWD County</div>
+
+                <h2 class="auth-title">Access Your Account</h2>
+                <p class="auth-subtitle">Sign in to continue to your dashboard</p>
+
+                <ul class="nav nav-tabs" id="loginTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user"
+                            type="button" role="tab">User Login</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="official-tab" data-bs-toggle="tab" data-bs-target="#official"
+                            type="button" role="tab">Official Login</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="loginTabsContent">
+                    <!-- User Login Form -->
+                    <div class="tab-pane fade show active" id="user" role="tabpanel">
+                        <form>
+                            <div class="form-group">
+                                <label for="user-id">User ID Number</label>
+                                <input type="text" class="form-control" id="user-id"
+                                    placeholder="Enter your PWD ID number">
+                            </div>
+                            <div class="form-group">
+                                <label for="user-password">Password</label>
+                                <input type="password" class="form-control" id="user-password"
+                                    placeholder="Enter your password">
+                            </div>
+                            <div class="d-flex justify-content-between mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="remember-user">
+                                    <label class="form-check-label" for="remember-user">Remember me</label>
+                                </div>
+                                <a href="#" class="text-decoration-none">Forgot password?</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Sign In as User</button>
+                        </form>
+                    </div>
+
+                    <!-- Official Login Form -->
+                    <div class="tab-pane fade" id="official" role="tabpanel">
+                        <form>
+                            <div class="form-group">
+                                <label for="official-id">Official ID</label>
+                                <input type="text" class="form-control" id="official-id"
+                                    placeholder="Enter your official ID">
+                            </div>
+                            <div class="form-group">
+                                <label for="official-password">Password</label>
+                                <input type="password" class="form-control" id="official-password"
+                                    placeholder="Enter your password">
+                            </div>
+                            <div class="d-flex justify-content-between mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="remember-official">
+                                    <label class="form-check-label" for="remember-official">Remember me</label>
+                                </div>
+                                <a href="#" class="text-decoration-none">Forgot password?</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Sign In as Official</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="auth-footer">
+                    Don't have an account? <a href="#">Register here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
