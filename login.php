@@ -1,105 +1,162 @@
 <?php
-// Start session and include database connection
 session_start();
 ob_start();
 include 'files/db_connect.php';
 
-// Handle login form submission
+// Initialize SweetAlert script variable
+$swal_script = '';
+
+// Function to sanitize input data
+function sanitize_input($data)
+{
+  return htmlspecialchars(stripslashes(trim($data)));
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $type = $_POST['type'];
-  $password = $_POST['password'];
+  // Sanitize all inputs
+  $type = isset($_POST['type']) ? sanitize_input($_POST['type']) : '';
+  $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-  if ($type === 'PWD') {
-    $id_number = $_POST['id_number'];
-    $query = "SELECT * FROM users WHERE id_number = ? AND type = ?";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $id_number, $type);
-  } else {
-    $license_id = $_POST['license_id'];
-    $official_type = $_POST['official_type'];
-    $query = "SELECT * FROM officials WHERE license_id = ? AND type = ?";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $license_id, $official_type);
-  }
-
-  mysqli_stmt_execute($stmt);
-  $result = mysqli_stmt_get_result($stmt);
-
-  if ($result && mysqli_num_rows($result) === 1) {
-    $user = mysqli_fetch_assoc($result);
-
-    if (password_verify($password, $user['password'])) {
-      session_regenerate_id(true);
-      $_SESSION['logged_in'] = true;
-
-      if ($type === 'PWD') {
-        $_SESSION['type'] = 'PWD';
-        $_SESSION['pwd_user'] = [
-          'id' => $user['id'],
-          'id_number' => $user['id_number'],
-          'name' => $user['name'],
-          'email' => $user['email'],
-          'mobile_number' => $user['mobile_number'],
-          'type' => $user['type']
-        ];
-        $redirect = 'pwd/index.php';
-      } else {
-        $_SESSION['type'] = $user['type'];
-        $_SESSION['official_user'] = [
-          'id' => $user['id'],
-          'license_id' => $user['license_id'],
-          'name' => $user['name'],
-          'email' => $user['email'],
-          'mobile_number' => $user['mobile_number'],
-          'type' => $user['type']
-        ];
-
-        if ($user['type'] === 'health_officer') {
-          $redirect = 'health/index.php';
-        } elseif ($user['type'] === 'medical_officer') {
-          $redirect = 'medical/index.php';
-        } elseif ($user['type'] === 'county_officer') {
-          $redirect = 'supervisor/index.php';
-        } else {
-          $redirect = 'index.php';
-        }
-      }
-
-      $swal_script = "<script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Login Successful',
-                    text: 'Welcome back, {$user['name']}!',
-                    confirmButtonColor: '#008080'
-                }).then(() => {
-                    window.location.href = '$redirect';
-                });
-            </script>";
-    } else {
-      $swal_script = "<script>
+  // Validate required fields
+  if (empty($type) || empty($password)) {
+    $swal_script = "
+            <script>
                 Swal.fire({
                     icon: 'error',
-                    title: 'Incorrect Password',
-                    text: 'Please check your password and try again.',
-                    confirmButtonColor: '#008080'
+                    title: 'Missing Fields',
+                    text: 'Please fill in all required fields.'
                 });
             </script>";
-    }
   } else {
-    $swal_script = "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'User Not Found',
-                text: 'No account found with the provided credentials.',
-                confirmButtonColor: '#008080'
-            });
-        </script>";
-  }
+    try {
+      if ($type === 'PWD') {
+        $id_number = isset($_POST['id_number']) ? sanitize_input($_POST['id_number']) : '';
+        $query = "SELECT * FROM users WHERE id_number = ? AND type = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "ss", $id_number, $type);
+      } else {
+        $license_id = isset($_POST['license_id']) ? sanitize_input($_POST['license_id']) : '';
+        $official_type = isset($_POST['official_type']) ? sanitize_input($_POST['official_type']) : '';
 
-  mysqli_stmt_close($stmt);
+        $query = "SELECT * FROM officials WHERE license_id = ? AND type = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "ss", $license_id, $official_type);
+      }
+
+      mysqli_stmt_execute($stmt);
+      $result = mysqli_stmt_get_result($stmt);
+
+      if ($result && mysqli_num_rows($result) === 1) {
+        $user = mysqli_fetch_assoc($result);
+
+        if (password_verify($password, $user['password'])) {
+          // Regenerate session ID to prevent session fixation
+          session_regenerate_id(true);
+
+          // Set session variables
+          $_SESSION['logged_in'] = true;
+          $_SESSION['user_id'] = $user['id'];
+          $_SESSION['user_email'] = $user['email'];
+          $_SESSION['user_name'] = $user['name'];
+
+          if ($type === 'PWD') {
+            $_SESSION['type'] = 'PWD';
+            $_SESSION['pwd_user'] = [
+              'id' => $user['id'],
+              'id_number' => $user['id_number'],
+              'name' => $user['name'],
+              'email' => $user['email'],
+              'mobile_number' => $user['mobile_number'],
+              'type' => $user['type']
+            ];
+            $redirect = 'pwd/index.php';
+          } else {
+            $_SESSION['type'] = $user['type'];
+            $_SESSION['official_user'] = [
+              'id' => $user['id'],
+              'license_id' => $user['license_id'],
+              'name' => $user['name'],
+              'email' => $user['email'],
+              'mobile_number' => $user['mobile_number'],
+              'type' => $user['type']
+            ];
+
+            // Set redirect based on user type
+            switch ($user['type']) {
+              case 'health_officer':
+                $redirect = 'health/index.php';
+                break;
+              case 'medical_officer':
+                $redirect = 'medical/index.php';
+                break;
+              case 'county_officer':
+                $redirect = 'supervisor/index.php';
+                break;
+              default:
+                $redirect = 'index.php';
+            }
+          }
+
+          // Successful login SweetAlert
+          $swal_script = "
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Login Successful',
+                                    text: 'Welcome back, {$user['name']}!',
+                                    showConfirmButton: true,
+                                    timer: 2000
+                                }).then(() => {
+                                    window.location.href = '$redirect';
+                                });
+                            });
+                        </script>";
+        } else {
+          $swal_script = "
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Incorrect Password',
+                                    text: 'Please check your password and try again.'
+                                });
+                            });
+                        </script>";
+        }
+      } else {
+        $swal_script = "
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'User Not Found',
+                                text: 'No account found with the provided credentials.'
+                            });
+                        });
+                    </script>";
+      }
+
+      mysqli_stmt_close($stmt);
+    } catch (Exception $e) {
+      $swal_script = "
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Database Error',
+                            text: 'An error occurred while processing your request.'
+                        });
+                    });
+                </script>";
+      // Log the error for debugging
+      error_log("Login error: " . $e->getMessage());
+    }
+  }
   mysqli_close($conn);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -109,11 +166,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <title>Welcome to PWD County</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.css" rel="stylesheet">
 
   <!-- General CSS Files -->
   <link rel="stylesheet" href="assets/modules/bootstrap/css/bootstrap.min.css">
@@ -151,110 +207,190 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     gtag('config', 'UA-94034622-3');
   </script>
-  <!-- /END GA -->
 
-
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
-      --primary-color: #008080;
-      --primary-light: #4da6a6;
-      --primary-dark: #006666;
-      --secondary-color: #5cb85c;
+      --teal-primary: #008080;
+      --teal-light: #4da6a6;
+      --teal-dark: #006666;
+      --teal-darker: #004d4d;
+      --light-gray: #f8f9fa;
       --dark-color: #2c3e50;
-      --light-color: #ecf0f1;
     }
 
     body {
-      /* font-family: 'Poppins', sans-serif; */
-      background-color: #f9f9f9;
-    }
-
-    .auth-container {
-      display: flex;
-      min-height: 100vh;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .auth-hero {
-      flex: 1;
-      background: linear-gradient(135deg, rgba(0, 128, 128, 0.85), rgba(0, 96, 96, 0.9)),
-        url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
-      background-size: cover;
-      background-position: center;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 3rem;
-      position: relative;
-      align-items: center;
-      /* 
-        flex: 1;
-      background: linear-gradient(135deg, rgba(0, 128, 128, 0.9), rgba(0, 96, 96, 0.95)),
-        url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-      background-size: cover;
-      background-position: center;  //
-      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center; */
-
-
+      overflow-x: hidden;
     }
 
-    .auth-hero::after {
-      content: '';
-      position: absolute;
-      top: 0;
+    /* Left Side - Static Content with Cards */
+    .auth-hero {
+      position: fixed;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      opacity: 0.9;
-      z-index: 0;
-    }
-
-    .auth-hero-content {
-      position: relative;
-      z-index: 1;
-      background: linear-gradient(135deg, rgba(0, 128, 128, 0.9), rgba(0, 96, 96, 0.95)),
-        url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-      background-size: cover;
-    }
-
-    .auth-form {
-      flex: 1;
+      top: 0;
+      width: 50%;
+      height: 100vh;
+      background: linear-gradient(to bottom right, var(--teal-dark), var(--teal-darker));
+      color: white;
+      overflow: hidden;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 3rem;
-      background-color: white;
     }
 
-    .logo {
-      font-weight: 700;
-      font-size: 1.8rem;
-      color: var(--primary-color);
+    .hero-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem;
+      opacity: 0.9;
+    }
+
+    /* Benefit Cards - 2×2 Grid */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
       margin-bottom: 2rem;
     }
 
+    .benefit-card {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      height: 100%;
+    }
+
+    .benefit-card:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .benefit-icon {
+      font-size: 2rem;
+      color: var(--teal-light);
+      margin-bottom: 1rem;
+    }
+
+    .benefit-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .benefit-description {
+      font-size: 1rem;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    /* Registration Buttons */
+    .registration-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .reg-btn {
+      background-color: transparent;
+      border: 2px solid teal;
+      color: teal;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .reg-btn:hover {
+      background-color: white;
+      color: var(--teal-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Right Side - Scrollable Form */
+    .right-side {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 50%;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 2rem;
+      background-color: white;
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar */
+    .right-side::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .right-side::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .right-side::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .right-side::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--teal-primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-icon {
+      margin-right: 0.75rem;
+      color: var(--teal-primary);
+    }
+
     .auth-title {
-      font-weight: 700;
+      font-size: 1.8rem;
+      font-weight: bold;
       color: var(--dark-color);
       margin-bottom: 0.5rem;
     }
 
     .auth-subtitle {
-      color: #7f8c8d;
+      color: #6c757d;
       margin-bottom: 2rem;
+      font-size: 1.1rem;
     }
 
+    /* Form styles */
     .nav-tabs {
       border-bottom: none;
       margin-bottom: 2rem;
@@ -269,127 +405,131 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     .nav-tabs .nav-link.active {
-      color: var(--primary-color);
+      color: var(--teal-primary);
       background: none;
-      border-bottom: 3px solid var(--primary-color);
+      border-bottom: 3px solid var(--teal-primary);
     }
 
-    .form-control {
+    .form-control,
+    .form-select {
       padding: 0.75rem 1rem;
       border-radius: 8px;
-      border: 1px solid #ddd;
-      margin-bottom: 1.5rem;
+      border: 1px solid #ced4da;
+      margin-bottom: 1.25rem;
     }
 
-    .form-control:focus {
-      border-color: var(--primary-color);
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--teal-light);
       box-shadow: 0 0 0 0.25rem rgba(0, 128, 128, 0.25);
     }
 
     .btn-primary {
-      background-color: var(--primary-color);
+      background-color: var(--teal-primary);
       border: none;
       padding: 0.75rem;
-      border-radius: 8px;
       font-weight: 500;
       width: 100%;
+      border-radius: 8px;
     }
 
     .btn-primary:hover {
-      background-color: var(--primary-dark);
+      background-color: var(--teal-dark);
     }
 
-    .auth-footer {
-      text-align: center;
-      margin-top: 2rem;
-      color: #95a5a6;
-    }
-
-    .auth-footer a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .feature-list {
-      list-style: none;
-      padding: 0;
-    }
-
-    .feature-list li {
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-    }
-
-    .feature-icon {
-      background-color: rgba(255, 255, 255, 0.2);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 1rem;
-    }
-
-    @media (max-width: 992px) {
-      .auth-container {
-        flex-direction: column;
-      }
-
+    /* Responsive styles */
+    @media (max-width: 991.98px) {
       .auth-hero {
-        padding: 2rem;
-        text-align: center;
-      }
-
-      .auth-form {
+        position: relative;
+        width: 100%;
+        height: auto;
         padding: 2rem;
       }
 
-      .feature-list li {
-        justify-content: center;
+      .right-side {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .benefits-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .benefits-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .registration-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
       }
     }
   </style>
 </head>
 
 <body>
+
+  <!-- #region -->
+
   <div class="container-fluid p-0">
-    <div class="auth-container">
-      <!-- Left side with image and overlay -->
-      <div class="auth-hero d-none d-lg-flex">
-        <div class="auth-hero-content">
-          <h1 class="display-4 fw-bold mb-4">Welcome to PWD County</h1>
-          <p class="lead mb-5">Join our community to access disability services and support programs designed for you.
-          </p>
+    <!-- Left side with teal background and cards -->
+    <div class="auth-hero d-none d-lg-block">
+      <div class="hero-content">
+        <h1 class="hero-title">Welcome to PWD County</h1>
+        <p class="hero-subtitle">Join our community to access disability services and support programs</p>
 
-          <ul class="feature-list">
-            <li>
-              <span class="feature-icon">
-                <i class="fas fa-user-shield"></i>
-              </span>
-              <span>Secure and confidential services</span>
-            </li>
-            <li>
-              <span class="feature-icon">
-                <i class="fas fa-heartbeat"></i>
-              </span>
-              <span>Personalized healthcare support</span>
-            </li>
-            <li>
-              <span class="feature-icon">
-                <i class="fas fa-clock"></i>
-              </span>
-              <span>Quick and easy registration</span>
-            </li>
-          </ul>
+        <div class="benefits-grid">
+          <!-- Card 1 -->
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <h3 class="benefit-title">Secure Services</h3>
+            <p class="benefit-description">Your information is protected with industry-standard security measures.</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <i class="fas fa-heartbeat"></i>
+            </div>
+            <h3 class="benefit-title">Health Support</h3>
+            <p class="benefit-description">Access personalized healthcare services tailored to your needs.</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <h3 class="benefit-title">Quick Access</h3>
+            <p class="benefit-description">Fast and easy registration process to get you the help you need.</p>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <i class="fas fa-comments"></i>
+            </div>
+            <h3 class="benefit-title">24/7 Support</h3>
+            <p class="benefit-description">Our team is always available to assist you with any questions.</p>
+          </div>
         </div>
-      </div>
 
-      <!-- Right side with login form -->
-      <div class="auth-form">
-        <div class="logo">PWD County</div>
+
+      </div>
+    </div>
+
+    <!-- Right side with scrollable form -->
+    <div class="right-side">
+      <div class="form-container">
+        <div class="logo">
+          <i class="fas fa-wheelchair-motion logo-icon"></i>
+          <span>PWD County</span>
+        </div>
 
         <h2 class="auth-title">Access Your Account</h2>
         <p class="auth-subtitle">Sign in to continue to your dashboard</p>
@@ -427,17 +567,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
                 <a href="#" class="text-decoration-none">Forgot password?</a>
               </div>
-              <button type="submit" class="btn btn-primary">Sign In as User</button>
+              <button type="submit" name="" class="btn btn-primary">Sign In as User</button>
             </form>
           </div>
+
+
+
 
           <!-- Official Login Form -->
           <div class="tab-pane fade" id="official" role="tabpanel">
             <form method="POST" action="" id="officialLoginForm">
-              <input type="hidden" name="type" value="OFFICIAL">
+              <input type="hidden" name="type" value="official">
               <div class="form-group">
                 <label for="official_type">Official Type</label>
-                <select class="form-control" name="official_type" id="official_type" required>
+                <select class="form-select" name="official_type" id="official_type" required>
                   <option value="">-- Select Type --</option>
                   <option value="health_officer">Health Officer</option>
                   <option value="medical_officer">Medical Officer</option>
@@ -461,15 +604,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
                 <a href="#" class="text-decoration-none">Forgot password?</a>
               </div>
-              <button type="submit" class="btn btn-primary">Sign In as Official</button>
+              <button type="submit" name="" class="btn btn-primary">Sign In as Official</button>
             </form>
           </div>
-        </div>
 
-        <div class="auth-footer">
-          <!-- Don't have an account? <a href="#">Register here</a> -->
-          Create account for <a href="register.php" class="btn border-info text-info">PWD Applicant</a>
-          <nbsp>|</nbsp> <a href="official_reg.php" class="btn border-dark text-dark">Officials</a>
+          <!-- Registration Buttons -->
+          <div class="registration-buttons">
+            <a href="register.php" class="reg-btn">Register as PWD</a>
+            <a href="official_reg.php" class="reg-btn">Register as Official</a>
+          </div>
+
         </div>
       </div>
     </div>
@@ -477,71 +621,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <script>
-    document.getElementById('logoutBtn').addEventListener('click', function (e) {
-      Swal.fire({
-        title: 'Are you sure you want to logout?',
-        text: "You will need to login again to access your account.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, logout',
-        cancelButtonText: 'No, stay logged in'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Redirect to logout.php
-          window.location.href = 'files/logout.php';
-        }
-      });
-    });
-  </script>
-  <!-- General JS Scripts -->
-  <script src="assets/modules/jquery.min.js"></script>
-  <script src="assets/modules/popper.js"></script>
-  <script src="assets/modules/tooltip.js"></script>
-  <script src="assets/modules/bootstrap/js/bootstrap.min.js"></script>
-  <script src="assets/modules/nicescroll/jquery.nicescroll.min.js"></script>
-  <script src="assets/modules/moment.min.js"></script>
-  <script src="assets/js/stisla.js"></script>
-
-  <!-- JS Libraies -->
-  <script src="assets/modules/simple-weather/jquery.simpleWeather.min.js"></script>
-  <script src="assets/modules/chart.min.js"></script>
-  <script src="assets/modules/jqvmap/dist/jquery.vmap.min.js"></script>
-  <script src="assets/modules/jqvmap/dist/maps/jquery.vmap.world.js"></script>
-  <script src="assets/modules/summernote/summernote-bs4.js"></script>
-  <script src="assets/modules/chocolat/dist/js/jquery.chocolat.min.js"></script>
-
-  <!-- Page Specific JS File -->
-  <script src="assets/js/page/index-0.js"></script>
-
-  <!-- Template JS File -->
-  <script src="assets/js/scripts.js"></script>
-  <script src="assets/js/custom.js"></script>
-
-
-
-  <!-- JS Libraies -->
-  <script src="assets/modules/datatables/datatables.min.js"></script>
-  <script src="assets/modules/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
-  <script src="assets/modules/datatables/Select-1.2.4/js/dataTables.select.min.js"></script>
-  <script src="assets/modules/jquery-ui/jquery-ui.min.js"></script>
-
-  <!-- Page Specific JS File -->
-  <script src="assets/js/page/modules-datatables.js"></script>
-
-  <!-- Template JS File -->
-  <script src="assets/js/scripts.js"></script>
-  <script src="assets/js/custom.js"></script>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.js"></script>
-
-  <?php if (isset($swal_script))
-    echo $swal_script; ?>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <?php
+  if (isset($swal_script)) {
+    echo $swal_script;
+  }
+  ?>
 </body>
 
 </html>

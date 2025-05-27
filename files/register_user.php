@@ -4,6 +4,8 @@ require_once 'db_connect.php';
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
+
+
     // Get POST data
     $name = $_POST['name'];
     $email = $_POST['email'];
@@ -18,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $next_of_kin_name = $_POST['nextOfKinName'];
     $next_of_kin_mobile = $_POST['nextOfKinMobile'];
     $next_of_kin_relationship = $_POST['nextOfKinRelationship'];
-    $county = $_POST['county'];
+    $county_id = $_POST['county_id'];
     $subcounty = $_POST['subcounty'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
@@ -68,10 +70,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt = mysqli_prepare($conn, $insert_query);
 
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ssssssssssssssss",
-            $name, $email, $dob, $gender, $occupation, $mobile_number, $type, $id_number,
-            $marital_status, $education_level, $next_of_kin_name, $next_of_kin_mobile,
-            $next_of_kin_relationship, $county, $subcounty, $hashed_password
+        mysqli_stmt_bind_param(
+            $stmt,
+            "ssssssssssssssss",
+            $name,
+            $email,
+            $dob,
+            $gender,
+            $occupation,
+            $mobile_number,
+            $type,
+            $id_number,
+            $marital_status,
+            $education_level,
+            $next_of_kin_name,
+            $next_of_kin_mobile,
+            $next_of_kin_relationship,
+            $county,
+            $subcounty,
+            $hashed_password
         );
 
         if (mysqli_stmt_execute($stmt)) {

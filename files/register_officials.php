@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $specialisation = trim($_POST['specialisation']);
     $department     = trim($_POST['department']);
     $county_id      = intval($_POST['county_id']);
-    $hospital_id    = intval($_POST['hospital_id']);
+    // $hospital_id = intval($_POST['hospital_id']); // Commented as per request
     $password       = $_POST['password'];
     $confirmPassword = $_POST['confirmPassword'];
 
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (
         empty($license_id) || empty($name) || empty($email) || empty($mobileNumber) || empty($type) ||
         empty($password) || empty($confirmPassword) || empty($id_number) || empty($specialisation) ||
-        empty($department) || empty($county_id) || empty($hospital_id)
+        empty($department) || empty($county_id)
     ) {
         header("Location: official_reg.php?status=empty");
         exit();
@@ -46,22 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     mysqli_stmt_close($stmtCheck);
 
-    // 4. Hash the password
+    // 4. Hash password and set active status
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $created_at = date("Y-m-d H:i:s");
+    $active = ($type === 'countyofficer') ? 1 : 0;
 
-    // 5. Insert data
+    // 5. Insert query (hospital_id omitted, created_at is auto-handled)
     $insertQuery = "INSERT INTO officials 
-        (license_id, name, email, id_number, mobile_number, type, specialisation, department, password, county_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        // , hospital_id, active, created_at) 
-        // VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        // , ?, 1, ?)";
-        
+        (license_id, name, email, id_number, mobile_number, type, specialisation, department, password, county_id, active) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
     $stmtInsert = mysqli_prepare($conn, $insertQuery);
     mysqli_stmt_bind_param(
         $stmtInsert,
-        'sssssssssis',
+        'ssssssssssi',
         $license_id,
         $name,
         $email,
@@ -72,8 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $department,
         $hashedPassword,
         $county_id,
-        // $hospital_id,
-        // $created_at
+        $active
     );
 
     if (mysqli_stmt_execute($stmtInsert)) {
