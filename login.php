@@ -50,68 +50,83 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $user = mysqli_fetch_assoc($result);
 
         if (password_verify($password, $user['password'])) {
-          // Regenerate session ID to prevent session fixation
-          session_regenerate_id(true);
-
-          // Set session variables
-          $_SESSION['logged_in'] = true;
-          $_SESSION['user_id'] = $user['id'];
-          $_SESSION['user_email'] = $user['email'];
-          $_SESSION['user_name'] = $user['name'];
-
-          if ($type === 'PWD') {
-            $_SESSION['type'] = 'PWD';
-            $_SESSION['pwd_user'] = [
-              'id' => $user['id'],
-              'id_number' => $user['id_number'],
-              'name' => $user['name'],
-              'email' => $user['email'],
-              'mobile_number' => $user['mobile_number'],
-              'type' => $user['type']
-            ];
-            $redirect = 'pwd/index.php';
-          } else {
-            $_SESSION['type'] = $user['type'];
-            $_SESSION['official_user'] = [
-              'id' => $user['id'],
-              'license_id' => $user['license_id'],
-              'name' => $user['name'],
-              'email' => $user['email'],
-              'mobile_number' => $user['mobile_number'],
-              'type' => $user['type']
-            ];
-
-            // Set redirect based on user type
-            switch ($user['type']) {
-              case 'health_officer':
-                $redirect = 'health/index.php';
-                break;
-              case 'medical_officer':
-                $redirect = 'medical/index.php';
-                break;
-              case 'county_officer':
-                $redirect = 'supervisor/index.php';
-                break;
-              default:
-                $redirect = 'index.php';
-            }
-          }
-
-          // Successful login SweetAlert
-          $swal_script = "
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Login Successful',
-                                    text: 'Welcome back, {$user['name']}!',
-                                    showConfirmButton: true,
-                                    timer: 2000
-                                }).then(() => {
-                                    window.location.href = '$redirect';
+          // Check if account is inactive (status = 0) for medical/health officers
+          if (($user['active'] == 0) && ($user['type'] === 'medical_officer' || $user['type'] === 'health_officer')) {
+            $swal_script = "
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Account Not Activated',
+                                        text: 'Your account needs to be activated by the county. Please contact the county office to arrange activation.',
+                                        showConfirmButton: true
+                                    });
                                 });
-                            });
-                        </script>";
+                            </script>";
+          } else {
+            // Regenerate session ID to prevent session fixation
+            session_regenerate_id(true);
+
+            // Set session variables
+            $_SESSION['logged_in'] = true;
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_name'] = $user['name'];
+
+            if ($type === 'PWD') {
+              $_SESSION['type'] = 'PWD';
+              $_SESSION['pwd_user'] = [
+                'id' => $user['id'],
+                'id_number' => $user['id_number'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'mobile_number' => $user['mobile_number'],
+                'type' => $user['type']
+              ];
+              $redirect = 'pwd/index.php';
+            } else {
+              $_SESSION['type'] = $user['type'];
+              $_SESSION['official_user'] = [
+                'id' => $user['id'],
+                'license_id' => $user['license_id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'mobile_number' => $user['mobile_number'],
+                'type' => $user['type']
+              ];
+
+              // Set redirect based on user type
+              switch ($user['type']) {
+                case 'health_officer':
+                  $redirect = 'health/index.php';
+                  break;
+                case 'medical_officer':
+                  $redirect = 'medical/index.php';
+                  break;
+                case 'county_officer':
+                  $redirect = 'supervisor/index.php';
+                  break;
+                default:
+                  $redirect = 'index.php';
+              }
+            }
+
+            // Successful login SweetAlert
+            $swal_script = "
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Login Successful',
+                                        text: 'Welcome back, {$user['name']}!',
+                                        showConfirmButton: true,
+                                        timer: 2000
+                                    }).then(() => {
+                                        window.location.href = '$redirect';
+                                    });
+                                });
+                            </script>";
+          }
         } else {
           $swal_script = "
                         <script>
@@ -156,6 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   mysqli_close($conn);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -610,8 +626,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
           <!-- Registration Buttons -->
           <div class="registration-buttons">
-            <a href="register.php" class="reg-btn">Register as PWD</a>
-            <a href="official_reg.php" class="reg-btn">Register as Official</a>
+            <a href="register" class="reg-btn">Register as PWD</a>
+            <a href="official_reg" class="reg-btn">Register as Official</a>
           </div>
 
         </div>
