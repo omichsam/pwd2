@@ -24,10 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
   $hospital_id = isset($_POST['hospital_id']) ? intval($_POST['hospital_id']) : 0;
   $assessment_date = $_POST['assessment_date'];
   $assessment_time = $_POST['assessment_time'];
-  $county_id = isset($_POST['county_id']) ? intval($_POST['county_id']) : 0;
+  // $county_id = isset($_POST['county_id']) ? intval($_POST['county_id']) : 0;
   $user_id = $pwdUser['id'];
   $status = "Pending";
-  $created_at = date('Y-m-d H:i:s');
 
   // Validate hospital exists
   $hospital_check = mysqli_query($conn, "SELECT id FROM hospitals WHERE id = '$hospital_id'");
@@ -42,17 +41,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
       $error = "You already have a pending assessment";
     } else {
       // Insert the assessment
-      $sql = "INSERT INTO assessments (hospital_id, county_id, assessment_date, assessment_time, status, user_id, created_at)
-                    VALUES ('$hospital_id', '$county_id', '$assessment_date', '$assessment_time', '$status', '$user_id', '$created_at')";
+      $sql = "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id)
+                    VALUES ('$hospital_id', '$assessment_date', '$assessment_time', '$status', '$user_id')";
 
       if (mysqli_query($conn, $sql)) {
         $assessment_id = mysqli_insert_id($conn);
         $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
 
         // Log this action
-        $action = "Booked assessment #$assessment_id at hospital ID $hospital_id";
-        $log_sql = "INSERT INTO activity_logs (user_id, action, created_at) VALUES ('$user_id', '$action', '$created_at')";
-        mysqli_query($conn, $log_sql);
+        // $action = "Booked assessment #$assessment_id at hospital ID $hospital_id";
+        // $log_sql = "INSERT INTO activity_logs (user_id, action, created_at) VALUES ('$user_id', '$action', '$created_at')";
+        // mysqli_query($conn, $log_sql);
       } else {
         $error = "Error: " . mysqli_error($conn);
       }
