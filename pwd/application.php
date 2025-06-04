@@ -26,39 +26,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
   $user_id = intval($pwdUser['id']);
   $status = "Pending";
 
-  // Validate hospital exists
-  $hospital_check = mysqli_prepare($conn, "SELECT id FROM hospitals WHERE id = ?");
-  mysqli_stmt_bind_param($hospital_check, "i", $hospital_id);
-  mysqli_stmt_execute($hospital_check);
-  mysqli_stmt_store_result($hospital_check);
+  // Direct insert without prior checks
+  $insert_stmt = mysqli_prepare($conn, "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id) VALUES (?, ?, ?, ?, ?)");
+  mysqli_stmt_bind_param($insert_stmt, "isssi", $hospital_id, $assessment_date, $assessment_time, $status, $user_id);
 
-  if (mysqli_stmt_num_rows($hospital_check) == 0) {
-    $error = "Selected hospital does not exist.";
+  if (mysqli_stmt_execute($insert_stmt)) {
+    $assessment_id = mysqli_insert_id($conn);
+    $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
   } else {
-    // Check for existing pending assessment
-    $pending_check = mysqli_prepare($conn, "SELECT id FROM assessments WHERE user_id = ? AND status = 'Pending'");
-    mysqli_stmt_bind_param($pending_check, "i", $user_id);
-    mysqli_stmt_execute($pending_check);
-    mysqli_stmt_store_result($pending_check);
-
-    if (mysqli_stmt_num_rows($pending_check) > 0) {
-      $error = "You already have a pending assessment.";
-    } else {
-      // Final insert
-      $insert_stmt = mysqli_prepare($conn, "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id) VALUES (?, ?, ?, ?, ?)");
-      mysqli_stmt_bind_param($insert_stmt, "isssi", $hospital_id, $assessment_date, $assessment_time, $status, $user_id);
-
-      if (mysqli_stmt_execute($insert_stmt)) {
-        $assessment_id = mysqli_insert_id($conn);
-        $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
-      } else {
-        $error = "Database insert error: " . mysqli_error($conn);
-      }
-    }
-    mysqli_stmt_close($pending_check);
+    $error = "Database insert error: " . mysqli_error($conn);
   }
-  mysqli_stmt_close($hospital_check);
+
+  mysqli_stmt_close($insert_stmt);
 }
+
 
 ?>
 
