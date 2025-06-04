@@ -1,5 +1,24 @@
 <?php include 'files/header.php';
 
+// Handle AJAX hospital fetching
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'fetch_hospitals') {
+  $county_id = intval($_POST['county_id']);
+  $sql = "SELECT id, name, subcounty FROM hospitals WHERE county_id = $county_id";
+  $result = mysqli_query($conn, $sql);
+  if (mysqli_num_rows($result) > 0) {
+    echo '<option value="">-- Select Hospital --</option>';
+    while ($row = mysqli_fetch_assoc($result)) {
+      $id = $row['id'];
+      $name = htmlspecialchars($row['name']);
+      $subcounty = htmlspecialchars($row['subcounty']);
+      echo "<option value='$id'>$name ($subcounty)</option>";
+    }
+  } else {
+    echo '<option value="">No hospitals found</option>';
+  }
+  exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST['assessment_date'], $_POST['assessment_time'])) {
   $hospital_id = intval($_POST['hospital_id']);
   $assessment_date = trim($_POST['assessment_date']);
