@@ -1,4 +1,10 @@
-<?php include 'files/header.php';
+<?php 
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+include 'files/header.php';
 
 // Handle AJAX hospital fetching
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'fetch_hospitals') {
@@ -20,25 +26,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST['assessment_date'], $_POST['assessment_time'])) {
+  echo "Step 1: Form submitted.<br>";
+
   $hospital_id = intval($_POST['hospital_id']);
   $assessment_date = trim($_POST['assessment_date']);
   $assessment_time = trim($_POST['assessment_time']);
   $user_id = intval($pwdUser['id']);
   $status = "Pending";
 
-  // Direct insert without prior checks
-  $insert_stmt = mysqli_prepare($conn, "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id) VALUES (?, ?, ?, ?, ?)");
-  mysqli_stmt_bind_param($insert_stmt, "isssi", $hospital_id, $assessment_date, $assessment_time, $status, $user_id);
+  echo "Step 2: Variables set.<br>";
 
-  if (mysqli_stmt_execute($insert_stmt)) {
-    $assessment_id = mysqli_insert_id($conn);
-    $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
-  } else {
-    $error = "Database insert error: " . mysqli_error($conn);
+  // Try to prepare statement
+  $insert_stmt = mysqli_prepare($conn, "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id) VALUES (?, ?, ?, ?, ?)");
+  if (!$insert_stmt) {
+    die("Prepare failed: " . mysqli_error($conn));
   }
+  echo "Step 3: Statement prepared.<br>";
+
+  if (!mysqli_stmt_bind_param($insert_stmt, "isssi", $hospital_id, $assessment_date, $assessment_time, $status, $user_id)) {
+    die("Bind failed: " . mysqli_stmt_error($insert_stmt));
+  }
+  echo "Step 4: Parameters bound.<br>";
+
+  if (!mysqli_stmt_execute($insert_stmt)) {
+    die("Execute failed: " . mysqli_stmt_error($insert_stmt));
+  }
+  echo "Step 5: Statement executed.<br>";
+
+  $assessment_id = mysqli_insert_id($conn);
+  $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
 
   mysqli_stmt_close($insert_stmt);
+  echo "Step 6: Insert complete.<br>";
 }
+
 
 
 ?>
