@@ -27,22 +27,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
   $county_id = isset($_POST['county_id']) ? intval($_POST['county_id']) : 0;
   $user_id = $pwdUser['id'];
   $status = "Pending";
+  $created_at = date('Y-m-d H:i:s');
 
+  // Validate hospital exists
   $hospital_check = mysqli_query($conn, "SELECT id FROM hospitals WHERE id = '$hospital_id'");
   if (mysqli_num_rows($hospital_check) == 0) {
     $error = "Selected hospital does not exist.";
   } else {
+    // Check for existing pending assessment
     $check_sql = "SELECT * FROM assessments WHERE user_id = '$user_id' AND status = 'Pending'";
     $check_result = mysqli_query($conn, $check_sql);
 
     if (mysqli_num_rows($check_result) > 0) {
       $error = "You already have a pending assessment";
     } else {
-      $sql = "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id)
-              VALUES ('$hospital_id', '$assessment_date', '$assessment_time', '$status', '$user_id')";
+      // Insert the assessment
+      $sql = "INSERT INTO assessments (hospital_id, county_id, assessment_date, assessment_time, status, user_id, created_at)
+                    VALUES ('$hospital_id', '$county_id', '$assessment_date', '$assessment_time', '$status', '$user_id', '$created_at')";
 
       if (mysqli_query($conn, $sql)) {
-        $success = "Appointment booked successfully!";
+        $assessment_id = mysqli_insert_id($conn);
+        $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
+
+        // Log this action
+        $action = "Booked assessment #$assessment_id at hospital ID $hospital_id";
+        $log_sql = "INSERT INTO activity_logs (user_id, action, created_at) VALUES ('$user_id', '$action', '$created_at')";
+        mysqli_query($conn, $log_sql);
       } else {
         $error = "Error: " . mysqli_error($conn);
       }
@@ -133,7 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
                         <div class="row">
                           <div class="form-group col-md-6">
                             <label for="assessment_date">Assessment Date</label>
-                            <input type="date" name="assessment_date" class="form-control" required>
+                            <input type="date" name="assessment_date" class="form-control" required
+                              min="<?php echo date('Y-m-d'); ?>">
                           </div>
                           <div class="form-group col-md-6">
                             <label for="assessment_time">Assessment Time</label>
@@ -168,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
             </div>
           </div>
         </section>
+        <!-- done -->
       </div>
 
       <?php include 'files/footer.php'; ?>
