@@ -1,63 +1,46 @@
 <?php include 'files/header.php';
 
-// Handle AJAX hospital fetching
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'fetch_hospitals') {
-  $county_id = intval($_POST['county_id']);
-  $sql = "SELECT id, name, subcounty FROM hospitals WHERE county_id = $county_id";
-  $result = mysqli_query($conn, $sql);
-  if (mysqli_num_rows($result) > 0) {
-    echo '<option value="">-- Select Hospital --</option>';
-    while ($row = mysqli_fetch_assoc($result)) {
-      $id = $row['id'];
-      $name = htmlspecialchars($row['name']);
-      $subcounty = htmlspecialchars($row['subcounty']);
-      echo "<option value='$id'>$name ($subcounty)</option>";
-    }
-  } else {
-    echo '<option value="">No hospitals found</option>';
-  }
-  exit;
-}
-
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST['assessment_date'], $_POST['assessment_time'])) {
-  $hospital_id = isset($_POST['hospital_id']) ? intval($_POST['hospital_id']) : 0;
-  $assessment_date = $_POST['assessment_date'];
-  $assessment_time = $_POST['assessment_time'];
-  // $county_id = isset($_POST['county_id']) ? intval($_POST['county_id']) : 0;
-  $user_id = $pwdUser['id'];
+  $hospital_id = intval($_POST['hospital_id']);
+  $assessment_date = trim($_POST['assessment_date']);
+  $assessment_time = trim($_POST['assessment_time']);
+  $user_id = intval($pwdUser['id']);
   $status = "Pending";
 
   // Validate hospital exists
-  $hospital_check = mysqli_query($conn, "SELECT id FROM hospitals WHERE id = '$hospital_id'");
-  if (mysqli_num_rows($hospital_check) == 0) {
+  $hospital_check = mysqli_prepare($conn, "SELECT id FROM hospitals WHERE id = ?");
+  mysqli_stmt_bind_param($hospital_check, "i", $hospital_id);
+  mysqli_stmt_execute($hospital_check);
+  mysqli_stmt_store_result($hospital_check);
+
+  if (mysqli_stmt_num_rows($hospital_check) == 0) {
     $error = "Selected hospital does not exist.";
   } else {
     // Check for existing pending assessment
-    $check_sql = "SELECT * FROM assessments WHERE user_id = '$user_id' AND status = 'Pending'";
-    $check_result = mysqli_query($conn, $check_sql);
+    $pending_check = mysqli_prepare($conn, "SELECT id FROM assessments WHERE user_id = ? AND status = 'Pending'");
+    mysqli_stmt_bind_param($pending_check, "i", $user_id);
+    mysqli_stmt_execute($pending_check);
+    mysqli_stmt_store_result($pending_check);
 
-    if (mysqli_num_rows($check_result) > 0) {
-      $error = "You already have a pending assessment";
+    if (mysqli_stmt_num_rows($pending_check) > 0) {
+      $error = "You already have a pending assessment.";
     } else {
-      // Insert the assessment
-      $sql = "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id)
-                    VALUES ('$hospital_id', '$assessment_date', '$assessment_time', '$status', '$user_id')";
+      // Final insert
+      $insert_stmt = mysqli_prepare($conn, "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id) VALUES (?, ?, ?, ?, ?)");
+      mysqli_stmt_bind_param($insert_stmt, "isssi", $hospital_id, $assessment_date, $assessment_time, $status, $user_id);
 
-      if (mysqli_query($conn, $sql)) {
+      if (mysqli_stmt_execute($insert_stmt)) {
         $assessment_id = mysqli_insert_id($conn);
         $success = "Appointment booked successfully! Your assessment ID is #$assessment_id";
-
-        // Log this action
-        // $action = "Booked assessment #$assessment_id at hospital ID $hospital_id";
-        // $log_sql = "INSERT INTO activity_logs (user_id, action, created_at) VALUES ('$user_id', '$action', '$created_at')";
-        // mysqli_query($conn, $log_sql);
       } else {
-        $error = "Error: " . mysqli_error($conn);
+        $error = "Database insert error: " . mysqli_error($conn);
       }
     }
+    mysqli_stmt_close($pending_check);
   }
+  mysqli_stmt_close($hospital_check);
 }
+
 ?>
 
 <!-- SweetAlert2 CDN -->
