@@ -22,7 +22,7 @@
 
             <li class="menu-header">Application</li>
             <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical
+                <a href="" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical
                         Assessment</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="assessment">New</a></li>
@@ -33,7 +33,7 @@
 
             <li class="menu-header">Hospital</li>
             <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical Sites</span></a>
+                <a href="" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical Sites</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="Add_Hospital.php">Add Hospital</a></li>
                     <li><a href="List_Hospitals.php">List hospital(s)</a></li>
@@ -42,7 +42,7 @@
 
             <li class="menu-header">Officers</li>
             <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Manager Officers</span></a>
+                <a href="" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Manager Officers</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="Approve_Officer.php">Approve Officers</a></li>
                     <li><a href="List_Officer.php">List Officer(s)</a></li>
@@ -52,7 +52,7 @@
 
             <li class="menu-header">Account</li>
             <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="far fa-user"></i>
+                <a href="" class="nav-link has-dropdown"><i class="far fa-user"></i>
                     <span>Account</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="view_profile">View Profile</a></li>
