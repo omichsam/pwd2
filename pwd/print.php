@@ -7,7 +7,7 @@ include 'files/header.php';
 
 // Updated SQL with JOINs to counties table
 $sql = "SELECT 
-    u.name AS user_name, u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
+    u.name AS user_name,  a.id AS assessment_id, u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
     u.mobile_number, u.email, u.next_of_kin_name, u.next_of_kin_mobile, u.next_of_kin_relationship,
     uc.county_name AS user_county, u.subcounty AS user_subcounty,
     a.assessment_date,
@@ -49,6 +49,12 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $data = $result->fetch_assoc();
+
+// Create unique certificate code
+$assessmentId = $data['assessment_id'];
+$certPrefix = "MOH276C";
+$certHash = strtoupper(substr(md5($assessmentId . $data['id_number']), 0, 6)); // Short hash
+$certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
 ?>
 
 
@@ -131,13 +137,19 @@ $data = $result->fetch_assoc();
                             <div id="qrcode"
                                 style="position: absolute; top: 10px; right: 10px; width: 100px; height: 100px;"></div>
 
+                                
                             <!-- Centered text -->
                             <div class="text-center h-100 d-flex flex-column justify-content-center">
-                                <p class="mb-1"><strong>Certificate ID:</strong>
-                                    CERT-<?= strtoupper(substr(md5($data['id_number'] . $data['assessment_date']), 0, 8)) ?>
+                                <!-- <p class="mb-1"><strong>Certificate ID:</strong>
+                                    CERT-< ?= strtoupper(substr(md5($data['id_number'] . $data['assessment_date']), 0, 8)) ?>
                                     | Issued on
-                                    <?= date('d M Y') ?>
+                                    < ?= date('d M Y') ?>
+                                </p> -->
+
+                                <p class="mb-1"><strong>Certificate ID:</strong>
+                                    <?= $certificateCode ?> | Issued on <?= date('d M Y') ?>
                                 </p>
+
                                 <small>This document is officially generated from the Ministry of Health Disability
                                     Assessment
                                     System.</small>
@@ -173,19 +185,22 @@ $data = $result->fetch_assoc();
                                     <td><input class="form-control " readonly value="<?= $data['dob'] ?> "></td>
                                 </tr>
                                 <tr>
-                                    <th>Occupation</th>
-                                    <td><input class="form-control " readonly value="<?= $data['occupation'] ?> "></td>
+                                    <!-- <th>Occupation</th>
+                                    <td><input class="form-control " readonly value="< ?= $data['occupation'] ?> "></td> -->
                                     <th>Phone</th>
                                     <td><input class="form-control " readonly value="<?= $data['mobile_number'] ?> ">
                                     </td>
-                                </tr>
-                                <tr>
                                     <th>County/Subcounty</th>
                                     <td><input class="form-control " readonly
                                             value="<?= $data['user_county'] ?>/<?= $data['user_subcounty'] ?> "></td>
-                                    <th>Marital Status</th>
-                                    <td><input class="form-control " readonly value="<?= $data['marital_status'] ?> ">
-                                    </td>
+                                </tr>
+                                <tr>
+                                    <!-- <th>County/Subcounty</th>
+                                    <td><input class="form-control " readonly
+                                            value="< ?= $data['user_county'] ?>/< ?= $data['user_subcounty'] ?> "></td> -->
+                                    <!-- <th>Marital Status</th>
+                                    <td><input class="form-control " readonly value="< ?= $data['marital_status'] ?> ">
+                                    </td> -->
                                 </tr>
 
                             </table>
@@ -361,9 +376,28 @@ $data = $result->fetch_assoc();
         // }
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <script>
-        const certId = "CERT-<?= strtoupper(substr(md5($data['id_number'] . $data['assessment_date']), 0, 8)) ?>";
-        const issueDate = "Issued on <?= date('d M Y') ?>";
+    const certCode = "<?= $certificateCode ?>";
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: certCode,
+        width: 100,
+        height: 100
+    });
+</script>
+
+
+    <script>
+        QRCode.toCanvas(document.getElementById('qrcode'), "<?= $certificateCode ?>", function (error) {
+            if (error) console.error(error);
+        });
+    </script>
+
+    <!-- <script>
+        const certId = "CERT-< ?= strtoupper(substr(md5($data['id_number'] . $data['assessment_date']), 0, 8)) ?>";
+        const issueDate = "Issued on < ?= date('d M Y') ?>";
         const qrText = certId + " | " + issueDate;
 
         new QRCode(document.getElementById("qrcode"), {
@@ -371,7 +405,7 @@ $data = $result->fetch_assoc();
             width: 100,
             height: 100,
         });
-    </script>
+    </script> -->
 </body>
 
 </html>

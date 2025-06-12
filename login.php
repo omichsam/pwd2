@@ -80,6 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 'id_number' => $user['id_number'],
                 'name' => $user['name'],
                 'email' => $user['email'],
+                'county_id' => $user['county_id'],
                 'mobile_number' => $user['mobile_number'],
                 'type' => $user['type']
               ];
@@ -90,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 'id' => $user['id'],
                 'license_id' => $user['license_id'],
                 'name' => $user['name'],
-                'email' => $user['email'],
+                'email' => $user['email'], 
                 'mobile_number' => $user['mobile_number'],
                 'type' => $user['type']
               ];

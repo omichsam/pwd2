@@ -31,15 +31,15 @@
         die("Could not find hospital for official ID $official_id.");
       }
 
-      // Handle validation action
-      if (isset($_GET['validate_id'])) {
-        $validate_id = intval($_GET['validate_id']);
-        $update_sql = "UPDATE assessments SET status = 'validated' WHERE id = $validate_id";
-        mysqli_query($conn, $update_sql);
-        header("complete_assessment");
-        exit;
-      }
-
+      // // Handle validation action
+      // if (isset($_GET['validate_id'])) {
+      //   $validate_id = intval($_GET['validate_id']);
+      //   $update_sql = "UPDATE assessments SET status = 'checked' WHERE id = $validate_id";
+      //   mysqli_query($conn, $update_sql);
+      //   header("complete_assessment");
+      //   exit;
+      // }
+      
       // echo $hospital_id;
       
       // ✅ Now build the query
@@ -64,7 +64,7 @@
       
 
       // Build the query with JOIN to counties
-      $sql = "SELECT 
+    $sql = "SELECT 
             a.id AS assessment_id,
             u.name AS user_name,
             u.gender,
@@ -81,8 +81,8 @@
         FROM assessments a
         JOIN users u ON a.user_id = u.id
         LEFT JOIN counties c ON u.county_id = c.id
-        WHERE a.hospital_id = $hospital_id
-          AND a.medical_officer_id IS NULL";
+        WHERE a.hospital_id = $hospital_id 
+          AND a.status = 'pending'";  
 
       // WHERE a.status = 'pending' AND a.hospital_id = $hospital_id";
       
@@ -98,11 +98,18 @@
 
 
       <!-- navigation -->
-      <?php include 'files/sidebar.php'; ?>
+      <?php include 'files/sidebar.php'; 
+      
+      
+      
+      
+      ?>
 
       <!-- Main Content -->
       <!-- Main Content -->
       <div class="main-content">
+
+      
         <section class="section">
           <div class="section-header">
             <h1>Assessment</h1>

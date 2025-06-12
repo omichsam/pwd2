@@ -179,9 +179,15 @@ if (!$data) {
 
                                 <!-- <a class="btn btn-primary shadow-sm text-right approve-btn" data-id="123">
                                     << Approve </a>  -->
-                                <button class="btn btn-primary open-approval-modal approve-btn shadow-sm text-right "
-                                    data-id="<?= $data['assessment_id'] ?>">Approve/Reject
-                                    Assessment</button>
+ 
+                            <?php if (isset($_GET['from']) && $_GET['from'] === 'assessment') { ?>
+                                    <button class="btn btn-primary open-approval-modal approve-btn shadow-sm text-right"
+                                        data-id="<?= $data['assessment_id'] ?>">
+                                        Approve/Reject Assessment
+                                    </button>
+                            <?php } ?>
+
+                                
                             </div>
                         </div>
 

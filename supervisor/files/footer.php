@@ -65,21 +65,21 @@
 
 
 
-    <!-- JS Libraies -->
-    <script src="../assets/modules/datatables/datatables.min.js"></script>
-    <script src="../assets/modules/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
-    <script src="../assets/modules/datatables/Select-1.2.4/js/dataTables.select.min.js"></script>
-    <script src="../assets/modules/jquery-ui/jquery-ui.min.js"></script>
+<!-- JS Libraies -->
+<script src="../assets/modules/datatables/datatables.min.js"></script>
+<script src="../assets/modules/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/modules/datatables/Select-1.2.4/js/dataTables.select.min.js"></script>
+<script src="../assets/modules/jquery-ui/jquery-ui.min.js"></script>
 
-    <!-- Page Specific JS File -->
-    <script src="../assets/js/page/modules-datatables.js"></script>
+<!-- Page Specific JS File -->
+<script src="../assets/js/page/modules-datatables.js"></script>
 
-    <!-- Template JS File -->
-    <script src="../assets/js/scripts.js"></script>
-    <script src="../assets/js/custom.js"></script>
+<!-- Template JS File -->
+<script src="../assets/js/scripts.js"></script>
+<script src="../assets/js/custom.js"></script>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.js"></script>
 </body>
 
 </html>

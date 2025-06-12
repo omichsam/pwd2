@@ -7,7 +7,21 @@ exit(); -->
 
 
 
-<?php include 'header.php'; ?>
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+</head>
 
 <body>
     <!--[if lt IE 7]>
@@ -15,7 +29,7 @@ exit(); -->
         <![endif]-->
 
     <?php
-    // session_start();
+    session_start();
     $_SESSION = [];
     session_destroy();
 
@@ -35,19 +49,22 @@ exit(); -->
 
     // Display logout confirmation with redirect
     echo "
-            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-            <script>
-            Swal.fire({
-            icon: 'success',
-            title: 'Logged Out',
-            text: 'You have been successfully logged out.',
-            showConfirmButton: false,
-            timer: 2000
-            }).then(() => {
-            window.location.href = '../../login.php';
-            });
-            </script>
+<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+<script>
+Swal.fire({
+  icon: 'success',
+  title: 'Logged Out',
+  text: 'You have been successfully logged out.',
+  showConfirmButton: false,
+  timer: 2000
+}).then(() => {
+  window.location.href = '../../login.php';
+});
+</script>
 ";
     ?>
 
     <script src="" async defer></script>
+</body>
+
+</html>

@@ -15,8 +15,7 @@
       $success = null;
       $error_message = "";
 
-      // Include DB connection file or establish connection here
-// Example: $conn = new mysqli("localhost", "root", "", "pwd");
+      // Ensure connection exists
       if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $assessment_id = $_POST['assessment_id'] ?? null;
         $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
@@ -33,8 +32,39 @@
         $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
         $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
         $required_services = $_POST['required_services'] ?? '';
-        $status = "checked";
 
+        $status = "checked";
+        $disability = 'Hearing';
+        $medical_officer_id = $_POST['user_id'];
+
+        // Check for duplicate
+        $check_sql = "SELECT id FROM hearing_disability_assessments WHERE assessment_id = ?";
+        $check_stmt = mysqli_prepare($conn, $check_sql);
+        mysqli_stmt_bind_param($check_stmt, "i", $assessment_id);
+        mysqli_stmt_execute($check_stmt);
+        mysqli_stmt_store_result($check_stmt);
+
+        if (mysqli_stmt_num_rows($check_stmt) > 0) {
+          // Duplicate found
+          echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Duplicate Entry',
+                    text: 'This assessment has already been submitted and cannot be entered again.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'complete_assessment';
+                });
+            });
+        </script>";
+          mysqli_stmt_close($check_stmt);
+          mysqli_close($conn);
+          exit();
+        }
+        mysqli_stmt_close($check_stmt);
+
+        // Proceed to insert since no duplicate
         $sql = "INSERT INTO hearing_disability_assessments (
         assessment_id,
         history_of_hearing_loss,
@@ -54,7 +84,6 @@
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($conn, $sql);
-
         if ($stmt) {
           mysqli_stmt_bind_param(
             $stmt,
@@ -77,34 +106,28 @@
           );
 
           if (mysqli_stmt_execute($stmt)) {
-            $disability = 'Hearing';
-            $medical_officer_id = $_SESSION['user_id'] ?? 1;
-
+            // Also update assessments table
             $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
             $update_stmt = mysqli_prepare($conn, $update_sql);
 
             if ($update_stmt) {
               mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
-              if (mysqli_stmt_execute($update_stmt)) {
-                echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'Assessment and hearing details saved.',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.href = 'complete_assessment';
-                            });
-                        });
-                    </script>";
-              } else {
-                $error_message = mysqli_stmt_error($update_stmt);
-              }
+              mysqli_stmt_execute($update_stmt);
               mysqli_stmt_close($update_stmt);
-            } else {
-              $error_message = mysqli_error($conn);
             }
+
+            echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Assessment successfully submitted.',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = 'complete_assessment';
+                    });
+                });
+            </script>";
           } else {
             $error_message = mysqli_stmt_error($stmt);
           }
@@ -116,7 +139,6 @@
 
         mysqli_close($conn);
 
-        // Show error if any
         if (!empty($error_message)) {
           echo "<script>
             document.addEventListener('DOMContentLoaded', function() {

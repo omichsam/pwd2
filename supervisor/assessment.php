@@ -48,29 +48,29 @@
       
       // ✅ Now build the query
       $sql = "SELECT 
-    a.id AS assessment_id,
-    u.name AS user_name,
-    u.id AS user_id,
-    u.gender,
-    u.dob,
-    u.id_number,
-    u.mobile_number,
-    u.email,
-    c.county_name AS county,
-    u.subcounty,
-    a.disability_type,
-    a.assessment_date,
-    a.assessment_time,
-    a.status
-FROM assessments a
-JOIN users u ON a.user_id = u.id
-LEFT JOIN counties c ON u.county_id = c.id
-WHERE 
-    a.health_officer_id IS NOT NULL
-    AND a.medical_officer_id IS NOT NULL
-    AND a.county_officer_id IS NOT NULL
-    AND a.user_id = u.id
-    AND u.county_id IS NOT NULL";
+                  a.id AS assessment_id,
+                  u.name AS user_name,
+                  u.id AS user_id,
+                  u.gender,
+                  u.dob,
+                  u.id_number,
+                  u.mobile_number,
+                  u.email,
+                  c.county_name AS county,
+                  u.subcounty,
+                  a.disability_type,
+                  a.assessment_date,
+                  a.assessment_time,
+                  a.status
+              FROM assessments a
+              JOIN users u ON a.user_id = u.id
+              LEFT JOIN counties c ON u.county_id = c.id
+              WHERE 
+                  a.health_officer_id IS NOT NULL
+                  AND a.medical_officer_id IS NOT NULL
+                  AND a.county_officer_id IS NULL
+                  AND a.user_id = u.id
+                  AND u.county_id IS NOT NULL";
 
 
       // WHERE a.status = 'pending' AND a.hospital_id = $hospital_id";
@@ -84,9 +84,7 @@ WHERE
         die("SQL Error: " . mysqli_error($conn));
       }
       ?>
-
-
-      <!-- Main Content -->
+ 
       <!-- Main Content -->
       <div class="main-content">
         <section class="section">
@@ -148,6 +146,7 @@ WHERE
                               <td>
                                 <form method="get" action="view_assessment">
                                   <input type="hidden" name="user_id" value="<?= $row['user_id'] ?>">
+                                  <input type="hidden" name="from" value="assessment">
                                   <button type="submit" class="btn btn-success btn-sm">View</button>
                                 </form>
                               </td>

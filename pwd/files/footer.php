@@ -74,7 +74,25 @@
         });
     });
 </script>
-
+<script>
+    document.getElementById('logoutBtn').addEventListener('click', function (e) {
+        Swal.fire({
+            title: 'Are you sure you want to logout?',
+            text: "You will need to login again to access your account.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, logout',
+            cancelButtonText: 'No, stay logged in'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to logout.php
+                window.location.href = 'files/logout.php';
+            }
+        });
+    });
+</script>
 <!-- General JS Scripts -->
 <script src="../assets/modules/jquery.min.js"></script>
 <script src="../assets/modules/popper.js"></script>
@@ -99,9 +117,23 @@
 <script src="../assets/js/scripts.js"></script>
 <script src="../assets/js/custom.js"></script>
 
-<!-- sweetalert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.js"></script>
 
+
+<!-- JS Libraies -->
+<script src="../assets/modules/datatables/datatables.min.js"></script>
+<script src="../assets/modules/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+<script src="../assets/modules/datatables/Select-1.2.4/js/dataTables.select.min.js"></script>
+<script src="../assets/modules/jquery-ui/jquery-ui.min.js"></script>
+
+<!-- Page Specific JS File -->
+<script src="../assets/js/page/modules-datatables.js"></script>
+
+<!-- Template JS File -->
+<script src="../assets/js/scripts.js"></script>
+<script src="../assets/js/custom.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.19/dist/sweetalert2.min.js"></script>
 
 </body>
 

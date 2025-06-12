@@ -1,8 +1,4 @@
-<?php 
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); 
+<?php include 'files/header.php';
 
 // Handle AJAX hospital fetching
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'fetch_hospitals') {
@@ -40,13 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
     $error = "Selected hospital does not exist.";
   } else {
     // Check for existing pending assessment
-    $pending_check = mysqli_prepare($conn, "SELECT id FROM assessments WHERE user_id = ? AND status = 'Pending'");
-    mysqli_stmt_bind_param($pending_check, "i", $user_id);
-    mysqli_stmt_execute($pending_check);
-    mysqli_stmt_store_result($pending_check);
+    $check_assessment = mysqli_prepare($conn, "SELECT id FROM assessments WHERE user_id = ? AND status != 'rejected'");
+    mysqli_stmt_bind_param($check_assessment, "i", $user_id);
+    mysqli_stmt_execute($check_assessment);
+    mysqli_stmt_store_result($check_assessment);
 
-    if (mysqli_stmt_num_rows($pending_check) > 0) {
-      $error = "You already have a pending assessment.";
+    if (mysqli_stmt_num_rows($check_assessment) > 0) {
+        $error = "You already have an active or completed assessment. Only one is allowed unless rejected.";
+
     } else {
       // Final insert
       $insert_stmt = mysqli_prepare($conn, "INSERT INTO assessments (hospital_id, assessment_date, assessment_time, status, user_id) VALUES (?, ?, ?, ?, ?)");
@@ -59,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hospital_id'], $_POST
         $error = "Database insert error: " . mysqli_error($conn);
       }
     }
-    mysqli_stmt_close($pending_check);
+    mysqli_stmt_close($check_assessment);
   }
   mysqli_stmt_close($hospital_check);
 }

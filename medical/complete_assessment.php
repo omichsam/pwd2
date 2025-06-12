@@ -85,7 +85,7 @@
         JOIN users u ON a.user_id = u.id
         LEFT JOIN counties c ON u.county_id = c.id
         WHERE a.hospital_id = $hospital_id
-          AND a.medical_officer_id IS NOT NULL";
+          AND a.medical_officer_id IS NOT NULL ";
 
       // WHERE a.status = 'pending' AND a.hospital_id = $hospital_id";
       

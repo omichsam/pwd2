@@ -28,7 +28,7 @@
 
                             <div class="col-md-12" hidden>
                                 <label>User id</label>
-                                <input type="user_id" name="assessment_id" value=<?= $pwdUser['id'] ?>
+                                <input type="user_id" name="user_id" value=<?= $pwdUser['id'] ?>
                                     class="form-control">
                             </div>
                         </div>

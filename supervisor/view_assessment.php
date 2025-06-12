@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approval'])) {
 @$user_id = intval($_GET['user_id']);
 // $user_id = 1;
 // SQL query to fetch all relevant data
- $sql = "SELECT 
+$sql = "SELECT 
     u.name AS user_name, u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
     u.mobile_number, u.email, u.type AS user_type, u.next_of_kin_name, u.next_of_kin_mobile,
     u.next_of_kin_relationship, uc.county_name AS user_county, u.subcounty AS user_subcounty, u.education_level,
@@ -169,9 +169,14 @@ if (!$data) {
 
                                 <!-- <a class="btn btn-primary shadow-sm text-right approve-btn" data-id="123">
                                     << Approve </a>  -->
-                                <button class="btn btn-primary open-approval-modal approve-btn shadow-sm text-right "
-                                    data-id="<?= $data['assessment_id'] ?>">Approve/Reject
-                                    Assessment</button>
+
+                                <?php if (isset($_GET['from']) && $_GET['from'] === 'assessment') { ?>
+                                    <button class="btn btn-primary open-approval-modal approve-btn shadow-sm text-right"
+                                        data-id="<?= $data['assessment_id'] ?>">
+                                        Approve/Reject Assessment
+                                    </button>
+                                <?php } ?>
+                                
                             </div>
                         </div>
 

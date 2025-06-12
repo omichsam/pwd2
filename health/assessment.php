@@ -48,6 +48,8 @@
             u.name AS user_name,
             u.gender,
             u.dob,
+            a.user_id,
+            u.id,
             u.id_number,
             u.mobile_number,
             u.email,
@@ -141,7 +143,8 @@
                               <!-- <td>< ?= htmlspecialchars($row['assessment_time']) ?></td> -->
                               <td>
                                 <form method="get" action="view_assessment">
-                                  <input type="hidden" name="user_id" value="<?= $row['user_id'] ?>">
+                                  <input type="hidden" name="user_id" value="<?= $row['id'] ?>">
+                                   <input type="hidden" name="from" value="assessment">
                                   <button type="submit" class="btn btn-success btn-sm">View</button>
                                 </form>
                               </td>
