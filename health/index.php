@@ -37,7 +37,7 @@ function getCount($sql)
 function getPendingAssessments($hospital_id)
 {
   global $conn;
-  $sql = "SELECT a.id, u.name AS user_name, a.disability_type
+  $sql = "SELECT a.id, a.user_id, u.name AS user_name, a.disability_type
             FROM assessments a
             JOIN users u ON a.user_id = u.id
             WHERE a.hospital_id = $hospital_id AND a.status = 'checked'
@@ -290,7 +290,7 @@ function getDisabilityStats($hospital_id)
                                 </span>
                               </td>
                               <td>
-                                <a href="view_assessment.php?id=<?= $assessment['id'] ?>" class="btn btn-primary">
+                                <a href="view_assessment?user_id=<?= $assessment['user_id'] ?>&from=assessment" class="btn btn-primary">
                                   Review
                                 </a>
                               </td>
