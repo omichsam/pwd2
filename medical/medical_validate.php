@@ -1,71 +1,32 @@
-<?php include 'files/header.php'; ?>
+<?php include 'files/header.php';
 
+?>
 
-<body>
+<?php
+$success = null;
+$error_message = "";
 
-  <div id="app">
-    <div class="main-wrapper main-wrapper-1">
-      <div class="navbar-bg"></div>
+// Include DB connection file or establish connection here
+// Example: $conn = new mysqli("localhost", "root", "", "pwd");
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $assessment_id = $_POST['assessment_id'] ?? null;
+  $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
+  $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
+  $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
+  $hearing_loss_type_left = $_POST['hearing_loss_type_left'] ?? '';
+  $hearing_grade_right = $_POST['hearing_grade_right'] ?? '';
+  $hearing_grade_left = $_POST['hearing_grade_left'] ?? '';
+  $hearing_level_dbhl_right = $_POST['hearing_level_dbhl_right'] ?? null;
+  $hearing_level_dbhl_left = $_POST['hearing_level_dbhl_left'] ?? null;
+  $monoaural_percent_right = $_POST['monoaural_percent_right'] ?? null;
+  $monoaural_percent_left = $_POST['monoaural_percent_left'] ?? null;
+  $binaural_percent = $_POST['binaural_percent'] ?? null;
+  $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
+  $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
+  $required_services = $_POST['required_services'] ?? '';
+  $status = "approved_by_health_officer";
 
-
-      <!-- top navigation  -->
-      <?php include 'files/nav.php'; ?>
-
-      <?php
-      $success = null;
-      $error_message = "";
-
-      // Ensure connection exists
-      if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $assessment_id = $_POST['assessment_id'] ?? null;
-        $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
-        $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
-        $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
-        $hearing_loss_type_left = $_POST['hearing_loss_type_left'] ?? '';
-        $hearing_grade_right = $_POST['hearing_grade_right'] ?? '';
-        $hearing_grade_left = $_POST['hearing_grade_left'] ?? '';
-        $hearing_level_dbhl_right = $_POST['hearing_level_dbhl_right'] ?? null;
-        $hearing_level_dbhl_left = $_POST['hearing_level_dbhl_left'] ?? null;
-        $monoaural_percent_right = $_POST['monoaural_percent_right'] ?? null;
-        $monoaural_percent_left = $_POST['monoaural_percent_left'] ?? null;
-        $binaural_percent = $_POST['binaural_percent'] ?? null;
-        $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
-        $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
-        $required_services = $_POST['required_services'] ?? '';
-
-        $status = "checked";
-        $disability = 'Hearing';
-        $medical_officer_id = $_POST['user_id'];
-
-        // Check for duplicate
-        $check_sql = "SELECT id FROM hearing_disability_assessments WHERE assessment_id = ?";
-        $check_stmt = mysqli_prepare($conn, $check_sql);
-        mysqli_stmt_bind_param($check_stmt, "i", $assessment_id);
-        mysqli_stmt_execute($check_stmt);
-        mysqli_stmt_store_result($check_stmt);
-
-        if (mysqli_stmt_num_rows($check_stmt) > 0) {
-          // Duplicate found
-          echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Duplicate Entry',
-                    text: 'This assessment has already been submitted and cannot be entered again.',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.href = 'complete_assessment';
-                });
-            });
-        </script>";
-          mysqli_stmt_close($check_stmt);
-          mysqli_close($conn);
-          exit();
-        }
-        mysqli_stmt_close($check_stmt);
-
-        // Proceed to insert since no duplicate
-        $sql = "INSERT INTO hearing_disability_assessments (
+  $sql = "INSERT INTO hearing_disability_assessments (
         assessment_id,
         history_of_hearing_loss,
         history_of_hearing_devices,
@@ -83,64 +44,72 @@
         required_services
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        $stmt = mysqli_prepare($conn, $sql);
-        if ($stmt) {
-          mysqli_stmt_bind_param(
-            $stmt,
-            "isssssssddddsss",
-            $assessment_id,
-            $history_of_hearing_loss,
-            $history_of_hearing_devices,
-            $hearing_loss_type_right,
-            $hearing_loss_type_left,
-            $hearing_grade_right,
-            $hearing_grade_left,
-            $hearing_level_dbhl_right,
-            $hearing_level_dbhl_left,
-            $monoaural_percent_right,
-            $monoaural_percent_left,
-            $binaural_percent,
-            $conclusion,
-            $recommended_assistive_products,
-            $required_services
-          );
+  $stmt = mysqli_prepare($conn, $sql);
 
-          if (mysqli_stmt_execute($stmt)) {
-            // Also update assessments table
-            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
-            $update_stmt = mysqli_prepare($conn, $update_sql);
+  if ($stmt) {
+    mysqli_stmt_bind_param(
+      $stmt,
+      "isssssssddddsss",
+      $assessment_id,
+      $history_of_hearing_loss,
+      $history_of_hearing_devices,
+      $hearing_loss_type_right,
+      $hearing_loss_type_left,
+      $hearing_grade_right,
+      $hearing_grade_left,
+      $hearing_level_dbhl_right,
+      $hearing_level_dbhl_left,
+      $monoaural_percent_right,
+      $monoaural_percent_left,
+      $binaural_percent,
+      $conclusion,
+      $recommended_assistive_products,
+      $required_services
+    );
 
-            if ($update_stmt) {
-              mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
-              mysqli_stmt_execute($update_stmt);
-              mysqli_stmt_close($update_stmt);
-            }
+    if (mysqli_stmt_execute($stmt)) {
+      $disability = 'Hearing';
+      $medical_officer_id = $_SESSION['user_id'] ?? 1;
 
-            echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Assessment successfully submitted.',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        window.location.href = 'complete_assessment';
-                    });
-                });
-            </script>";
-          } else {
-            $error_message = mysqli_stmt_error($stmt);
-          }
+      $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
+      $update_stmt = mysqli_prepare($conn, $update_sql);
 
-          mysqli_stmt_close($stmt);
-        } else {
-          $error_message = mysqli_error($conn);
-        }
-
-        mysqli_close($conn);
-
-        if (!empty($error_message)) {
+      if ($update_stmt) {
+        mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
+        if (mysqli_stmt_execute($update_stmt)) {
           echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Assessment and hearing details saved.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'assessments';
+                            });
+                        });
+                    </script>";
+        } else {
+          $error_message = mysqli_stmt_error($update_stmt);
+        }
+        mysqli_stmt_close($update_stmt);
+      } else {
+        $error_message = mysqli_error($conn);
+      }
+    } else {
+      $error_message = mysqli_stmt_error($stmt);
+    }
+
+    mysqli_stmt_close($stmt);
+  } else {
+    $error_message = mysqli_error($conn);
+  }
+
+  mysqli_close($conn);
+
+  // Show error if any
+  if (!empty($error_message)) {
+    echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'error',
@@ -150,9 +119,19 @@
                 });
             });
         </script>";
-        }
-      }
-      ?>
+  }
+}
+?>
+
+<body>
+
+  <div id="app">
+    <div class="main-wrapper main-wrapper-1">
+      <div class="navbar-bg"></div>
+
+
+      <!-- top navigation  -->
+      <?php include 'files/nav.php'; ?>
 
 
       <!-- navigation -->
@@ -174,9 +153,9 @@
                   <option value="">-- Select --</option>
                   <option value="Physical Disabilities">Physical Disabilities</option>
                   <option value="Hearing Impairments">Hearing Impairments</option>
+                  <option value="Visual Impairments">Visual Impairments</option>
                   <option value="Multiple Disabilities">Multiple Disabilities</option>
                   <option value="Mental/Intellectual">Mental/Intellectual Disabilities</option>
-                  <option value="Visual Impairments">Visual Impairments</option>
                   <option value="Progressive Chronic Disorders">Progressive Chronic Disorders</option>
                   <option value="Speech Disabilities">Speech Disabilities</option>
                 </select>
@@ -184,18 +163,8 @@
               <div class="hr"></div>
               <!-- Physical Disabilities Form -->
               <div id="Physical Disabilities" class="disability-form card">
-                <h4>Physical Disability Assessment</h4>
-                <form action="submit_physical_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Description</label>
-                    <textarea name="physical_description" class="form-control"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label>Mobility Level</label>
-                    <input type="text" name="mobility_level" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
+                
+                <?php include 'physical_form.php'; ?>
               </div>
 
               <!-- Multiple Disabilities Form -->
@@ -228,24 +197,11 @@
                   </div>
                   <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
-              </div>
-
+              </div> 
               <!-- Visual Impairments Form -->
               <div id="Visual Impairments" class="disability-form card">
-                <h4>Visual Impairment Assessment</h4>
-                <form action="submit_visual_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Vision Test Summary</label>
-                    <textarea name="vision_summary" class="form-control"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label>Corrective Measures</label>
-                    <input type="text" name="corrective_measures" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
+                <?php include 'visual_form.php'; ?>
               </div>
-
               <!-- Hearing Impairments Form -->
               <div id="Hearing Impairments" class="disability-form card">
                 <!-- <h5>Hearing Impairment Assessment</h5> -->

@@ -28,8 +28,7 @@
 
                             <div class="col-md-12" hidden>
                                 <label>User id</label>
-                                <input type="user_id" name="user_id" value=<?= $pwdUser['id'] ?>
-                                    class="form-control">
+                                <input type="user_id" name="user_id" value=<?= $pwdUser['id'] ?> class="form-control">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -137,6 +136,11 @@
                         <div class="mb-3">
                             <label>Required Services</label>
                             <textarea name="required_services" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Upload Supporting Documents (PDF, JPG, PNG)</label>
+                            <input type="file" name="supporting_file" class="form-control"
+                                accept=".pdf,.jpg,.jpeg,.png">
                         </div>
                     </div>
                 </div>

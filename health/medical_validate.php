@@ -163,18 +163,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               <div class="hr"></div>
               <!-- Physical Disabilities Form -->
               <div id="Physical Disabilities" class="disability-form card">
-                <h4>Physical Disability Assessment</h4>
-                <form action="submit_physical_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Description</label>
-                    <textarea name="physical_description" class="form-control"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label>Mobility Level</label>
-                    <input type="text" name="mobility_level" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
+                <!-- <h4>Physical Disability Assessment</h4>
+                 MMMM -->
+                <?php include 'physical_form.php'; ?>
               </div>
 
               <!-- Multiple Disabilities Form -->
