@@ -180,7 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to PWD County</title>
+  <title>Welcome to PWD Access</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
@@ -495,7 +495,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <!-- Left side with teal background and cards -->
     <div class="auth-hero d-none d-lg-block">
       <div class="hero-content">
-        <h1 class="hero-title">Welcome to PWD County</h1>
+        <h1 class="hero-title">Welcome to PWD Access</h1>
         <p class="hero-subtitle">Join our community to access disability services and support programs</p>
 
         <div class="benefits-grid">
@@ -545,7 +545,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <div class="form-container">
         <div class="logo">
           <i class="fas fa-wheelchair-motion logo-icon"></i>
-          <span>PWD County</span>
+          <span>PWD Access</span>
         </div>
 
         <h2 class="auth-title">Access Your Account</h2>
@@ -600,7 +600,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <select class="form-select" name="official_type" id="official_type" required>
                   <option value="">-- Select Type --</option>
                   <option value="health_officer">Health Officer</option>
-                  <option value="medical_officer">Medical Officer</option>
+                  <option value="medical_officer">Approval Officer</option>
                   <option value="county_officer">County Officer</option>
                 </select>
               </div>

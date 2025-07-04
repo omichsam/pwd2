@@ -7,7 +7,7 @@ include 'files/register_officials.php';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PWD County - Official Portal</title>
+  <title>PWD Access - Official Portal</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
@@ -442,7 +442,7 @@ include 'files/register_officials.php';
       <div class="form-container">
         <div class="logo">
           <i class="fas fa-wheelchair-motion logo-icon"></i>
-          <span>PWD County</span>
+          <span>PWD Access</span>
         </div>
 
         <h2 class="auth-title">Official Registration</h2>
@@ -510,7 +510,7 @@ include 'files/register_officials.php';
                 <select class="form-select" name="type" id="type" required>
                   <option value="">Select your role</option>
                   <option value="health_officer">Health Officer</option>
-                  <option value="medical_officer">Medical Officer</option>
+                  <option value="medical_officer">Approval Officer</option>
                   <option value="county_officer">County Officer</option>
                 </select>
               </div>

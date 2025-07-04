@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PWD County Portal | Gamified Disability Certification</title>
+  <title>PWD Access Portal | Assessment</title>
   <meta name="description" content="Interactive PWD certification process with real-time tracking and gamification">
 
   <!-- Bootstrap CSS -->
@@ -677,7 +677,7 @@
   <nav class="navbar navbar-expand-lg navbar-light fixed-top">
     <div class="container">
       <a class="navbar-brand" href="/">
-        <i class="fas fa-wheelchair"></i>PWD County
+        <i class="fas fa-wheelchair"></i>PWD Access
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
@@ -709,7 +709,7 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-6">
-          <h1 class="hero-title animate__animated animate__fadeInDown">Your PWD Certification Journey</h1>
+          <h1 class="hero-title animate__animated animate__fadeInDown">Your PWD Assessment Journey</h1>
           <p class="hero-subtitle animate__animated animate__fadeIn animate__delay-1s">Track your application through
             every step with our transparent process. Easy visibilty of your process!</p>
           <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeIn animate__delay-2s">
@@ -769,7 +769,7 @@
   <!-- Process Section -->
   <section class="process-section" id="process">
     <div class="container">
-      <h2 class="section-title text-center animate__animated animate__fadeIn">Our Transparent Certification Process</h2>
+      <h2 class="section-title text-center animate__animated animate__fadeIn">Our Transparent Assessment Process</h2>
 
       <div class="process-steps">
         <!-- Step 1 -->
@@ -777,7 +777,7 @@
           <div class="step-number">1</div>
           <div class="step-content">
             <h5 class="step-title">Application Submission</h5>
-            <p class="step-description">Complete our online form with your personal details and disability information.
+            <p class="step-description">Complete your online form with your personal details and disability information.
               Upload required documents for verification.</p>
             <span class="step-badge">Current Step</span>
           </div>
@@ -788,7 +788,7 @@
           <div class="step-number">2</div>
           <div class="step-content">
             <h5 class="step-title">Medical Review</h5>
-            <p class="step-description">Our certified medical team will review your documents and may request additional
+            <p class="step-description">The certified medical team will review your documents and may request additional
               information or examination.</p>
             <span class="step-badge">Pending</span>
           </div>
@@ -798,8 +798,8 @@
         <div class="process-step animate__animated animate__fadeIn animate__delay-2s">
           <div class="step-number">3</div>
           <div class="step-content">
-            <h5 class="step-title">Health Verification</h5>
-            <p class="step-description">The county health department verifies the medical assessment and disability
+            <h5 class="step-title">Approval Verification</h5>
+            <p class="step-description">The hospital health department verifies the medical assessment and disability
               classification.</p>
             <span class="step-badge">Pending</span>
           </div>
@@ -820,9 +820,8 @@
         <div class="process-step animate__animated animate__fadeIn animate__delay-4s">
           <div class="step-number">5</div>
           <div class="step-content">
-            <h5 class="step-title">Certificate Delivery</h5>
-            <p class="step-description">Receive your digital PWD ID immediately and optional physical card by mail
-              within 7 days.</p>
+            <h5 class="step-title"> Assessment Report Delivery</h5>
+            <p class="step-description">Receive your Assessment report after the approval process.</p>
             <span class="step-badge">Pending</span>
           </div>
         </div>
@@ -864,7 +863,7 @@
           </div>
         </div>
 
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
           <div class="feature-card animate__animated animate__fadeInUp animate__delay-2s">
             <div class="feature-icon">
               <i class="fas fa-gamepad"></i>
@@ -873,7 +872,7 @@
             <p class="feature-description">Earn badges, points, and rewards as you complete each step, making the
               process engaging.</p>
           </div>
-        </div>
+        </div> -->
 
         <div class="col-md-4">
           <div class="feature-card animate__animated animate__fadeInUp">
@@ -919,7 +918,7 @@
       <div class="row">
         <div class="col-lg-4 mb-4">
           <div class="testimonial-card">
-            <p class="testimonial-text">"The gamification made what I expected to be a stressful process actually
+            <p class="testimonial-text">"The assessment process made what I expected to be a stressful process actually
               enjoyable. I looked forward to completing each step!"</p>
             <div class="testimonial-author">
               <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah J." class="author-avatar">
@@ -966,10 +965,10 @@
   <section class="cta-section">
     <div class="container">
       <h2 class="cta-title">Ready to Begin Your PWD Journey?</h2>
-      <p class="cta-subtitle">Join thousands who have successfully navigated our transparent certification process.</p>
+      <p class="cta-subtitle">Join thousands who have successfully navigated our transparent Assessment process.</p>
       <div class="d-flex flex-wrap justify-content-center gap-3">
         <a href="register" class="btn btn-light btn-lg px-5">
-          <i class="fas fa-user-plus me-2"></i> Register as PWD
+          <i class="fas fa-user-plus me-2"></i> Register for Assessment
         </a>
         <a href="official_reg" class="btn btn-outline-light btn-lg px-5">
           <i class="fas fa-user-md me-2"></i> Official Registration
@@ -982,21 +981,21 @@
   <footer class="footer">
     <div class="container">
       <div class="row">
-        <div class="col-lg-4 mb-5 mb-lg-0">
+        <div class="col-lg-5 mb-5 mb-lg-0">
           <a href="/" class="footer-logo text-light">
             <i class="fas fa-wheelchair "></i>PWD Access
           </a>
           <p class="footer-about">Making disability certification transparent and accessible for everyone through
             innovative technology and compassionate service.</p>
-          <div class="social-links">
+          <!-- <div class="social-links">
             <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
             <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
             <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
             <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-          </div>
+          </div> -->
         </div>
 
-        <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+        <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
           <h5 class="footer-title">Quick Links</h5>
           <ul class="footer-links">
             <li><a href="/"><i class="fas fa-chevron-right"></i> Home</a></li>
@@ -1007,7 +1006,7 @@
           </ul>
         </div>
 
-        <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
+        <!-- <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
           <h5 class="footer-title">Resources</h5>
           <ul class="footer-links">
             <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
@@ -1016,25 +1015,25 @@
             <li><a href="#"><i class="fas fa-chevron-right"></i> Support Services</a></li>
             <li><a href="#"><i class="fas fa-chevron-right"></i> Benefits Guide</a></li>
           </ul>
-        </div>
+        </div> -->
 
-        <div class="col-lg-3 col-md-4 text-light">
+        <div class="col-lg-4 col-md-4 text-light">
           <h5 class="footer-title">Contact Us</h5>
           <ul class="footer-links text-light">
-            <li class="text-light"><a href="mailto:help@pwdcounty.gov"><i class="fas fa-envelope text-light"></i>
-                help@pwdcounty.gov</a></li>
-            <li class="text-light"><a href="tel:1234567890"><i class="fas fa-phone text-light"></i> (123) 456-7890</a>
-            </li>
-            <li class="text-light"><a href="#"><i class="fas fa-map-marker-alt text-light"></i> 123 Disability Ave,
-                County</a></li>
-            <li class="text-light"><a href="#"><i class="fas fa-clock text-light"></i> Mon-Fri: 8AM - 6PM</a></li>
-            <li class="text-light"><a href="#"><i class="fas fa-ambulance text-light"></i> Emergency Support</a></li>
+            <li class="text-light"><a href="mailto:help@pwdaccess.online"><i class="fas fa-envelope text-light"></i>
+                help@pwdaccess.online</a></li>
+            <!-- <li class="text-light"><a href="tel:1234567890"><i class="fas fa-phone text-light"></i> (123) 456-7890</a>
+            </li> -->
+            <!-- <li class="text-light"><a href="#"><i class="fas fa-map-marker-alt text-light"></i> 123 Disability Ave,
+                County</a></li> -->
+            <li class="text-light"><a href="#"><i class="fas fa-clock text-light"></i> Monday - Sunday 24 / 7  </a></li>
+            <!-- <li class="text-light"><a href="#"><i class="fas fa-ambulance text-light"></i> Emergency Support</a></li> -->
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; <span id="currentYear"></span> PWD County. All rights reserved. | <a href="#"
+        <p>&copy; <span id="currentYear"></span> PWD Access. All rights reserved. | <a href="#"
             style="color: rgba(255,255,255,0.7);">Privacy Policy</a> | <a href="#"
             style="color: rgba(255,255,255,0.7);">Terms of Service</a></p>
       </div>
