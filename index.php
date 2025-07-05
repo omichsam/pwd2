@@ -685,7 +685,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="/">Home</a>
+            <a class="nav-link" href="">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#process">Process</a>
@@ -964,7 +964,7 @@
   <!-- CTA Section -->
   <section class="cta-section">
     <div class="container">
-      <h2 class="cta-title">Ready to Begin Your PWD Journey?</h2>
+      <h2 class="cta-title">Ready to Begin Your Assessment Journey?</h2>
       <p class="cta-subtitle">Join thousands who have successfully navigated our transparent Assessment process.</p>
       <div class="d-flex flex-wrap justify-content-center gap-3">
         <a href="register" class="btn btn-light btn-lg px-5">
@@ -985,7 +985,7 @@
           <a href="/" class="footer-logo text-light">
             <i class="fas fa-wheelchair "></i>PWD Access
           </a>
-          <p class="footer-about">Making disability certification transparent and accessible for everyone through
+          <p class="footer-about">Making disability assessment process transparent and accessible for everyone through
             innovative technology and compassionate service.</p>
           <!-- <div class="social-links">
             <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
