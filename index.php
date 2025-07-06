@@ -711,7 +711,7 @@
         <div class="col-lg-6">
           <h1 class="hero-title animate__animated animate__fadeInDown">Your PWD Assessment Journey</h1>
           <p class="hero-subtitle animate__animated animate__fadeIn animate__delay-1s">Track your application through
-            every step with our transparent process. Easy visibilty of your process!</p>
+            every step with the transparent process. Easy visibilty of your process!</p>
           <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeIn animate__delay-2s">
             <a href="register" class="btn btn-light btn-lg px-4">
               Apply Now <i class="fas fa-arrow-right ms-2"></i>
@@ -769,7 +769,7 @@
   <!-- Process Section -->
   <section class="process-section" id="process">
     <div class="container">
-      <h2 class="section-title text-center animate__animated animate__fadeIn">Our Transparent Assessment Process</h2>
+      <h2 class="section-title text-center animate__animated animate__fadeIn">Transparent Assessment Process</h2>
 
       <div class="process-steps">
         <!-- Step 1 -->
@@ -838,7 +838,7 @@
   <!-- Features Section -->
   <section class="features-section" id="features">
     <div class="container">
-      <h2 class="section-title text-center">Why Choose Our Platform</h2>
+      <h2 class="section-title text-center">Why Choose the Platform</h2>
 
       <div class="row g-4">
         <div class="col-md-4">
@@ -847,7 +847,7 @@
               <i class="fas fa-bolt"></i>
             </div>
             <h4 class="feature-title">Fast Processing</h4>
-            <p class="feature-description">Our streamlined process reduces wait times from weeks to days with real-time
+            <p class="feature-description">The streamlined process reduces wait times from weeks to days with real-time
               updates at every stage.</p>
           </div>
         </div>
@@ -891,7 +891,7 @@
               <i class="fas fa-headset"></i>
             </div>
             <h4 class="feature-title">24/7 Support</h4>
-            <p class="feature-description">Our disability specialists are available round the clock to assist with your
+            <p class="feature-description">The health specialists are available round the clock to assist with your
               application.</p>
           </div>
         </div>
@@ -965,7 +965,8 @@
   <section class="cta-section">
     <div class="container">
       <h2 class="cta-title">Ready to Begin Your Assessment Journey?</h2>
-      <p class="cta-subtitle">Join thousands who have successfully navigated our transparent Assessment process.</p>
+      <p class="cta-subtitle">The platform is designed to make your assessment journey easier, faster, and truly
+        accessible, with full transparency you can trust.</p>
       <div class="d-flex flex-wrap justify-content-center gap-3">
         <a href="register" class="btn btn-light btn-lg px-5">
           <i class="fas fa-user-plus me-2"></i> Register for Assessment
@@ -1026,7 +1027,7 @@
             </li> -->
             <!-- <li class="text-light"><a href="#"><i class="fas fa-map-marker-alt text-light"></i> 123 Disability Ave,
                 County</a></li> -->
-            <li class="text-light"><a href="#"><i class="fas fa-clock text-light"></i> Monday - Sunday 24 / 7  </a></li>
+            <li class="text-light"><a href="#"><i class="fas fa-clock text-light"></i> Monday - Sunday 24 / 7 </a></li>
             <!-- <li class="text-light"><a href="#"><i class="fas fa-ambulance text-light"></i> Emergency Support</a></li> -->
           </ul>
         </div>
