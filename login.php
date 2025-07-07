@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 'id' => $user['id'],
                 'license_id' => $user['license_id'],
                 'name' => $user['name'],
-                'email' => $user['email'], 
+                'email' => $user['email'],
                 'mobile_number' => $user['mobile_number'],
                 'type' => $user['type']
               ];
@@ -599,8 +599,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <label for="official_type">Official Type</label>
                 <select class="form-select" name="official_type" id="official_type" required>
                   <option value="">-- Select Type --</option>
-                  <option value="health_officer">Health Officer</option>
-                  <option value="medical_officer">Approval Officer</option>
+                  <option value="medical_officer">Medical Officer</option>
+                  <option value="health_officer">Approval Officer</option>
                   <option value="county_officer">County Officer</option>
                 </select>
               </div>

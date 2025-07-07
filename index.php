@@ -709,9 +709,9 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-6">
-          <h1 class="hero-title animate__animated animate__fadeInDown">Your PWD Assessment Journey</h1>
-          <p class="hero-subtitle animate__animated animate__fadeIn animate__delay-1s">Track your application through
-            every step with the transparent process. Easy visibilty of your process!</p>
+          <h1 class="hero-title animate__animated animate__fadeInDown">Your Medical Assessment Journey</h1>
+          <p class="hero-subtitle animate__animated animate__fadeIn animate__delay-1s">As a Person with Disability, track your application through
+            every step of the medical assessment journey. Easy visibilty of your process!</p>
           <div class="d-flex flex-wrap gap-3 animate__animated animate__fadeIn animate__delay-2s">
             <a href="register" class="btn btn-light btn-lg px-4">
               Apply Now <i class="fas fa-arrow-right ms-2"></i>
@@ -769,7 +769,7 @@
   <!-- Process Section -->
   <section class="process-section" id="process">
     <div class="container">
-      <h2 class="section-title text-center animate__animated animate__fadeIn">Transparent Assessment Process</h2>
+      <h2 class="section-title text-center animate__animated animate__fadeIn">Medical Assessment Process</h2>
 
       <div class="process-steps">
         <!-- Step 1 -->
@@ -810,8 +810,7 @@
           <div class="step-number">4</div>
           <div class="step-content">
             <h5 class="step-title">County Approval</h5>
-            <p class="step-description">Final approval from the county disability services office with official
-              certification.</p>
+            <p class="step-description">Final approval from the County Health Director's office .</p>
             <span class="step-badge">Pending</span>
           </div>
         </div>
@@ -964,9 +963,9 @@
   <!-- CTA Section -->
   <section class="cta-section">
     <div class="container">
-      <h2 class="cta-title">Ready to Begin Your Assessment Journey?</h2>
-      <p class="cta-subtitle">The platform is designed to make your assessment journey easier, faster, and truly
-        accessible, with full transparency you can trust.</p>
+      <h2 class="cta-title">Ready to Begin Your Medical Assessment Journey?</h2>
+      <p class="cta-subtitle">As a person with disability, this platform is designed to make your medical assessment journey easier, faster and truly
+        accessible.</p>
       <div class="d-flex flex-wrap justify-content-center gap-3">
         <a href="register" class="btn btn-light btn-lg px-5">
           <i class="fas fa-user-plus me-2"></i> Register for Assessment
@@ -986,7 +985,7 @@
           <a href="/" class="footer-logo text-light">
             <i class="fas fa-wheelchair "></i>PWD Access
           </a>
-          <p class="footer-about">Making disability assessment process transparent and accessible for everyone through
+          <p class="footer-about">Making disability assessment process transparent and accessible for Persons with Disability through
             innovative technology and compassionate service.</p>
           <!-- <div class="social-links">
             <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
