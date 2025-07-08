@@ -365,124 +365,331 @@ include 'files/header.php';
                                         </div>
 
 
-                                    <?php if($disability_type == "Hearing"){?>
-                                        <div class="form-divider mt-4">
-                                            <u>Hearing Assessment</u>
-                                        </div>
-                                        <div class="row">
-                                            <div class="form-group col-md-6">
-                                                <label>History of Hearing Loss</label>
+                                        <?php if ($disability_type == "Hearing") { ?>
+                                            <div class="form-divider mt-4">
+                                                <u>Hearing Assessment</u>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label>History of Hearing Loss</label>
+                                                    <textarea class="form-control" rows="3"
+                                                        readonly><?php echo htmlspecialchars($data['history_of_hearing_loss']); ?></textarea>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>History of Hearing Devices</label>
+                                                    <textarea class="form-control" rows="3"
+                                                        readonly><?php echo htmlspecialchars($data['history_of_hearing_devices']); ?></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label>Hearing Test Type (Right)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['hearing_test_type_right']); ?>"
+                                                        readonly>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Hearing Test Type (Left)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['hearing_test_type_left']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <label>Hearing Loss Degree (Right)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['hearing_loss_degree_right']); ?>"
+                                                        readonly>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Hearing Loss Degree (Left)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['hearing_loss_degree_left']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <label>Hearing Level (Right)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['hearing_level_dbhl_right']); ?>"
+                                                        readonly>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Hearing Level (Left)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['hearing_level_dbhl_left']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label>Monaural Percentage (Right)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['monaural_percentage_right']); ?>"
+                                                        readonly>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Monaural Percentage (Left)</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['monaural_percentage_left']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Overall Binaural Percentage</label>
+                                                <input type="text" class="form-control"
+                                                    value="<?php echo htmlspecialchars($data['overall_binaural_percentage']); ?>"
+                                                    readonly>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Conclusion</label>
                                                 <textarea class="form-control" rows="3"
-                                                    readonly><?php echo htmlspecialchars($data['history_of_hearing_loss']); ?></textarea>
+                                                    readonly><?php echo htmlspecialchars($data['conclusion']); ?></textarea>
                                             </div>
-                                            <div class="form-group col-md-6">
-                                                <label>History of Hearing Devices</label>
+
+                                            <div class="form-group">
+                                                <label>Recommended Assistive Products</label>
                                                 <textarea class="form-control" rows="3"
-                                                    readonly><?php echo htmlspecialchars($data['history_of_hearing_devices']); ?></textarea>
+                                                    readonly><?php echo htmlspecialchars($data['recommended_assistive_products']); ?></textarea>
                                             </div>
-                                        </div>
 
-                                        <div class="row">
-                                            <div class="form-group col-md-6">
-                                                <label>Hearing Test Type (Right)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['hearing_test_type_right']); ?>"
-                                                    readonly>
+                                            <div class="form-group">
+                                                <label>Required Services</label>
+                                                <textarea class="form-control" rows="3"
+                                                    readonly><?php echo htmlspecialchars($data['required_services']); ?></textarea>
                                             </div>
-                                            <div class="form-group col-md-6">
-                                                <label>Hearing Test Type (Left)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['hearing_test_type_left']); ?>"
-                                                    readonly>
-                                            </div>
-                                        </div>
 
-                                        <div class="form-row">
-                                            <div class="form-group col-md-6">
-                                                <label>Hearing Loss Degree (Right)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['hearing_loss_degree_right']); ?>"
-                                                    readonly>
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label>Hearing Loss Degree (Left)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['hearing_loss_degree_left']); ?>"
-                                                    readonly>
-                                            </div>
-                                        </div>
+                                        <?php }
+                                        if ($disability_type == "Physical") { ?>
 
-                                        <div class="form-row">
-                                            <div class="form-group col-md-6">
-                                                <label>Hearing Level (Right)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['hearing_level_dbhl_right']); ?>"
-                                                    readonly>
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label>Hearing Level (Left)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['hearing_level_dbhl_left']); ?>"
-                                                    readonly>
-                                            </div>
-                                        </div>
 
-                                        <div class="row">
-                                            <div class="form-group col-md-6">
-                                                <label>Monaural Percentage (Right)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['monaural_percentage_right']); ?>"
-                                                    readonly>
+                                            <div class="form-divider mt-4">
+                                                <u>Medical Information</u>
                                             </div>
-                                            <div class="form-group col-md-6">
-                                                <label>Monaural Percentage (Left)</label>
-                                                <input type="text" class="form-control"
-                                                    value="<?php echo htmlspecialchars($data['monaural_percentage_left']); ?>"
-                                                    readonly>
+
+                                            <div class="row">
+                                                <!-- Medical History -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Medical History</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['medical_history']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Injury Date -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Injury Date</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['injury_date']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Last Intervention Date -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Last Intervention Date</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['last_intervention_date']); ?>"
+                                                        readonly>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Overall Binaural Percentage</label>
-                                            <input type="text" class="form-control"
-                                                value="<?php echo htmlspecialchars($data['overall_binaural_percentage']); ?>"
-                                                readonly>
-                                        </div>
 
-                                        <div class="form-group">
-                                            <label>Conclusion</label>
-                                            <textarea class="form-control" rows="3"
-                                                readonly><?php echo htmlspecialchars($data['conclusion']); ?></textarea>
-                                        </div>
+                                            <div class="form-divider mt-4">
+                                                <u>Disability Information</u>
+                                            </div>
 
-                                        <div class="form-group">
-                                            <label>Recommended Assistive Products</label>
-                                            <textarea class="form-control" rows="3"
-                                                readonly><?php echo htmlspecialchars($data['recommended_assistive_products']); ?></textarea>
-                                        </div>
+                                            <div class="row">
+                                                <!-- Cause of Disability -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Cause of Disability</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['cause_of_disability']); ?>"
+                                                        readonly>
+                                                </div>
 
-                                        <div class="form-group">
-                                            <label>Required Services</label>
-                                            <textarea class="form-control" rows="3"
-                                                readonly><?php echo htmlspecialchars($data['required_services']); ?></textarea>
-                                        </div>
+                                                <!-- Muscle Power Score -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Muscle Power Score</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['muscle_power_score']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Joint Range Score -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Joint Range Score</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['joint_range_score']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-divider mt-4">
+                                                <u>Assessment Details</u>
+                                            </div>
+
+                                            <div class="row">
+                                                <!-- Angulation Score -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Angulation Score</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['angulation_score']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Amputation Score -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Amputation Score</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['amputation_score']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Impairments Remark -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Impairments Remark</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['impairments_remark']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-divider mt-4">
+                                                <u>Scores and Ratings</u>
+                                            </div>
+
+                                            <div class="row">
+                                                <!-- Mobility Score -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Mobility Score</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['mobility_score']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Self-Care Score -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Self-Care Score</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['self_care_score']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Restrictions Remark -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Restrictions Remark</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['restrictions_remark']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-divider mt-4">
+                                                <u>Conclusion and Recommendations</u>
+                                            </div>
+
+                                            <div class="row">
+                                                <!-- Disability Rating -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Disability Rating</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['disability_rating']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Conclusion Type -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Conclusion Type</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['conclusion_type']); ?>"
+                                                        readonly>
+                                                </div>
+
+                                                <!-- Assistive Products -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Assistive Products</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['assistive_products']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-divider mt-4">
+                                                <u>Required Services</u>
+                                            </div>
+
+                                            <div class="row">
+                                                <!-- Required Services -->
+                                                <div class="form-group col-md-4">
+                                                    <label>Required Services</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<?php echo htmlspecialchars($data['required_services']); ?>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
 
                                         <?php } ?>
-                                        <script>
-    const documents = <?php echo json_encode($documents_data); ?>;
 
-    documents.forEach(document => {
-        let documentLink = document.document_url;
-        let documentType = document.document_type;
+                                        <div class="form-divider mt-4">
+                                            <u><strong>Uploaded Document</strong></u>
+                                        </div>
 
-        if (documentType === "PDF") {
-            // Embed the PDF in an iframe
-            let iframeHTML = `<iframe src="${documentLink}" width="600" height="400"></iframe><br>`;
-            document.getElementById('documentsContainer').innerHTML += iframeHTML;
-        }
-    });
-</script>
+                                        <div class="row">
+                                            <div class="form-group col-md-12">
+                                                <label>Document</label>
+                                                <?php if (!empty($data['file_path'])): ?>
+                                                    <?php
+                                                    $document_url = "" . htmlspecialchars($data['file_path']);
+                                                    $document_extension = pathinfo($data['file_path'], PATHINFO_EXTENSION);
+                                                    $file_name = basename($data['file_path']);
+                                                    ?>
 
-<div id="documentsContainer"></div>
+                                                    <div class="mb-2">
+                                                        <span class="font-weight-bold">File:</span>
+                                                        <?php echo htmlspecialchars($file_name); ?>
+                                                        <span
+                                                            class="badge badge-secondary ml-2"><?php echo strtoupper($document_extension); ?></span>
+                                                    </div>
+
+                                                    <div class="btn-group">
+                                                        <?php if ($document_extension == 'pdf'): ?>
+                                                            <a href="<?php echo $document_url; ?>" target="_blank"
+                                                                class="btn btn-primary">
+                                                                <i class="fas fa-file-pdf"></i> View PDF
+                                                            </a>
+                                                        <?php elseif (in_array($document_extension, ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                                                            <a href="<?php echo $document_url; ?>" target="_blank"
+                                                                class="btn btn-success">
+                                                                <i class="fas fa-image"></i> View Image
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <a href="<?php echo $document_url; ?>" target="_blank"
+                                                                class="btn btn-primary">
+                                                                <i class="fas fa-file"></i> View Document
+                                                            </a>
+                                                        <?php endif; ?>
+
+                                                        <a href="<?php echo $document_url; ?>" download
+                                                            class="btn btn-warning">
+                                                            <i class="fas fa-download"></i> Download
+                                                        </a>
+                                                    </div>
+
+                                                <?php else: ?>
+                                                    <div class="alert alert-info">
+                                                        <i class="fas fa-info-circle"></i> No document uploaded
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+
                                     </form>
                                 </div>
                             </div>

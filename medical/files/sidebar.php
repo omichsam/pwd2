@@ -22,7 +22,7 @@
 
             <li class="menu-header">Assessment</li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical Assessment</span></a>
+              <a href="" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical Assessment</span></a>
               <ul class="dropdown-menu">
                 <li><a href="assessment">New</a></li>
                 <li><a href="complete_assessment">Approved</a></li>
@@ -33,7 +33,7 @@
 
             <li class="menu-header">Account</li>
             <li class="dropdown">
-              <a href="#" class="nav-link has-dropdown"><i class="far fa-user"></i> <span>Account</span></a>
+              <a href="" class="nav-link has-dropdown"><i class="far fa-user"></i> <span>Account</span></a>
               <ul class="dropdown-menu">
                 <li><a href="view_profile">View Profile</a></li>
                 <li><a href="edit_profile">Edit Profile</a></li>

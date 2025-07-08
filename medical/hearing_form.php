@@ -2,8 +2,8 @@
 $success = null;
 $error_message = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $assessment_id = $_POST['assessment_id'] ?? null;
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["hearing"])) {
+    $assessment_id = $_GET['assessment_id'] ?? null;
     $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
     $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
     $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
