@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["hearing"])) {
     // File upload handling
     $file_uploaded = false;
     $file_path = '';
-    if (isset($_FILES['supporting_file']) && $_FILES['supporting_file']['error'] === 0) {
+    if (isset($_FILES['supporting_file']) && $_FILES['supporting_file']['error'] === UPLOAD_ERR_OK) {
         $file_name = $_FILES['supporting_file']['name'];
         $file_tmp = $_FILES['supporting_file']['tmp_name'];
         $file_size = $_FILES['supporting_file']['size'];
@@ -32,12 +32,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["hearing"])) {
         $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
         if (in_array($file_ext, $allowed_exts)) {
             $upload_dir = "uploads/";
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
             $file_path = $upload_dir . uniqid() . '.' . $file_ext;
 
             if (move_uploaded_file($file_tmp, $file_path)) {
                 $file_uploaded = true;
             } else {
-                $error_message = "Error uploading file.";
+                $error_message = "Error uploading file. Please try again.";
             }
         } else {
             $error_message = "Invalid file type. Only PDF, JPG, JPEG, PNG files are allowed.";
@@ -96,60 +99,55 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["hearing"])) {
                 mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
                 if (mysqli_stmt_execute($update_stmt)) {
                     // Insert the uploaded document into the documents table
-                    if ($file_uploaded) {
+                    if ($file_uploaded && isset($pwdUser['id'])) {
                         $insert_document_sql = "INSERT INTO documents (user_id, assessment_id, file_path, document_type) 
-                                                VALUES (?, ?, ?, ?)";
+                                              VALUES (?, ?, ?, ?)";
                         $insert_document_stmt = mysqli_prepare($conn, $insert_document_sql);
                         if ($insert_document_stmt) {
                             $document_type = 'Hearing Assessment File';
                             mysqli_stmt_bind_param($insert_document_stmt, "iiss", $pwdUser['id'], $assessment_id, $file_path, $document_type);
                             mysqli_stmt_execute($insert_document_stmt);
+                            mysqli_stmt_close($insert_document_stmt);
                         }
                     }
 
                     echo "<script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Assessment and hearing details saved.',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    window.location.href = 'complete_assessment';
-                                });
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Assessment and hearing details saved.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'complete_assessment';
                             });
                         </script>";
+                    exit;
                 } else {
-                    $error_message = mysqli_stmt_error($update_stmt);
+                    $error_message = "Update failed: " . mysqli_stmt_error($update_stmt);
                 }
                 mysqli_stmt_close($update_stmt);
             } else {
-                $error_message = mysqli_error($conn);
+                $error_message = "Statement preparation failed: " . mysqli_error($conn);
             }
         } else {
-            $error_message = mysqli_stmt_error($stmt);
+            $error_message = "Execution failed: " . mysqli_stmt_error($stmt);
         }
-
         mysqli_stmt_close($stmt);
     } else {
-        $error_message = mysqli_error($conn);
+        $error_message = "Preparation failed: " . mysqli_error($conn);
     }
 
-    mysqli_close($conn);
-
-    // Show error if any
     if (!empty($error_message)) {
         echo "<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: '" . addslashes($error_message) . "',
-                confirmButtonText: 'OK'
-            });
-        });
-    </script>";
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '" . addslashes($error_message) . "',
+                    confirmButtonText: 'OK'
+                });
+              </script>";
     }
+    mysqli_close($conn);
 }
 ?>
 
