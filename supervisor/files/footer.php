@@ -4,7 +4,7 @@
 </div>
 <footer class="main-footer">
     <div class="footer-right ">
-        Copyright &copy; 2025 <div class="bullet"></div><i class="fa fa-wheelchair" aria-hidden="true"></i> Pwd County
+        Copyright &copy; 2025 <div class="bullet"></div><i class="fa fa-wheelchair" aria-hidden="true"></i> Pwd Access
     </div>
     <div class="footer-right">
 

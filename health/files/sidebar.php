@@ -4,7 +4,7 @@
             <a href="index" class="border border-3 border-info p-2 bg-primary "
               style="width: 18rem; border-radius: 30px; overflow: hidden;"><b
                 class="text-light text-bolder rounded-pill "><i class="fa fa-wheelchair" aria-hidden="true"></i> Pwd
-                County</b>
+                Access </b>
             </a>
           </div>
           <div class="sidebar-brand sidebar-brand-sm">

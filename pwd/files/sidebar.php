@@ -4,13 +4,13 @@
             <a href="index.php" class="border border-3 border-info p-2 bg-primary "
                 style="width: 18rem; border-radius: 30px; overflow: hidden;"><b
                     class="text-light text-bolder rounded-pill "><i class="fas fa-wheelchair   fa-2x "></i> PWD
-                    County</b>
+                    Access</b>
             </a>
         </div>
         <div class="sidebar-brand sidebar-brand-sm">
             <a href="index.php" class="text-primary text-bolder rounded-pill border border-3 border-primary p-2"
                 style="width: 18rem; border-radius: 30px; overflow: hidden;">
-                P + C
+                P + A
             </a>
         </div>
         <ul class="sidebar-menu">
@@ -25,7 +25,7 @@
                 <a href="application.php" class="nav-link has-dropdown"><i class="fa fa-edit"></i> <span>Assessment</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="application.php">Book Assessment</a></li>
-                    <li><a href="view_application.phpp">View Assessment</a></li>
+                    <li><a href="view_application.php">View Assessment</a></li>
                 </ul>
             </li>
 

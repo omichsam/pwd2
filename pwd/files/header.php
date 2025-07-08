@@ -26,7 +26,7 @@ define('BASE_PATH', __DIR__); // or realpath(__DIR__)
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>Portal &mdash; PWD</title>
+  <title>Portal &mdash; Assessment Portal</title>
 
   <!-- General CSS Files -->
   <link rel="stylesheet" href="../assets/modules/bootstrap/css/bootstrap.min.css">
