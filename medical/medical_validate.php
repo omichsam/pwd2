@@ -9,38 +9,37 @@
 
 
     <?php
-// Include top nav
 include 'files/nav.php';
-
-// // DB connection (replace with your actual connection details)
-// $conn = new mysqli("localhost", "root", "", "pwd");
-
-// if ($conn->connect_error) {
-//     die("Connection failed: " . $conn->connect_error);
-// }
 
 $success = null;
 $error_message = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $assessment_id = $_POST['assessment_id'] ?? null;
+// Assume $conn is established
+if ($_SERVER["REQUEST_METHOD"] === "POST") { 
+
+    $assessment_id = isset($_POST['assessment_id']) ? (int) $_POST['assessment_id'] : null;
     $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
     $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
     $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
     $hearing_loss_type_left = $_POST['hearing_loss_type_left'] ?? '';
     $hearing_grade_right = $_POST['hearing_grade_right'] ?? '';
     $hearing_grade_left = $_POST['hearing_grade_left'] ?? '';
-    $hearing_level_dbhl_right = $_POST['hearing_level_dbhl_right'] ?? 0.0;
-    $hearing_level_dbhl_left = $_POST['hearing_level_dbhl_left'] ?? 0.0;
-    $monoaural_percent_right = $_POST['monoaural_percent_right'] ?? 0.0;
-    $monoaural_percent_left = $_POST['monoaural_percent_left'] ?? 0.0;
-    $binaural_percent = $_POST['binaural_percent'] ?? 0.0;
+
+    $hearing_level_dbhl_right = isset($_POST['hearing_level_dbhl_right']) ? (float) $_POST['hearing_level_dbhl_right'] : 0.0;
+    $hearing_level_dbhl_left = isset($_POST['hearing_level_dbhl_left']) ? (float) $_POST['hearing_level_dbhl_left'] : 0.0;
+    $monoaural_percent_right = isset($_POST['monoaural_percent_right']) ? (float) $_POST['monoaural_percent_right'] : 0.0;
+    $monoaural_percent_left = isset($_POST['monoaural_percent_left']) ? (float) $_POST['monoaural_percent_left'] : 0.0;
+    $binaural_percent = isset($_POST['binaural_percent']) ? (float) $_POST['binaural_percent'] : 0.0;
+
     $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
     $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
     $required_services = $_POST['required_services'] ?? '';
     $status = "checked";
 
-    // Insert data into hearing_disability_assessments
+    if (!$conn) {
+        die("Database connection failed: " . mysqli_connect_error());
+    }
+
     $sql = "INSERT INTO hearing_disability_assessments (
         assessment_id,
         history_of_hearing_loss,
@@ -64,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($stmt) {
         mysqli_stmt_bind_param(
             $stmt,
-            "issssssddddssss", // Corrected: 15 types
+            "issssssddddsss",
             $assessment_id,
             $history_of_hearing_loss,
             $history_of_hearing_devices,
@@ -91,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($update_stmt) {
                 mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
+
                 if (mysqli_stmt_execute($update_stmt)) {
                     echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -122,17 +122,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     mysqli_close($conn);
 
-    // Show error if any
     if (!empty($error_message)) {
         echo "<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: '" . addslashes($error_message) . "',
-                confirmButtonText: 'OK'
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '" . addslashes($error_message) . "',
+                    confirmButtonText: 'OK'
+                });
             });
-        });
         </script>";
     }
 }
