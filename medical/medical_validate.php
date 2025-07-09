@@ -330,4 +330,4 @@
       </script>
 
 
-      <?php include 'files/footer.php'; ?>
+      <?php include 'files/footer.php';
