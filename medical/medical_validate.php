@@ -8,146 +8,123 @@
       <div class="navbar-bg"></div>
 
 
-      <?php
-      // 1. Enable error reporting for debugging
-      ini_set('display_errors', 1);
-      ini_set('display_startup_errors', 1);
-      error_reporting(E_ALL);
+    <?php
+// Include top nav
+include 'files/nav.php';
 
-      // 2. Include navigation and DB connection
-      include 'files/nav.php';
+// // DB connection (replace with your actual connection details)
+// $conn = new mysqli("localhost", "root", "", "pwd");
 
-      // $conn = new mysqli("localhost", "root", "", "pwd");
-      // if ($conn->connect_error) {
-      //   die("DB Connection failed: " . $conn->connect_error);
-      // }
+// if ($conn->connect_error) {
+//     die("Connection failed: " . $conn->connect_error);
+// }
 
-      // 3. Initialize result variables
-      $success = null;
-      $error_message = "";
+$success = null;
+$error_message = "";
 
-      if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        // Debug log
-        error_log("POST request received");
-        echo "<!-- POST request received -->";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $assessment_id = $_POST['assessment_id'] ?? null;
+    $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
+    $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
+    $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
+    $hearing_loss_type_left = $_POST['hearing_loss_type_left'] ?? '';
+    $hearing_grade_right = $_POST['hearing_grade_right'] ?? '';
+    $hearing_grade_left = $_POST['hearing_grade_left'] ?? '';
+    $hearing_level_dbhl_right = $_POST['hearing_level_dbhl_right'] ?? 0.0;
+    $hearing_level_dbhl_left = $_POST['hearing_level_dbhl_left'] ?? 0.0;
+    $monoaural_percent_right = $_POST['monoaural_percent_right'] ?? 0.0;
+    $monoaural_percent_left = $_POST['monoaural_percent_left'] ?? 0.0;
+    $binaural_percent = $_POST['binaural_percent'] ?? 0.0;
+    $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
+    $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
+    $required_services = $_POST['required_services'] ?? '';
+    $status = "checked";
 
-        // 4. Collect POST Data
-        $assessment_id = $_POST['assessment_id'] ?? null;
-        $history_of_hearing_loss = trim($_POST['history_of_hearing_loss'] ?? '');
-        $history_of_hearing_devices = trim($_POST['history_of_hearing_devices'] ?? '');
-        $hearing_loss_type_right = trim($_POST['hearing_loss_type_right'] ?? '');
-        $hearing_loss_type_left = trim($_POST['hearing_loss_type_left'] ?? '');
-        $hearing_grade_right = trim($_POST['hearing_grade_right'] ?? '');
-        $hearing_grade_left = trim($_POST['hearing_grade_left'] ?? '');
-        $hearing_level_dbhl_right = floatval($_POST['hearing_level_dbhl_right'] ?? 0.0);
-        $hearing_level_dbhl_left = floatval($_POST['hearing_level_dbhl_left'] ?? 0.0);
-        $monoaural_percent_right = floatval($_POST['monoaural_percent_right'] ?? 0.0);
-        $monoaural_percent_left = floatval($_POST['monoaural_percent_left'] ?? 0.0);
-        $binaural_percent = floatval($_POST['binaural_percent'] ?? 0.0);
-        $conclusion = trim($_POST['hearing_disability_conclusion'] ?? '');
-        $recommended_assistive_products = trim($_POST['recommended_assistive_products'] ?? '');
-        $required_services = trim($_POST['required_services'] ?? '');
-        $status = "checked";
+    // Insert data into hearing_disability_assessments
+    $sql = "INSERT INTO hearing_disability_assessments (
+        assessment_id,
+        history_of_hearing_loss,
+        history_of_hearing_devices,
+        hearing_test_type_right,
+        hearing_test_type_left,
+        hearing_loss_degree_right,
+        hearing_loss_degree_left,
+        hearing_level_dbhl_right,
+        hearing_level_dbhl_left,
+        monaural_percentage_right,
+        monaural_percentage_left,
+        overall_binaural_percentage,
+        conclusion,
+        recommended_assistive_products,
+        required_services
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // 5. Basic validation
-        if (!$assessment_id) {
-          $error_message = "Assessment ID is missing.";
-        } elseif (empty($hearing_loss_type_right) || empty($hearing_grade_right)) {
-          $error_message = "Missing required hearing assessment fields.";
-        }
+    $stmt = mysqli_prepare($conn, $sql);
 
-        // 6. Proceed only if no error
-        if (empty($error_message)) {
-          $sql = "INSERT INTO hearing_disability_assessments (
-            assessment_id,
-            history_of_hearing_loss,
-            history_of_hearing_devices,
-            hearing_test_type_right,
-            hearing_test_type_left,
-            hearing_loss_degree_right,
-            hearing_loss_degree_left,
-            hearing_level_dbhl_right,
-            hearing_level_dbhl_left,
-            monaural_percentage_right,
-            monaural_percentage_left,
-            overall_binaural_percentage,
-            conclusion,
-            recommended_assistive_products,
-            required_services
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    if ($stmt) {
+        mysqli_stmt_bind_param(
+            $stmt,
+            "issssssddddssss", // Corrected: 15 types
+            $assessment_id,
+            $history_of_hearing_loss,
+            $history_of_hearing_devices,
+            $hearing_loss_type_right,
+            $hearing_loss_type_left,
+            $hearing_grade_right,
+            $hearing_grade_left,
+            $hearing_level_dbhl_right,
+            $hearing_level_dbhl_left,
+            $monoaural_percent_right,
+            $monoaural_percent_left,
+            $binaural_percent,
+            $conclusion,
+            $recommended_assistive_products,
+            $required_services
+        );
 
-          $stmt = mysqli_prepare($conn, $sql);
+        if (mysqli_stmt_execute($stmt)) {
+            $disability = 'Hearing';
+            $medical_officer_id = $_SESSION['user_id'] ?? 1;
 
-          if ($stmt) {
-            mysqli_stmt_bind_param(
-              $stmt,
-              "issssssddddsss",
-              $assessment_id,
-              $history_of_hearing_loss,
-              $history_of_hearing_devices,
-              $hearing_loss_type_right,
-              $hearing_loss_type_left,
-              $hearing_grade_right,
-              $hearing_grade_left,
-              $hearing_level_dbhl_right,
-              $hearing_level_dbhl_left,
-              $monoaural_percent_right,
-              $monoaural_percent_left,
-              $binaural_percent,
-              $conclusion,
-              $recommended_assistive_products,
-              $required_services
-            );
+            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
+            $update_stmt = mysqli_prepare($conn, $update_sql);
 
-            if (mysqli_stmt_execute($stmt)) {
-              // Step 2: Update assessment status
-              $disability = 'Hearing';
-              $medical_officer_id = $_SESSION['user_id'] ?? 1;
-
-              $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
-              $update_stmt = mysqli_prepare($conn, $update_sql);
-
-              if ($update_stmt) {
+            if ($update_stmt) {
                 mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
-
                 if (mysqli_stmt_execute($update_stmt)) {
-                  echo "<script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Assessment and hearing details saved.',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    window.location.href = 'complete_assessment';
-                                });
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Assessment and hearing details saved.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'complete_assessment';
                             });
-                        </script>";
+                        });
+                    </script>";
                 } else {
-                  $error_message = "Update failed: " . mysqli_stmt_error($update_stmt);
-                  error_log($error_message);
+                    $error_message = mysqli_stmt_error($update_stmt);
                 }
                 mysqli_stmt_close($update_stmt);
-              } else {
-                $error_message = "Prepare failed (update_stmt): " . mysqli_error($conn);
-                error_log($error_message);
-              }
             } else {
-              $error_message = "Insert failed: " . mysqli_stmt_error($stmt);
-              error_log($error_message);
+                $error_message = mysqli_error($conn);
             }
-            mysqli_stmt_close($stmt);
-          } else {
-            $error_message = "Prepare failed (stmt): " . mysqli_error($conn);
-            error_log($error_message);
-          }
+        } else {
+            $error_message = mysqli_stmt_error($stmt);
         }
 
-        mysqli_close($conn);
+        mysqli_stmt_close($stmt);
+    } else {
+        $error_message = mysqli_error($conn);
+    }
 
-        // 7. Display error to user if any
-        if (!empty($error_message)) {
-          echo "<script>
+    mysqli_close($conn);
+
+    // Show error if any
+    if (!empty($error_message)) {
+        echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'error',
@@ -157,9 +134,9 @@
             });
         });
         </script>";
-        }
-      }
-      ?>
+    }
+}
+?>
 
 
 
