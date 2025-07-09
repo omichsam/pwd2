@@ -16,8 +16,8 @@
       $error_message = "";
 
       // Include DB connection file or establish connection here
+// Example: $conn = new mysqli("localhost", "root", "", "pwd");
       if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        // Fetch form data
         $assessment_id = $_POST['assessment_id'] ?? null;
         $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
         $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
@@ -30,60 +30,32 @@
         $monoaural_percent_right = $_POST['monoaural_percent_right'] ?? null;
         $monoaural_percent_left = $_POST['monoaural_percent_left'] ?? null;
         $binaural_percent = $_POST['binaural_percent'] ?? null;
-        $hearing_disability_conclusion = $_POST['hearing_disability_conclusion'] ?? '';
+        $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
         $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
         $required_services = $_POST['required_services'] ?? '';
         $status = "checked";
 
-        // File upload handling
-        $file_uploaded = false;
-        $file_path = '';
-
-        if (isset($_FILES['supporting_file']) && $_FILES['supporting_file']['error'] === UPLOAD_ERR_OK) {
-          $file_name = $_FILES['supporting_file']['name'];
-          $file_tmp = $_FILES['supporting_file']['tmp_name'];
-          $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-
-          // Allowed file extensions
-          $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
-          if (in_array($file_ext, $allowed_exts)) {
-            $upload_dir = "../uploads/";
-            if (!is_dir($upload_dir)) {
-              mkdir($upload_dir, 0755, true);
-            }
-            $file_path = $upload_dir . uniqid() . '.' . $file_ext;
-
-            if (!move_uploaded_file($file_tmp, $file_path)) {
-              $error_message = "Error uploading file.";
-            } else {
-              $file_uploaded = true;
-            }
-          } else {
-            $error_message = "Invalid file type. Only PDF, JPG, JPEG, PNG files are allowed.";
-          }
-        }
-
-        // Insert or Update record
         $sql = "INSERT INTO hearing_disability_assessments (
-            assessment_id,
-            history_of_hearing_loss,
-            history_of_hearing_devices,
-            hearing_loss_type_right,
-            hearing_loss_type_left,
-            hearing_grade_right,
-            hearing_grade_left,
-            hearing_level_dbhl_right,
-            hearing_level_dbhl_left,
-            monaural_percent_right,
-            monaural_percent_left,
-            binaural_percent,
-            conclusion,
-            recommended_assistive_products,
-            required_services
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        assessment_id,
+        history_of_hearing_loss,
+        history_of_hearing_devices,
+        hearing_test_type_right,
+        hearing_test_type_left,
+        hearing_loss_degree_right,
+        hearing_loss_degree_left,
+        hearing_level_dbhl_right,
+        hearing_level_dbhl_left,
+        monaural_percentage_right,
+        monaural_percentage_left,
+        overall_binaural_percentage,
+        conclusion,
+        recommended_assistive_products,
+        required_services
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // Prepare and execute query
-        if ($stmt = mysqli_prepare($conn, $sql)) {
+        $stmt = mysqli_prepare($conn, $sql);
+
+        if ($stmt) {
           mysqli_stmt_bind_param(
             $stmt,
             "isssssssddddsss",
@@ -99,7 +71,7 @@
             $monoaural_percent_right,
             $monoaural_percent_left,
             $binaural_percent,
-            $hearing_disability_conclusion,
+            $conclusion,
             $recommended_assistive_products,
             $required_services
           );
@@ -107,24 +79,25 @@
           if (mysqli_stmt_execute($stmt)) {
             $disability = 'Hearing';
             $medical_officer_id = $_SESSION['user_id'] ?? 1;
-            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
 
-            // Update the assessment status
-            if ($update_stmt = mysqli_prepare($conn, $update_sql)) {
+            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
+            $update_stmt = mysqli_prepare($conn, $update_sql);
+
+            if ($update_stmt) {
               mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
               if (mysqli_stmt_execute($update_stmt)) {
                 echo "<script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Assessment and hearing details saved.',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    window.location.href = 'complete_assessment';
-                                });
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Assessment and hearing details saved.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'complete_assessment';
                             });
-                        </script>";
+                        });
+                    </script>";
               } else {
                 $error_message = mysqli_stmt_error($update_stmt);
               }
@@ -135,6 +108,7 @@
           } else {
             $error_message = mysqli_stmt_error($stmt);
           }
+
           mysqli_stmt_close($stmt);
         } else {
           $error_message = mysqli_error($conn);
@@ -145,19 +119,18 @@
         // Show error if any
         if (!empty($error_message)) {
           echo "<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: '" . addslashes($error_message) . "',
-                confirmButtonText: 'OK'
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '" . addslashes($error_message) . "',
+                    confirmButtonText: 'OK'
+                });
             });
-        });
         </script>";
         }
       }
       ?>
-
 
 
       <!-- navigation -->
@@ -177,8 +150,8 @@
                 <label for="disabilityType">Disability Type</label>
                 <select id="disabilityType" class="form-control" required>
                   <option value="">-- Select --</option>
-                  <option value="Hearing Impairments">Hearing Impairments</option>
                   <option value="Physical Disabilities">Physical Disabilities</option>
+                  <option value="Hearing Impairments">Hearing Impairments</option>
                   <option value="Multiple Disabilities">Multiple Disabilities</option>
                   <option value="Mental/Intellectual">Mental/Intellectual Disabilities</option>
                   <option value="Visual Impairments">Visual Impairments</option>
