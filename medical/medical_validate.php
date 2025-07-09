@@ -8,63 +8,62 @@
       <div class="navbar-bg"></div>
 
 
-      <?php
+    <?php
 
-      $success = null;
-      $error_message = "";
+$success = null;
+$error_message = "";
 
-      if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        // Validate assessment ID
-        $assessment_id = isset($_POST['assessment_id']) ? intval($_POST['assessment_id']) : 0;
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Step 1: Get and validate fields
+    $assessment_id = isset($_POST['assessment_id']) ? intval($_GET['assessment_id']) : 0;
+    $disability_type = isset($_POST['disability_type']) ? trim($_POST['disability_type']) : '';
+    $medical_officer_id = $pwdUser['id'] ?? 11;
+    $status = 'checked';
 
-        if ($assessment_id <= 0) {
-          $error_message = "Invalid or missing assessment ID.";
-        } else {
-          // Define other variables
-          $disability_type = $_POST['disability_type'] ?? 'Hearing'; // Default to "Hearing"
-          $status = 'checked';
-          $medical_officer_id = $_SESSION['user_id'] ?? 1;
-
-          // Update query
-          $sql = "UPDATE assessments 
+    // Step 2: Check if all required fields are present
+    if ($assessment_id <= 0 || empty($disability_type) || $medical_officer_id <= 0) {
+        $error_message = "Missing required fields. Please ensure assessment ID and disability type are provided.";
+    } else {
+        // Step 3: Prepare and execute update query
+        $sql = "UPDATE assessments 
                 SET disability_type = ?, status = ?, medical_officer_id = ?
                 WHERE id = ?";
 
-          $stmt = mysqli_prepare($conn, $sql);
+        $stmt = mysqli_prepare($conn, $sql);
 
-          if ($stmt) {
-            // Bind parameters: s = string, i = integer
+        if ($stmt) {
             mysqli_stmt_bind_param($stmt, "ssii", $disability_type, $status, $medical_officer_id, $assessment_id);
-
-            // Execute and check result
             if (mysqli_stmt_execute($stmt)) {
-              echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Assessment Updated!',
-                            text: 'Assessment record successfully updated.',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.href = 'complete_assessment';
+                // Step 4: Check if row was actually updated
+                if (mysqli_stmt_affected_rows($stmt) > 0) {
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Assessment Updated!',
+                                text: 'The assessment was successfully updated.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'complete_assessment';
+                            });
                         });
-                    });
-                </script>";
+                    </script>";
+                } else {
+                    $error_message = "No changes were made. Record may already be up-to-date or not found.";
+                }
             } else {
-              $error_message = "Execution failed: " . mysqli_stmt_error($stmt);
+                $error_message = "Execution failed: " . mysqli_stmt_error($stmt);
             }
-
             mysqli_stmt_close($stmt);
-          } else {
-            $error_message = "Prepare failed: " . mysqli_error($conn);
-          }
-
-          mysqli_close($conn);
+        } else {
+            $error_message = "SQL prepare failed: " . mysqli_error($conn);
         }
+        mysqli_close($conn);
+    }
 
-        // If error, show popup
-        if (!empty($error_message)) {
-          echo "<script>
+    // Step 5: Display any error message using SweetAlert
+    if (!empty($error_message)) {
+        echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'error',
@@ -74,9 +73,9 @@
                 });
             });
         </script>";
-        }
-      }
-      ?>
+    }
+}
+?>
 
 
 
