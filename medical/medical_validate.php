@@ -17,9 +17,8 @@
 
       // Include DB connection file or establish connection here
 // Example: $conn = new mysqli("localhost", "root", "", "pwd");
-      
       if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $assessment_id = $_POST['assessment_id'] ?? null;
+        $assessment_id = $_GET['assessment_id'] ?? null;
         $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
         $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
         $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
@@ -36,148 +35,86 @@
         $required_services = $_POST['required_services'] ?? '';
         $status = "checked";
 
-        // File upload handling
-        $file_uploaded = false;
-        $file_path = '';
+        $sql = "INSERT INTO hearing_disability_assessments (
+        assessment_id,
+        history_of_hearing_loss,
+        history_of_hearing_devices,
+        hearing_test_type_right,
+        hearing_test_type_left,
+        hearing_loss_degree_right,
+        hearing_loss_degree_left,
+        hearing_level_dbhl_right,
+        hearing_level_dbhl_left,
+        monaural_percentage_right,
+        monaural_percentage_left,
+        overall_binaural_percentage,
+        conclusion,
+        recommended_assistive_products,
+        required_services
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // Set the upload directory
-        $upload_dir = "../uploads/";
+        $stmt = mysqli_prepare($conn, $sql);
 
-        // Check if the upload directory exists, if not, create it
-        if (!is_dir($upload_dir)) {
-          if (!mkdir($upload_dir, 0755, true)) {
-            $error_message = "Failed to create the upload directory.";
-          }
-        }
+        if ($stmt) {
+          mysqli_stmt_bind_param(
+            $stmt,
+            "isssssssddddsss",
+            $assessment_id,
+            $history_of_hearing_loss,
+            $history_of_hearing_devices,
+            $hearing_loss_type_right,
+            $hearing_loss_type_left,
+            $hearing_grade_right,
+            $hearing_grade_left,
+            $hearing_level_dbhl_right,
+            $hearing_level_dbhl_left,
+            $monoaural_percent_right,
+            $monoaural_percent_left,
+            $binaural_percent,
+            $conclusion,
+            $recommended_assistive_products,
+            $required_services
+          );
 
-        // Handle file upload, check for no file selected
-        if (isset($_FILES['supporting_file']) && $_FILES['supporting_file']['error'] === UPLOAD_ERR_OK) {
-          $file_name = $_FILES['supporting_file']['name'];
-          $file_tmp = $_FILES['supporting_file']['tmp_name'];
-          $file_size = $_FILES['supporting_file']['size'];
-          $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+          if (mysqli_stmt_execute($stmt)) {
+            $disability = 'Hearing';
+            $medical_officer_id = $_SESSION['user_id'] ?? 1;
 
-          $allowed_exts = ['pdf', 'jpg', 'jpeg', 'png'];
+            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
+            $update_stmt = mysqli_prepare($conn, $update_sql);
 
-          // Check file extension
-          if (in_array($file_ext, $allowed_exts)) {
-            // Generate a unique file path
-            $file_path = $upload_dir . uniqid() . '.' . $file_ext;
-
-            // Move the uploaded file to the target directory
-            if (move_uploaded_file($file_tmp, $file_path)) {
-              $file_uploaded = true;
-            } else {
-              $error_message = "Error uploading file.";
-            }
-          } else {
-            $error_message = "Invalid file type. Only PDF, JPG, JPEG, PNG files are allowed.";
-          }
-        } elseif ($_FILES['supporting_file']['error'] === UPLOAD_ERR_NO_FILE) {
-          // No file uploaded, we will still continue without file
-          $file_uploaded = false;
-          $file_path = ''; // Ensure no file path is stored
-        } else {
-          $error_message = "File upload error: " . $_FILES['supporting_file']['error'];
-        }
-
-        // Insert hearing disability assessment details into the database
-        if (empty($error_message)) {
-          // Insert hearing disability assessment details
-          $sql = "INSERT INTO hearing_disability_assessments (
-            assessment_id,
-            history_of_hearing_loss,
-            history_of_hearing_devices,
-            hearing_loss_type_right,
-            hearing_loss_type_left,
-            hearing_grade_right,
-            hearing_grade_left,
-            hearing_level_dbhl_right,
-            hearing_level_dbhl_left,
-            monaural_percent_right,
-            monaural_percent_left,
-            binaural_percent,
-            conclusion,
-            recommended_assistive_products,
-            required_services
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-          $stmt = mysqli_prepare($conn, $sql);
-
-          if ($stmt) {
-            mysqli_stmt_bind_param(
-              $stmt,
-              "isssssssddddsss",
-              $assessment_id,
-              $history_of_hearing_loss,
-              $history_of_hearing_devices,
-              $hearing_loss_type_right,
-              $hearing_loss_type_left,
-              $hearing_grade_right,
-              $hearing_grade_left,
-              $hearing_level_dbhl_right,
-              $hearing_level_dbhl_left,
-              $monoaural_percent_right,
-              $monoaural_percent_left,
-              $binaural_percent,
-              $conclusion,
-              $recommended_assistive_products,
-              $required_services
-            );
-
-            if (mysqli_stmt_execute($stmt)) {
-              $disability = 'Hearing'; // Set disability type for hearing
-      
-              // Update assessments table to mark the disability type
-              $update_sql = "UPDATE assessments SET disability_type = ?, status = ? WHERE id = ?";
-              $update_stmt = mysqli_prepare($conn, $update_sql);
-
-              if ($update_stmt) {
-                mysqli_stmt_bind_param($update_stmt, "ssi", $disability, $status, $assessment_id);
-
-                if (mysqli_stmt_execute($update_stmt)) {
-                  // If the file was uploaded, insert the document details into the database
-                  if ($file_uploaded) {
-                    $insert_document_sql = "INSERT INTO documents (user_id, assessment_id, file_path, document_type)
-                                                     VALUES (?, ?, ?, ?)";
-                    $insert_document_stmt = mysqli_prepare($conn, $insert_document_sql);
-
-                    if ($insert_document_stmt) {
-                      $document_type = 'Hearing Assessment File';
-                      mysqli_stmt_bind_param($insert_document_stmt, "iiss", $pwdUser['id'], $assessment_id, $file_path, $document_type);
-                      mysqli_stmt_execute($insert_document_stmt);
-                      mysqli_stmt_close($insert_document_stmt);
-                    }
-                  }
-
-                  // Success message
-                  echo "<script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Assessment and hearing details saved.',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    window.location.href = 'complete_assessment';
-                                });
+            if ($update_stmt) {
+              mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
+              if (mysqli_stmt_execute($update_stmt)) {
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Assessment and hearing details saved.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'complete_assessment';
                             });
-                        </script>";
-                } else {
-                  $error_message = "Failed to update assessment: " . mysqli_stmt_error($update_stmt);
-                }
-                mysqli_stmt_close($update_stmt);
+                        });
+                    </script>";
               } else {
-                $error_message = "Failed to prepare update statement: " . mysqli_error($conn);
+                $error_message = mysqli_stmt_error($update_stmt);
               }
+              mysqli_stmt_close($update_stmt);
             } else {
-              $error_message = "Failed to save assessment: " . mysqli_stmt_error($stmt);
+              $error_message = mysqli_error($conn);
             }
-            mysqli_stmt_close($stmt);
           } else {
-            $error_message = "Failed to prepare statement: " . mysqli_error($conn);
+            $error_message = mysqli_stmt_error($stmt);
           }
+
+          mysqli_stmt_close($stmt);
+        } else {
+          $error_message = mysqli_error($conn);
         }
+
+        mysqli_close($conn);
 
         // Show error if any
         if (!empty($error_message)) {
@@ -192,8 +129,6 @@
             });
         </script>";
         }
-
-        mysqli_close($conn);
       }
       ?>
 
@@ -215,8 +150,8 @@
                 <label for="disabilityType">Disability Type</label>
                 <select id="disabilityType" class="form-control" required>
                   <option value="">-- Select --</option>
-                  <option value="Hearing Impairments">Hearing Impairments</option>
                   <option value="Physical Disabilities">Physical Disabilities</option>
+                  <option value="Hearing Impairments">Hearing Impairments</option>
                   <option value="Multiple Disabilities">Multiple Disabilities</option>
                   <option value="Mental/Intellectual">Mental/Intellectual Disabilities</option>
                   <option value="Visual Impairments">Visual Impairments</option>
