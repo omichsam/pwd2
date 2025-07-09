@@ -1,11 +1,9 @@
-
-
 <div class="container mt-5 divider">
     <h4 class="mb-4 text-center">Physical Disability Assessment</h4>
     <form action="" method="POST" enctype="multipart/form-data">
         <div class="accordion" id="assessmentAccordion">
 
-            <!-- 1. Medical History --> 
+            <!-- 1. Medical History -->
             <div class="accordion-item my-2">
                 <div class="accordion-header" role="button" data-toggle="collapse" data-target="#collapseOne"
                     aria-expanded="true" id="headingOne">
@@ -16,33 +14,41 @@
                     data-bs-parent="#assessmentAccordion">
                     <div class="accordion-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="medical_history">Medical History</label>
-                                <textarea name="medical_history" id="medical_history" class="form-control" rows="3"
-                                    placeholder="Describe medical history..."></textarea>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="injury_date">Date of Injury</label>
-                                <input type="date" name="injury_date" id="injury_date" class="form-control">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="last_intervention_date">Last Intervention Date</label>
-                                <input type="date" name="last_intervention_date" id="last_intervention_date"
-                                    class="form-control">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="cause_of_disability">Cause of Disability</label>
-                                <input type="text" name="cause_of_disability" id="cause_of_disability"
-                                    class="form-control" placeholder="E.g., accident, illness...">
-                            </div>
-
-                            <div class="col-md-6 mb-3" hidden>
-                                <input type="text" name="medical_officer_id" value="<?= $pwdUser['id'] ?>"
+                            <div class="col-md-12" hidden>
+                                <label for="assessment_id">Assessment ID</label>
+                                <input type="text" name="assessment_id" value="<?= $_GET['assessment_id'] ?>"
                                     class="form-control">
                             </div>
 
-
+                            <div class="col-md-12" hidden>
+                                <label for="user_id">User ID</label>
+                                <input type="text" name="user_id" value="<?= $pwdUser['id'] ?>" class="form-control">
+                            </div>
                         </div>
+                        <div class="mb-3">
+                            <label for="medical_history">Medical History</label>
+                            <textarea name="medical_history" id="medical_history" class="form-control" rows="3"
+                                placeholder="Describe medical history..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="injury_date">Date of Injury</label>
+                            <input type="date" name="injury_date" id="injury_date" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_intervention_date">Last Intervention Date</label>
+                            <input type="date" name="last_intervention_date" id="last_intervention_date"
+                                class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cause_of_disability">Cause of Disability</label>
+                            <input type="text" name="cause_of_disability" id="cause_of_disability" class="form-control"
+                                placeholder="E.g., accident, illness...">
+                        </div>
+
+                        <div class="col-md-12" hidden>
+                            <input type="text" name="disability_type" value="Physical" class="form-control">
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -117,8 +123,6 @@
                     aria-expanded="true" id="headingThree">
                     <h4> 3. Activity & Participation Restrictions</h4>
                 </div>
-
-
 
                 <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
                     data-bs-parent="#assessmentAccordion">
