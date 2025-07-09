@@ -17,10 +17,10 @@
       // 2. Include navigation and DB connection
       include 'files/nav.php';
 
-      $conn = new mysqli("localhost", "root", "", "pwd");
-      if ($conn->connect_error) {
-        die("DB Connection failed: " . $conn->connect_error);
-      }
+      // $conn = new mysqli("localhost", "root", "", "pwd");
+      // if ($conn->connect_error) {
+      //   die("DB Connection failed: " . $conn->connect_error);
+      // }
 
       // 3. Initialize result variables
       $success = null;
