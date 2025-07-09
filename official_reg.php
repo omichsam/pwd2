@@ -505,12 +505,23 @@ include 'files/register_officials.php';
 
 
 
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <label for="type" class="form-label">Official Type</label>
                 <select class="form-select" name="type" id="type" required>
                   <option value="">Select your role</option>
                   <option value="health_officer">Health Officer</option>
                   <option value="medical_officer">Approval Officer</option>
+                  <option value="county_officer">County Officer</option>
+                </select>
+              </div> -->
+
+
+              <div class="col-md-6">
+                <label for="type" class="form-label">Official Type</label>
+                <select class="form-select" name="type" id="type" required>
+                  <option value="">Select your role</option>
+                  <option value="medical_officer">Health Officer</option>
+                  <option value="health_officer">Approval Officer</option>
                   <option value="county_officer">County Officer</option>
                 </select>
               </div>
