@@ -50,7 +50,7 @@
           }
         }
 
-        // Handle file upload
+        // Handle file upload, check for no file selected
         if (isset($_FILES['supporting_file']) && $_FILES['supporting_file']['error'] === UPLOAD_ERR_OK) {
           $file_name = $_FILES['supporting_file']['name'];
           $file_tmp = $_FILES['supporting_file']['tmp_name'];
@@ -73,11 +73,12 @@
           } else {
             $error_message = "Invalid file type. Only PDF, JPG, JPEG, PNG files are allowed.";
           }
+        } elseif ($_FILES['supporting_file']['error'] === UPLOAD_ERR_NO_FILE) {
+          // No file uploaded, we will still continue without file
+          $file_uploaded = false;
+          $file_path = ''; // Ensure no file path is stored
         } else {
-          if ($_FILES['supporting_file']['error'] != 0) {
-            // Provide error details if file upload failed
-            $error_message = "File upload error: " . $_FILES['supporting_file']['error'];
-          }
+          $error_message = "File upload error: " . $_FILES['supporting_file']['error'];
         }
 
         // Insert hearing disability assessment details into the database
