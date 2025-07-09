@@ -9,115 +9,51 @@
 
 
     <?php
-include 'files/nav.php';
+// include 'files/nav.php';
+// include '../config/db.php'; // Ensure your DB connection file is included
 
 $success = null;
 $error_message = "";
 
-// Assume $conn is established
-if ($_SERVER["REQUEST_METHOD"] === "POST") { 
-
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $assessment_id = isset($_POST['assessment_id']) ? (int) $_POST['assessment_id'] : null;
-    $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
-    $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
-    $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
-    $hearing_loss_type_left = $_POST['hearing_loss_type_left'] ?? '';
-    $hearing_grade_right = $_POST['hearing_grade_right'] ?? '';
-    $hearing_grade_left = $_POST['hearing_grade_left'] ?? '';
+    $disability_type = $_POST['disability_type'] ?? 'Hearing'; // Default to Hearing or get from form
+    $status = 'checked';
+    $medical_officer_id = $_SESSION['user_id'] ?? 1;
 
-    $hearing_level_dbhl_right = isset($_POST['hearing_level_dbhl_right']) ? (float) $_POST['hearing_level_dbhl_right'] : 0.0;
-    $hearing_level_dbhl_left = isset($_POST['hearing_level_dbhl_left']) ? (float) $_POST['hearing_level_dbhl_left'] : 0.0;
-    $monoaural_percent_right = isset($_POST['monoaural_percent_right']) ? (float) $_POST['monoaural_percent_right'] : 0.0;
-    $monoaural_percent_left = isset($_POST['monoaural_percent_left']) ? (float) $_POST['monoaural_percent_left'] : 0.0;
-    $binaural_percent = isset($_POST['binaural_percent']) ? (float) $_POST['binaural_percent'] : 0.0;
-
-    $conclusion = $_POST['hearing_disability_conclusion'] ?? '';
-    $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
-    $required_services = $_POST['required_services'] ?? '';
-    $status = "checked";
-
-    if (!$conn) {
-        die("Database connection failed: " . mysqli_connect_error());
-    }
-
-    $sql = "INSERT INTO hearing_disability_assessments (
-        assessment_id,
-        history_of_hearing_loss,
-        history_of_hearing_devices,
-        hearing_test_type_right,
-        hearing_test_type_left,
-        hearing_loss_degree_right,
-        hearing_loss_degree_left,
-        hearing_level_dbhl_right,
-        hearing_level_dbhl_left,
-        monaural_percentage_right,
-        monaural_percentage_left,
-        overall_binaural_percentage,
-        conclusion,
-        recommended_assistive_products,
-        required_services
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    $stmt = mysqli_prepare($conn, $sql);
-
-    if ($stmt) {
-        mysqli_stmt_bind_param(
-            $stmt,
-            "issssssddddsss",
-            $assessment_id,
-            $history_of_hearing_loss,
-            $history_of_hearing_devices,
-            $hearing_loss_type_right,
-            $hearing_loss_type_left,
-            $hearing_grade_right,
-            $hearing_grade_left,
-            $hearing_level_dbhl_right,
-            $hearing_level_dbhl_left,
-            $monoaural_percent_right,
-            $monoaural_percent_left,
-            $binaural_percent,
-            $conclusion,
-            $recommended_assistive_products,
-            $required_services
-        );
-
-        if (mysqli_stmt_execute($stmt)) {
-            $disability = 'Hearing';
-            $medical_officer_id = $_SESSION['user_id'] ?? 1;
-
-            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
-            $update_stmt = mysqli_prepare($conn, $update_sql);
-
-            if ($update_stmt) {
-                mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
-
-                if (mysqli_stmt_execute($update_stmt)) {
-                    echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'Assessment and hearing details saved.',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.href = 'complete_assessment';
-                            });
-                        });
-                    </script>";
-                } else {
-                    $error_message = mysqli_stmt_error($update_stmt);
-                }
-                mysqli_stmt_close($update_stmt);
-            } else {
-                $error_message = mysqli_error($conn);
-            }
-        } else {
-            $error_message = mysqli_stmt_error($stmt);
-        }
-
-        mysqli_stmt_close($stmt);
+    if (!$assessment_id) {
+        $error_message = "Invalid assessment ID.";
     } else {
-        $error_message = mysqli_error($conn);
+        $sql = "UPDATE assessments 
+                SET disability_type = ?, status = ?, medical_officer_id = ?
+                WHERE id = ?";
+
+        $stmt = mysqli_prepare($conn, $sql);
+
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "ssii", $disability_type, $status, $medical_officer_id, $assessment_id);
+
+            if (mysqli_stmt_execute($stmt)) {
+                echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Assessment Updated!',
+                            text: 'Assessment record updated successfully.',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = 'complete_assessment';
+                        });
+                    });
+                </script>";
+            } else {
+                $error_message = mysqli_stmt_error($stmt);
+            }
+
+            mysqli_stmt_close($stmt);
+        } else {
+            $error_message = mysqli_error($conn);
+        }
     }
 
     mysqli_close($conn);
