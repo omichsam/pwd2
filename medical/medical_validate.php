@@ -11,7 +11,7 @@
       <!-- top navigation  -->
       <?php include 'files/nav.php'; ?>
 
-<?php
+      <?php
       $success = null;
       $error_message = "";
 
@@ -19,7 +19,7 @@
 // Example: $conn = new mysqli("localhost", "root", "", "pwd");
       
       if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $assessment_id = $_GET['assessment_id'] ?? null;
+        $assessment_id = $_POST['assessment_id'] ?? null;
         $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
         $history_of_hearing_devices = $_POST['history_of_hearing_devices'] ?? '';
         $hearing_loss_type_right = $_POST['hearing_loss_type_right'] ?? '';
@@ -195,7 +195,6 @@
         mysqli_close($conn);
       }
       ?>
-
 
 
       <!-- navigation -->
