@@ -15,8 +15,8 @@ $error_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Step 1: Get and validate fields
-    $assessment_id = isset($_POST['assessment_id']) ? intval($_GET['assessment_id']) : 0;
-    $disability_type = isset($_POST['disability_type']) ? trim($_POST['disability_type']) : '';
+    $assessment_id = isset($_POST['assessment_id']) ? intval($_POST['assessment_id']) : 0;
+    $disability_type =  "Hearing";
     $medical_officer_id = $pwdUser['id'] ?? 11;
     $status = 'checked';
 
