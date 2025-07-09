@@ -17,7 +17,6 @@
 
       // Include DB connection file or establish connection here
 // Example: $conn = new mysqli("localhost", "root", "", "pwd");
-      
       if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $assessment_id = $_POST['assessment_id'] ?? null;
         $history_of_hearing_loss = $_POST['history_of_hearing_loss'] ?? '';
@@ -36,91 +35,86 @@
         $required_services = $_POST['required_services'] ?? '';
         $status = "checked";
 
+        $sql = "INSERT INTO hearing_disability_assessments (
+        assessment_id,
+        history_of_hearing_loss,
+        history_of_hearing_devices,
+        hearing_test_type_right,
+        hearing_test_type_left,
+        hearing_loss_degree_right,
+        hearing_loss_degree_left,
+        hearing_level_dbhl_right,
+        hearing_level_dbhl_left,
+        monaural_percentage_right,
+        monaural_percentage_left,
+        overall_binaural_percentage,
+        conclusion,
+        recommended_assistive_products,
+        required_services
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // Insert hearing disability assessment details into the database
-        if (empty($error_message)) {
-          // Insert hearing disability assessment details
-          $sql = "INSERT INTO hearing_disability_assessments (
-            assessment_id,
-            history_of_hearing_loss,
-            history_of_hearing_devices,
-            hearing_loss_type_right,
-            hearing_loss_type_left,
-            hearing_grade_right,
-            hearing_grade_left,
-            hearing_level_dbhl_right,
-            hearing_level_dbhl_left,
-            monaural_percent_right,
-            monaural_percent_left,
-            binaural_percent,
-            conclusion,
-            recommended_assistive_products,
-            required_services
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
 
-          $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+          mysqli_stmt_bind_param(
+            $stmt,
+            "isssssssddddsss",
+            $assessment_id,
+            $history_of_hearing_loss,
+            $history_of_hearing_devices,
+            $hearing_loss_type_right,
+            $hearing_loss_type_left,
+            $hearing_grade_right,
+            $hearing_grade_left,
+            $hearing_level_dbhl_right,
+            $hearing_level_dbhl_left,
+            $monoaural_percent_right,
+            $monoaural_percent_left,
+            $binaural_percent,
+            $conclusion,
+            $recommended_assistive_products,
+            $required_services
+          );
 
-          if ($stmt) {
-            mysqli_stmt_bind_param(
-              $stmt,
-              "isssssssddddsss",
-              $assessment_id,
-              $history_of_hearing_loss,
-              $history_of_hearing_devices,
-              $hearing_loss_type_right,
-              $hearing_loss_type_left,
-              $hearing_grade_right,
-              $hearing_grade_left,
-              $hearing_level_dbhl_right,
-              $hearing_level_dbhl_left,
-              $monoaural_percent_right,
-              $monoaural_percent_left,
-              $binaural_percent,
-              $conclusion,
-              $recommended_assistive_products,
-              $required_services
-            );
+          if (mysqli_stmt_execute($stmt)) {
+            $disability = 'Hearing';
+            $medical_officer_id = $_SESSION['user_id'] ?? 1;
 
-            if (mysqli_stmt_execute($stmt)) {
-              $disability = 'Hearing'; // Set disability type for hearing
-      
-              // Update assessments table to mark the disability type
-              $update_sql = "UPDATE assessments SET disability_type = ?, status = ? WHERE id = ?";
-              $update_stmt = mysqli_prepare($conn, $update_sql);
+            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
+            $update_stmt = mysqli_prepare($conn, $update_sql);
 
-              if ($update_stmt) {
-                mysqli_stmt_bind_param($update_stmt, "ssi", $disability, $status, $assessment_id);
-
-                if (mysqli_stmt_execute($update_stmt)) {
-
-                  // Success message
-                  echo "<script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success!',
-                                    text: 'Assessment and hearing details saved.',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    window.location.href = 'complete_assessment';
-                                });
+            if ($update_stmt) {
+              mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
+              if (mysqli_stmt_execute($update_stmt)) {
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Assessment and hearing details saved.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = 'complete_assessment';
                             });
-                        </script>";
-                } else {
-                  $error_message = "Failed to update assessment: " . mysqli_stmt_error($update_stmt);
-                }
-                mysqli_stmt_close($update_stmt);
+                        });
+                    </script>";
               } else {
-                $error_message = "Failed to prepare update statement: " . mysqli_error($conn);
+                $error_message = mysqli_stmt_error($update_stmt);
               }
+              mysqli_stmt_close($update_stmt);
             } else {
-              $error_message = "Failed to save assessment: " . mysqli_stmt_error($stmt);
+              $error_message = mysqli_error($conn);
             }
-            mysqli_stmt_close($stmt);
           } else {
-            $error_message = "Failed to prepare statement: " . mysqli_error($conn);
+            $error_message = mysqli_stmt_error($stmt);
           }
+
+          mysqli_stmt_close($stmt);
+        } else {
+          $error_message = mysqli_error($conn);
         }
+
+        mysqli_close($conn);
 
         // Show error if any
         if (!empty($error_message)) {
@@ -135,8 +129,6 @@
             });
         </script>";
         }
-
-        mysqli_close($conn);
       }
       ?>
 
