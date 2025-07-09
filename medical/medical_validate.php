@@ -8,38 +8,42 @@
       <div class="navbar-bg"></div>
 
 
-    <?php
-// include 'files/nav.php';
-// include '../config/db.php'; // Ensure your DB connection file is included
+      <?php
 
-$success = null;
-$error_message = "";
+      $success = null;
+      $error_message = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $assessment_id = isset($_POST['assessment_id']) ? (int) $_POST['assessment_id'] : null;
-    $disability_type = $_POST['disability_type'] ?? 'Hearing'; // Default to Hearing or get from form
-    $status = 'checked';
-    $medical_officer_id = $_SESSION['user_id'] ?? 1;
+      if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        // Validate assessment ID
+        $assessment_id = isset($_POST['assessment_id']) ? intval($_POST['assessment_id']) : 0;
 
-    if (!$assessment_id) {
-        $error_message = "Invalid assessment ID.";
-    } else {
-        $sql = "UPDATE assessments 
+        if ($assessment_id <= 0) {
+          $error_message = "Invalid or missing assessment ID.";
+        } else {
+          // Define other variables
+          $disability_type = $_POST['disability_type'] ?? 'Hearing'; // Default to "Hearing"
+          $status = 'checked';
+          $medical_officer_id = $_SESSION['user_id'] ?? 1;
+
+          // Update query
+          $sql = "UPDATE assessments 
                 SET disability_type = ?, status = ?, medical_officer_id = ?
                 WHERE id = ?";
 
-        $stmt = mysqli_prepare($conn, $sql);
+          $stmt = mysqli_prepare($conn, $sql);
 
-        if ($stmt) {
+          if ($stmt) {
+            // Bind parameters: s = string, i = integer
             mysqli_stmt_bind_param($stmt, "ssii", $disability_type, $status, $medical_officer_id, $assessment_id);
 
+            // Execute and check result
             if (mysqli_stmt_execute($stmt)) {
-                echo "<script>
+              echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             icon: 'success',
                             title: 'Assessment Updated!',
-                            text: 'Assessment record updated successfully.',
+                            text: 'Assessment record successfully updated.',
                             confirmButtonText: 'OK'
                         }).then(() => {
                             window.location.href = 'complete_assessment';
@@ -47,19 +51,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     });
                 </script>";
             } else {
-                $error_message = mysqli_stmt_error($stmt);
+              $error_message = "Execution failed: " . mysqli_stmt_error($stmt);
             }
 
             mysqli_stmt_close($stmt);
-        } else {
-            $error_message = mysqli_error($conn);
+          } else {
+            $error_message = "Prepare failed: " . mysqli_error($conn);
+          }
+
+          mysqli_close($conn);
         }
-    }
 
-    mysqli_close($conn);
-
-    if (!empty($error_message)) {
-        echo "<script>
+        // If error, show popup
+        if (!empty($error_message)) {
+          echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'error',
@@ -69,9 +74,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 });
             });
         </script>";
-    }
-}
-?>
+        }
+      }
+      ?>
 
 
 
