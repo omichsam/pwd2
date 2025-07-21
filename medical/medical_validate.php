@@ -8,75 +8,54 @@
       <div class="navbar-bg"></div>
 
 
-    <?php
+      <!-- top navigation  -->
+      <?php
+          include 'files/nav.php';
+          include_once 'process/process_hearing_assessment.php';
+          include_once 'process/maxillofacial_process.php';
+          include_once 'process/mental_process.php';
+          include_once 'process/visual_process.php';
+          include_once 'process/chronic_process.php';
+          include_once 'process/physical_process.php';
+          // include_once 'process_visual_assessment.php';
+          // include_once 'process_physical_assessment.php';
 
-$success = null;
-$error_message = "";
+          if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+              $type = $_POST['disability_type'] ?? '';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Step 1: Get and validate fields
-    $assessment_id =  $_GET["assessment_id"];
-    $disability_type =  "Hearing";
-    $medical_officer_id = $pwdUser['id'] ?? 11;
-    $status = 'checked';
-
-    // Step 2: Check if all required fields are present
-    if ($assessment_id <= 0 || empty($disability_type) || $medical_officer_id <= 0) {
-        $error_message = "Missing required fields. Please ensure assessment ID and disability type are provided.";
-    } else {
-        // Step 3: Prepare and execute update query
-        $sql = "UPDATE assessments 
-                SET disability_type = ?, status = ?, medical_officer_id = ?
-                WHERE id = ?";
-
-        $stmt = mysqli_prepare($conn, $sql);
-
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssii", $disability_type, $status, $medical_officer_id, $assessment_id);
-            if (mysqli_stmt_execute($stmt)) {
-                // Step 4: Check if row was actually updated
-                if (mysqli_stmt_affected_rows($stmt) > 0) {
-                    echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Assessment Updated!',
-                                text: 'The assessment was successfully updated.',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.href = 'complete_assessment';
-                            });
-                        });
-                    </script>";
-                } else {
-                    $error_message = "No changes were made. Record may already be up-to-date or not found.";
-                }
-            } else {
-                $error_message = "Execution failed: " . mysqli_stmt_error($stmt);
-            }
-            mysqli_stmt_close($stmt);
-        } else {
-            $error_message = "SQL prepare failed: " . mysqli_error($conn);
-        }
-        mysqli_close($conn);
-    }
-
-    // Step 5: Display any error message using SweetAlert
-    if (!empty($error_message)) {
-        echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: '" . addslashes($error_message) . "',
-                    confirmButtonText: 'OK'
+              switch (strtolower($type)) {
+                  case 'hearing':
+                      processHearingAssessment($conn);
+                      break;
+                  case 'maxillofacial':
+                      processMaxillofacialAssessment($conn);
+                      break;
+                  case 'mental':
+                      processMentalAssessment($conn);
+                      break;
+                  case 'visual':
+                      processVisualAssessment($conn);
+                      break;
+                  case 'chronic':
+                      processVisualAssessment($conn);
+                      break;
+                  case 'physical':
+                      processPhysicalAssessment($conn);
+                      break;
+                  default:
+                      echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Unknown disability type submitted.',
+                        confirmButtonText: 'OK'
+                    });
                 });
-            });
-        </script>";
-    }
-}
-?>
-
+            </script>";
+              }
+          }
+      ?>
 
 
       <!-- navigation -->
@@ -96,8 +75,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <label for="disabilityType">Disability Type</label>
                 <select id="disabilityType" class="form-control" required>
                   <option value="">-- Select --</option>
-                  <option value="Physical Disabilities">Physical Disabilities</option>
                   <option value="Hearing Impairments">Hearing Impairments</option>
+                  <option value="Maxillofacial Impairments">Maxillofacial Disabilities</option>
+                  <option value="Physical Disabilities">Physical Disabilities</option>
                   <option value="Multiple Disabilities">Multiple Disabilities</option>
                   <option value="Mental/Intellectual">Mental/Intellectual Disabilities</option>
                   <option value="Visual Impairments">Visual Impairments</option>
@@ -108,22 +88,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               <div class="hr"></div>
               <!-- Physical Disabilities Form -->
               <div id="Physical Disabilities" class="disability-form card">
-                <h4>Physical Disability Assessment</h4>
-                <form action="submit_physical_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Description</label>
-                    <textarea name="physical_description" class="form-control"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label>Mobility Level</label>
-                    <input type="text" name="mobility_level" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
+                 <?php include 'physical_form.php'; ?>
+              </div>
+
+
+               <!-- Hearing Impairments Form -->
+              <div id="Hearing Impairments" class="disability-form card">
+                <!-- <h5>Hearing Impairment Assessment</h5> -->
+                <?php include 'hearing_form.php'; ?>
+              </div>
+
+              <!-- Hearing Impairments Form -->
+              <div id="Maxillofacial Impairments" class="disability-form card">
+                <!-- <h5>Hearing Impairment Assessment</h5> -->
+                <?php include 'maxillofacial_form.php'; ?>
+              </div>
+
+               <!-- Mental/Intellectual Disabilities Form -->
+              <div id="Mental/Intellectual" class="disability-form card">
+                    <?php include 'mental_form.php'; ?>  
+              </div>
+
+                <!-- Visual Impairments Form -->
+              <div id="Visual Impairments" class="disability-form card">
+                    <?php include 'visual_form.php'; ?>  
+              </div>
+
+               <!-- Visual Impairments Form -->
+              <div id="Progressive Chronic Disorders" class="disability-form card">
+                    <?php include 'chronic_form.php'; ?>  
               </div>
 
               <!-- Multiple Disabilities Form -->
-              <div id="Multiple Disabilities" class="disability-form card">
+              <!-- <div id="Multiple Disabilities" class="disability-form card">
                 <h4>Multiple Disability Assessment</h4>
                 <form action="submit_multiple_assessment.php" method="post">
                   <div class="mb-3">
@@ -136,45 +133,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                   </div>
                   <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
-              </div>
+              </div> -->
 
-              <!-- Mental/Intellectual Disabilities Form -->
-              <div id="Mental/Intellectual" class="disability-form card">
-                <h4>Mental/Intellectual Disability Assessment</h4>
-                <form action="submit_mental_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Cognitive Level</label>
-                    <input type="text" name="cognitive_level" class="form-control">
-                  </div>
-                  <div class="mb-3">
-                    <label>Behavioral Notes</label>
-                    <textarea name="behavioral_notes" class="form-control"></textarea>
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-              </div>
-
-              <!-- Visual Impairments Form -->
-              <div id="Visual Impairments" class="disability-form card">
-                <h4>Visual Impairment Assessment</h4>
-                <form action="submit_visual_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Vision Test Summary</label>
-                    <textarea name="vision_summary" class="form-control"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label>Corrective Measures</label>
-                    <input type="text" name="corrective_measures" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-              </div>
-
-              <!-- Hearing Impairments Form -->
-              <div id="Hearing Impairments" class="disability-form card">
-                <!-- <h5>Hearing Impairment Assessment</h5> -->
-                <?php include 'hearing_form.php'; ?>
-              </div>
 
               <!-- Progressive Chronic Disorders Form -->
               <div id="Progressive Chronic Disorders" class="disability-form card">
