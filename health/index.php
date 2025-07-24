@@ -290,8 +290,10 @@ function getDisabilityStats($hospital_id)
                                 </span>
                               </td>
                               <td>
-                                <a href="view_assessment?user_id=<?= $assessment['user_id'] ?>&from=assessment" class="btn btn-primary">
-                                  Review
+                                <!-- <a href="view_assessment?user_id=<?= $assessment['user_id'] ?>&from=assessment" class="btn btn-primary"> -->
+                                <a href="assessment" class="btn btn-primary">
+
+                                Review
                                 </a>
                               </td>
                             </tr>
