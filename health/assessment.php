@@ -146,6 +146,7 @@
                                   <input type="hidden" name="user_id" value="<?= $row['id'] ?>">
                                    <input type="hidden" name="from" value="assessment">
                                    <input type="hidden" name="type" value="<?= $row['disability_type']?>">
+                                   <input type="hidden" name="id" value="<?= $row['assessment_id']?>">
                                   <button type="submit" class="btn btn-success btn-sm">View</button>
                                 </form>
                               </td>

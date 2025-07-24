@@ -22,6 +22,10 @@
     d.name AS doctor_name, d.license_id AS doctor_license, d.email AS doctor_email,
     d.mobile_number AS doctor_mobile, d.type AS doctor_type,
 
+    -- Health Officer
+    ho.name AS health_officer_name, ho.license_id AS health_officer_license, ho.email AS health_officer_email,
+    ho.mobile_number AS health_officer_mobile, ho.type AS health_officer_type,
+
     h.name AS hospital_name, hc.county_name AS hospital_county, h.subcounty AS hospital_subcounty, h.address AS hospital_address,
 
     hda.history_of_hearing_loss, hda.history_of_hearing_devices,
@@ -36,6 +40,7 @@ FROM users u
 JOIN assessments a ON a.user_id = u.id
 LEFT JOIN hearing_disability_assessments hda ON hda.assessment_id = a.id
 LEFT JOIN officials d ON a.medical_officer_id = d.id
+LEFT JOIN officials ho ON a.health_officer_id = ho.id
 LEFT JOIN hospitals h ON a.hospital_id = h.id
 LEFT JOIN counties uc ON u.county_id = uc.id
 LEFT JOIN counties hc ON h.county_id = hc.id
@@ -218,6 +223,36 @@ WHERE u.id = ? AND a.disability_type = 'Hearing'";
                                                 <label>Doctor's Mobile</label>
                                                 <input type="text" class="form-control"
                                                     value="<?php echo htmlspecialchars($data['doctor_mobile']); ?>"
+                                                    readonly>
+                                            </div>
+                                        </div>
+ 
+
+
+
+                                      
+                                        <div class="form-divider mt-4">
+                                            <u>Approver Information</u>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-md-4">
+                                                <label>Name</label>
+                                                <input type="text" class="form-control"
+                                                    value="<?php echo htmlspecialchars($data['health_officer_name']); ?>"
+                                                    readonly>
+                                            </div> 
+
+                                            <div class="form-group col-md-4">
+                                                <label> Email</label>
+                                                <input type="email" class="form-control"
+                                                    value="<?php echo htmlspecialchars($data['health_officer_email']); ?>"
+                                                    readonly>
+                                            </div>
+
+                                            <div class="form-group col-md-4">
+                                                <label> Mobile</label>
+                                                <input type="text" class="form-control"
+                                                    value="<?php echo htmlspecialchars($data['health_officer_mobile']); ?>"
                                                     readonly>
                                             </div>
                                         </div>

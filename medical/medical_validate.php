@@ -78,7 +78,7 @@
                   <option value="Hearing Impairments">Hearing Impairments</option>
                   <option value="Maxillofacial Impairments">Maxillofacial Disabilities</option>
                   <option value="Physical Disabilities">Physical Disabilities</option>
-                  <option value="Multiple Disabilities">Multiple Disabilities</option>
+                  <!-- <option value="Multiple Disabilities">Multiple Disabilities</option> -->
                   <option value="Mental/Intellectual">Mental/Intellectual Disabilities</option>
                   <option value="Visual Impairments">Visual Impairments</option>
                   <option value="Progressive Chronic Disorders">Progressive Chronic Disorders</option>
@@ -117,43 +117,11 @@
                <!-- Visual Impairments Form -->
               <div id="Progressive Chronic Disorders" class="disability-form card">
                     <?php include 'chronic_form.php'; ?>  
-              </div>
-
-              <!-- Multiple Disabilities Form -->
-              <!-- <div id="Multiple Disabilities" class="disability-form card">
-                <h4>Multiple Disability Assessment</h4>
-                <form action="submit_multiple_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Conditions Combined</label>
-                    <textarea name="combined_conditions" class="form-control"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label>Severity</label>
-                    <input type="text" name="severity" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-              </div> -->
-
-
-              <!-- Progressive Chronic Disorders Form -->
-              <div id="Progressive Chronic Disorders" class="disability-form card">
-                <h4>Progressive Chronic Disorder Assessment</h4>
-                <form action="submit_chronic_assessment.php" method="post">
-                  <div class="mb-3">
-                    <label>Diagnosis</label>
-                    <input type="text" name="diagnosis" class="form-control">
-                  </div>
-                  <div class="mb-3">
-                    <label>Stage</label>
-                    <input type="text" name="stage" class="form-control">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-              </div>
+              </div> 
+ 
 
               <!-- Speech Disabilities Form -->
-              <div id="Speech Disabilities" class="disability-form card">
+              <div id="Speech Disabilities" class="disability-form card" disabled>
                 <h4>Speech Disability Assessment</h4>
                 <form action="submit_speech_assessment.php" method="post">
                   <div class="mb-3">

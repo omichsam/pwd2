@@ -146,6 +146,8 @@
                               <td>
                                 <form method="get" action="view_assessment">
                                   <input type="hidden" name="user_id" value="<?= $row['user_id'] ?>">
+                                   <input type="hidden" name="id" value="<?= $row['assessment_id']?>">
+                                   <input type="hidden" name="type" value="<?= $row['disability_type']?>">
                                   <input type="hidden" name="from" value="assessment">
                                   <button type="submit" class="btn btn-success btn-sm">View</button>
                                 </form>

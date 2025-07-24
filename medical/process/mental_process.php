@@ -17,7 +17,7 @@ function processMentalAssessment($conn)
     $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
     $other_services_required        = $_POST['other_services_required'] ?? '';
     $status                         = "checked";
-    $disability                     = "Mental/Intellectual/Autism Spectrum";
+    $disability                     = "Mental";
 
     // File upload
     $file_path = null;

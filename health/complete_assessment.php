@@ -86,8 +86,8 @@
       LEFT JOIN counties c ON u.county_id = c.id
       WHERE  
           a.health_officer_id IS NOT NULL
-          AND a.medical_officer_id IS NOT NULL
-          AND a.county_officer_id IS NOT NULL";
+          AND a.medical_officer_id IS NOT NULL";
+          // AND a.county_officer_id IS NULL
 
       
       // ✅ Debug check
@@ -168,6 +168,7 @@
                               <td>
                                 <form method="get" action="view_assessment">
                                   <input type="hidden" name="user_id" value="<?= $row['user_id'] ?>">
+                                  <input type="hidden" name="type" value="<?= $row['disability_type'] ?>">  
                                   <button type="submit" class="btn btn-success btn-sm">View</button>
                                 </form>
                               </td>
