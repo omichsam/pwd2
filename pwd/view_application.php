@@ -13,30 +13,30 @@
 
       <!-- Main Content -->
       <?php
-          // Fetch the latest assessment
-          $assessment = mysqli_fetch_assoc(mysqli_query(
-              $conn,
-              "SELECT * FROM assessments
+      // Fetch the latest assessment
+      $assessment = mysqli_fetch_assoc(mysqli_query(
+        $conn,
+        "SELECT * FROM assessments
            WHERE user_id = {$pwdUser['id']}
            ORDER BY id DESC LIMIT 1"
-          ));
+      ));
 
-          $status = $assessment['status'] ?? 'pending';
+      $status = $assessment['status'] ?? 'pending';
 
-          // Match progress info
-          function getProgressInfo($status)
-          {
-              return match ($status) {
-                  'pending' => ['step' => 1, 'label' => 'Pending Medical Officer Review', 'badge' => 'warning', 'icon' => 'fa-hourglass-half'],
-                  'checked' => ['step' => 2, 'label' => 'Checked by Medical Officer', 'badge' => 'info', 'icon' => 'fa-user-md'],
-                  'approved_by_health_officer' => ['step' => 3, 'label' => 'Approved by Health Officer', 'badge' => 'primary', 'icon' => 'fa-clipboard-check'],
-                  'approved_by_county_officer' => ['step' => 4, 'label' => 'Approved by County Officer', 'badge' => 'success', 'icon' => 'fa-award'],
-                  'rejected' => ['step' => 0, 'label' => 'Rejected', 'badge' => 'danger', 'icon' => 'fa-exclamation-circle'],
-                  default => ['step' => 0, 'label' => 'Not Started', 'badge' => 'secondary', 'icon' => 'fa-file']
-              };
-          }
+      // Match progress info
+      function getProgressInfo($status)
+      {
+        return match ($status) {
+          'pending' => ['step' => 1, 'label' => 'Pending Medical Officer Review', 'badge' => 'warning', 'icon' => 'fa-hourglass-half'],
+          'checked' => ['step' => 2, 'label' => 'Checked by Medical Officer', 'badge' => 'info', 'icon' => 'fa-user-md'],
+          'approved_by_health_officer' => ['step' => 3, 'label' => 'Approved by Health Officer', 'badge' => 'primary', 'icon' => 'fa-clipboard-check'],
+          'approved_by_county_officer' => ['step' => 4, 'label' => 'Approved by County Officer', 'badge' => 'success', 'icon' => 'fa-award'],
+          'rejected' => ['step' => 0, 'label' => 'Rejected', 'badge' => 'danger', 'icon' => 'fa-exclamation-circle'],
+          default => ['step' => 0, 'label' => 'Not Started', 'badge' => 'secondary', 'icon' => 'fa-file']
+        };
+      }
 
-          $progress = getProgressInfo($status);
+      $progress = getProgressInfo($status);
       ?>
 
       <div class="main-content">
@@ -53,7 +53,7 @@
             <div class="row">
               <div class="col-12">
                 <div class="hero text-center bg-primary text-white py-4 rounded-lg mb-4">
-                  <h2 class="mb-1">Hello,                                          <?php echo htmlspecialchars($pwdUser['name']); ?>!</h2>
+                  <h2 class="mb-1">Hello, <?php echo htmlspecialchars($pwdUser['name']); ?>!</h2>
                   <p class="lead mb-0">Track Your Disability Assessment Application</p>
                 </div>
               </div>
@@ -128,7 +128,7 @@
                           background: #f0f0f0;
                           border-radius: 10px;
                           z-index: 1;
-                          box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+                          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
                         }
 
                         .roadmap-progress {
@@ -140,7 +140,9 @@
                           border-radius: 10px;
                           z-index: 2;
                           transition: width 1.5s ease;
-                          width: <?php echo $progress['step'] / 4 * 90?>%;
+                          width:
+                            <?php echo $progress['step'] / 4 * 90 ?>
+                            %;
                           box-shadow: 0 2px 4px rgba(54, 162, 235, 0.3);
                         }
 
@@ -170,7 +172,7 @@
                           color: #adb5bd;
                           font-size: 24px;
                           transition: all 0.4s ease;
-                          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                         }
 
                         .step-marker.completed {
@@ -212,9 +214,20 @@
                         }
 
                         @keyframes pulse {
-                          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(103, 119, 239, 0.7); }
-                          70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(103, 119, 239, 0); }
-                          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(103, 119, 239, 0); }
+                          0% {
+                            transform: scale(1);
+                            box-shadow: 0 0 0 0 rgba(103, 119, 239, 0.7);
+                          }
+
+                          70% {
+                            transform: scale(1.05);
+                            box-shadow: 0 0 0 10px rgba(103, 119, 239, 0);
+                          }
+
+                          100% {
+                            transform: scale(1);
+                            box-shadow: 0 0 0 0 rgba(103, 119, 239, 0);
+                          }
                         }
 
                         .status-card {
@@ -225,12 +238,19 @@
 
                         .status-card:hover {
                           transform: translateY(-3px);
-                          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
                         }
 
                         @keyframes fadeIn {
-                          from { opacity: 0; transform: translateY(20px); }
-                          to { opacity: 1; transform: translateY(0); }
+                          from {
+                            opacity: 0;
+                            transform: translateY(20px);
+                          }
+
+                          to {
+                            opacity: 1;
+                            transform: translateY(0);
+                          }
                         }
 
                         .action-btn {
@@ -241,7 +261,7 @@
 
                         .action-btn:hover {
                           transform: translateY(-2px);
-                          box-shadow: 0 7px 14px rgba(0,0,0,0.1);
+                          box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
                         }
                       </style>
 
@@ -251,29 +271,32 @@
 
                         <div class="roadmap-steps">
                           <?php
-                              $steps = [
-                                  1 => ['icon' => 'fa-file-upload', 'label' => 'Submitted', 'date' => $assessment['created_at']],
-                                  2 => ['icon' => 'fa-user-md', 'label' => 'Medical Review', 'date' => $status == 'checked' ? $assessment['assessment_date'] : ''],
-                                  3 => ['icon' => 'fa-clipboard-check', 'label' => 'Health Officer', 'date' => $status == 'approved_by_health_officer' ? $assessment['assessment_date'] : ''],
-                                  4 => ['icon' => 'fa-stamp', 'label' => 'County Approval', 'date' => $status == 'approved_by_county_officer' ? $assessment['update_time'] : ''],
-                              ];
+                          $steps = [
+                            1 => ['icon' => 'fa-file-upload', 'label' => 'Submitted', 'date' => $assessment['created_at']],
+                            2 => ['icon' => 'fa-user-md', 'label' => 'Medical Review', 'date' => $status == 'checked' ? $assessment['assessment_date'] : ''],
+                            3 => ['icon' => 'fa-clipboard-check', 'label' => 'Health Officer', 'date' => $status == 'approved_by_health_officer' ? $assessment['assessment_date'] : ''],
+                            4 => ['icon' => 'fa-stamp', 'label' => 'County Approval', 'date' => $status == 'approved_by_county_officer' ? $assessment['update_time'] : ''],
+                          ];
 
-                              foreach ($steps as $stepNum => $step):
-                                  $isCompleted = $stepNum < $progress['step'] || ($stepNum == 4 && $status == 'approved_by_county_officer');
-                                  $isCurrent   = $stepNum == $progress['step'] && $status != 'rejected' && $status != 'approved_by_county_officer';
-                              ?>
-		                            <div class="roadmap-step">
-		                              <div class="step-marker		                                                      <?php echo $isCompleted ? 'completed' : '' ?><?php echo $isCurrent ? 'current' : 'pending' ?>">
-		                                <i class="fas		                                              <?php echo $isCompleted ? 'fa-check' : $step['icon'] ?>"></i>
-		                              </div>
-		                              <div class="step-label		                                                     <?php echo $isCompleted ? 'completed' : '' ?><?php echo $isCurrent ? 'current' : '' ?>">
-		                                <?php echo $step['label'] ?>
-		                              </div>
-		                              <div class="step-date">
-		                                <?php echo ! empty($step['date']) ? date('M d, Y', strtotime($step['date'])) : '&nbsp;' ?>
-		                              </div>
-		                            </div>
-		                          <?php endforeach; ?>
+                          foreach ($steps as $stepNum => $step):
+                            $isCompleted = $stepNum < $progress['step'] || ($stepNum == 4 && $status == 'approved_by_county_officer');
+                            $isCurrent = $stepNum == $progress['step'] && $status != 'rejected' && $status != 'approved_by_county_officer';
+                            ?>
+                            <div class="roadmap-step">
+                              <div
+                                class="step-marker		                                                      <?php echo $isCompleted ? 'completed' : '' ?><?php echo $isCurrent ? 'current' : 'pending' ?>">
+                                <i
+                                  class="fas		                                              <?php echo $isCompleted ? 'fa-check' : $step['icon'] ?>"></i>
+                              </div>
+                              <div
+                                class="step-label		                                                     <?php echo $isCompleted ? 'completed' : '' ?><?php echo $isCurrent ? 'current' : '' ?>">
+                                <?php echo $step['label'] ?>
+                              </div>
+                              <div class="step-date">
+                                <?php echo !empty($step['date']) ? date('M d, Y', strtotime($step['date'])) : '&nbsp;' ?>
+                              </div>
+                            </div>
+                          <?php endforeach; ?>
                         </div>
                       </div>
 
@@ -282,26 +305,27 @@
                         <div class="card-body">
                           <div class="d-flex align-items-center">
                             <div class="mr-3">
-                              <i class="fas                                            <?php echo $progress['icon'] ?> fa-3x text-<?php echo $progress['badge'] ?>"></i>
+                              <i
+                                class="fas <?php echo $progress['icon'] ?> fa-3x text-<?php echo $progress['badge'] ?>"></i>
                             </div>
                             <div>
                               <h5 class="card-title mb-1">Status Update</h5>
                               <p class="card-text mb-0">
                                 <?php
-                                    $messages = [
-                                        'pending'                    => "Your application has been received and is currently being reviewed by our medical officers. This process typically takes 3-5 business days.",
-                                        'checked'                    => "The medical review is complete. Your application is now awaiting approval from the health officer.",
-                                        'approved_by_health_officer' => "Your application has been approved by the health officer and is now in the final stage of county approval.",
-                                        'approved_by_county_officer' => "Congratulations! Your disability assessment has been fully approved. You may now download your official certificate.",
-                                        'rejected'                   => "Your application requires modifications before it can be processed further. Please review the feedback below and resubmit.",
-                                        'default'                    => "Your application is being processed through our system.",
-                                    ];
+                                $messages = [
+                                  'pending' => "Your application has been received and is currently being reviewed by our medical officers. This process typically takes 3-5 business days.",
+                                  'checked' => "The medical review is complete. Your application is now awaiting approval from the health officer.",
+                                  'approved_by_health_officer' => "Your application has been approved by the health officer and is now in the final stage of county approval.",
+                                  'approved_by_county_officer' => "Congratulations! Your disability assessment has been fully approved. You may now download your official certificate.",
+                                  'rejected' => "Your application requires modifications before it can be processed further. Please review the feedback below and resubmit.",
+                                  'default' => "Your application is being processed through our system.",
+                                ];
 
-                                    echo $messages[$status] ?? $messages['default'];
+                                echo $messages[$status] ?? $messages['default'];
                                 ?>
                               </p>
 
-                              <?php if ($status === 'rejected' && ! empty($assessment['comment'])): ?>
+                              <?php if ($status === 'rejected' && !empty($assessment['comment'])): ?>
                                 <div class="alert alert-danger mt-3">
                                   <h6><i class="fas fa-comment-dots mr-2"></i>Officer Feedback</h6>
                                   <p class="mb-0"><?php echo htmlspecialchars($assessment['comment']) ?></p>
@@ -316,37 +340,47 @@
                       <div class="text-center mt-5">
                         <?php if ($status === 'approved_by_county_officer'): ?>
 
-                        <?php
-                            // Get the disability type from the assessment
-                            $disability_type = $assessment['disability_type'];
+                          <?php
+                          // Get the disability type from the assessment
+                          $disability_type = $assessment['disability_type'];
 
-                            // Map disability types to their corresponding print form
-                            switch ($disability_type) {
-                                case 'Hearing':
-                                    $url = 'hearing_print.php';
-                                    break;
-                                case 'Mental':
-                                    $url = 'mental_print.php';
-                                    break;
-                                case 'Maxillofacial':
-                                    $url = 'maxillofacial_print.php';
-                                    break;
-                                case 'others':
-                                    $url = 'others_print.php';
-                                    break;
-                                default:
-                                    $url = 'default_print.php'; // Handle a default case if needed
-                                    break;
-                            }
-                        ?>
+                          // Map disability types to their corresponding print form
+                          switch ($disability_type) {
+                            case 'Hearing':
+                              $url = 'hearing_print.php';
+                              break;
+                            case 'Mental':
+                              $url = 'mental_print.php';
+                              break;
+                            case 'Maxillofacial':
+                              $url = 'maxillofacial_print.php';
+                              break;
+                            case 'Physical':
+                              $url = 'physical_print.php';
+                              break;
+                            case 'Visual':
+                              $url = 'visual_print.php';
+                              break;
+                            case 'Progressive_Chronic':
+                              $url = 'chronic_print.php';
+                              break;
+                            case 'others':
+                              $url = 'others_print.php';
+                              break;
+                            default:
+                              $url = 'default_print.php'; // Handle a default case if needed
+                              break;
+                          }
+                          ?>
 
 
                           <!-- <a href="checker.php" class="btn btn-success btn-lg action-btn px-4 py-3">
                             <i class="fas fa-download mr-2"></i> Download Certificate                                                                                      <?php echo $assessment['disability_type']; ?>
                           </a> -->
 
-                        <a href="#" class="btn btn-success btn-lg action-btn px-4 py-3" onclick="window.location.href='<?php echo $url; ?>';">
-                        <i class="fas fa-download mr-2"></i> Download Certificate <?php echo $disability_type; ?></a>
+                          <a href="#" class="btn btn-success btn-lg action-btn px-4 py-3"
+                            onclick="window.location.href='<?php echo $url; ?>';">
+                            <i class="fas fa-download mr-2"></i> Download Certificate <?php echo $disability_type; ?></a>
 
 
 
@@ -354,7 +388,8 @@
                             <i class="fas fa-info-circle mr-2"></i> Next Steps
                           </a>
                         <?php elseif ($status === 'rejected'): ?>
-                          <a href="edit_application.php?id=<?php echo $assessment['id'] ?>" class="btn btn-warning btn-lg action-btn px-4 py-3">
+                          <a href="edit_application.php?id=<?php echo $assessment['id'] ?>"
+                            class="btn btn-warning btn-lg action-btn px-4 py-3">
                             <i class="fas fa-edit mr-2"></i> Resubmit Application
                           </a>
                           <a href="#" class="btn btn-outline-info btn-lg ml-3 px-4 py-3">
@@ -427,7 +462,7 @@
             // Force reflow to trigger animation
             progressBar.style.width = '0';
             setTimeout(() => {
-              progressBar.style.width = '<?php echo($progress['step'] / 4) * 90 ?>%';
+              progressBar.style.width = '<?php echo ($progress['step'] / 4) * 90 ?>%';
             }, 100);
           }
         });

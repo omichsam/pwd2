@@ -37,7 +37,7 @@
                       processVisualAssessment($conn);
                       break;
                   case 'chronic':
-                      processVisualAssessment($conn);
+                      processProgressiveAssessment($conn);
                       break;
                   case 'physical':
                       processPhysicalAssessment($conn);
@@ -100,7 +100,7 @@
 
               <!-- Hearing Impairments Form -->
               <div id="Maxillofacial Impairments" class="disability-form card">
-                <!-- <h5>Hearing Impairment Assessment</h5> -->
+                <!-- <h5>Maxillofacial Impairment Assessment</h5> -->
                 <?php include 'maxillofacial_form.php'; ?>
               </div>
 

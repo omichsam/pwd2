@@ -157,7 +157,7 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <div id="qrcode"
                                 style="position: absolute; top: 10px; right: 10px; width: 100px; height: 100px;"></div>
 
-                                
+
                             <!-- Centered text -->
                             <div class="text-center h-100 d-flex flex-column justify-content-center">
                                 <!-- <p class="mb-1"><strong>Certificate ID:</strong>
@@ -241,7 +241,7 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                     </td>
                                 </tr>
 
-                            </table>  
+                            </table>
 
                             <h6 class="mt-1">4. Maxillofacial History</h6>
                             <table class="table table-bordered">
@@ -262,7 +262,7 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                             readonly><?= $data['dental_assessment'] ?></textarea>
                                     </td>
                                 </tr>
-                            </table> 
+                            </table>
 
                             <h6 class="mt-1">5. Conclusion</h6>
                             <table class="table table-bordered ">
@@ -272,11 +272,11 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 </tr>
                             </table>
 
-                              
+
 
                             <h6 class="mt-1">6. Recommendations</h6>
                             <table class="table table-bordered ">
-                                 
+
                                 <tr>
                                     <th>Assistive Products</th>
                                     <td><?= $data['recommended_assistive_products'] ?></td>
@@ -367,13 +367,13 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-    const certCode = "<?= $certificateCode ?>";
-    const qrcode = new QRCode(document.getElementById("qrcode"), {
-        text: certCode,
-        width: 100,
-        height: 100
-    });
-</script>
+        const certCode = "<?= $certificateCode ?>";
+        const qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: certCode,
+            width: 100,
+            height: 100
+        });
+    </script>
 
 
     <script>

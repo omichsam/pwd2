@@ -22,10 +22,11 @@
             <input type="hidden" name="user_id" value="<?php echo $pwdUser['id'] ?? '' ?>">
 
             <div class="row g-2">
-              <div class="col-md-6">
+              <h5 class="">Medical History</h5>
+              <!-- <div class="col-md-6">
                 <label class="form-label small">Medical History</label>
                 <textarea name="medical_history" class="form-control form-control-sm" rows="2"></textarea>
-              </div>
+              </div> -->
               <div class="col-md-3">
                 <label class="form-label small">Injury/Onset</label>
                 <input type="date" name="onset_date" class="form-control form-control-sm">
@@ -35,13 +36,13 @@
                 <input type="date" name="last_intervention_date" class="form-control form-control-sm">
               </div>
               <div class="col-md-6">
-                <label class="form-label small">Ongoing Interventions</label>
-                <textarea name="interventions" class="form-control form-control-sm" rows="2"></textarea>
+                <label class="form-label small">Cause of Disability</label>
+                <textarea name="cause_of_disability" class="form-control form-control-sm" rows="2"></textarea>
               </div>
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <label class="form-label small">Cause of Disability</label>
                 <input type="text" name="cause_of_disability" class="form-control form-control-sm">
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -199,11 +200,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <!-- Functional Impairments -->
 <div class="accordion-item">
-  <h2 class="accordion-header" id="headingThree">
+  <!-- <h2 class="accordion-header" id="headingThree">
     <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
       3. Functional & Participation
     </button>
-  </h2>
+  </h2> -->
+   <div class="accordion-header " role="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" id="headingStructural">
+        <h4 class=""> 3. Functional & Participation </h4>
+    </div>
   <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionPhysical">
     <div class="accordion-body py-2 px-3">
       <div class="row g-2">
@@ -288,11 +292,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <div class="row g-2 mt-2">
         <div class="col-md-6">
-          <label class="form-label small">Assistive Products</label>
+          <label class="form-label small">Recommended Assistive Products</label>
           <input type="text" name="assistive_products" class="form-control form-control-sm">
         </div>
         <div class="col-md-6">
-          <label class="form-label small">Other Services</label>
+          <label class="form-label small">Other Required Services</label>
           <input type="text" name="other_services" class="form-control form-control-sm">
         </div>
       </div>
@@ -341,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <!-- Submit -->
     <div class="text-center mt-3">
-      <button type="submit" class="btn btn-primary btn-sm px-4">Submit</button>
+      <button type="submit" class="btn btn-primary btn-md px-4">Submit</button>
     </div>
   </form>
 </div>

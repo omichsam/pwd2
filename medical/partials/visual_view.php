@@ -1,17 +1,17 @@
 <?php
-// You can include the following if needed in full page:
-// include 'files/header.php';
-// include 'files/nav.php';
-// include 'files/sidebar.php';
+    // You can include the following if needed in full page:
+    // include 'files/header.php';
+    // include 'files/nav.php';
+    // include 'files/sidebar.php';
 
-if (!isset($_GET['user_id'])) {
-    echo "User ID is required.";
-    exit;
-}
+    if (! isset($_GET['user_id'])) {
+        echo "User ID is required.";
+        exit;
+    }
 
-$user_id = intval($_GET['user_id']);
+    $user_id = intval($_GET['user_id']);
 
-$sql = "SELECT
+    $sql = "SELECT
     u.name AS user_name, u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
     u.mobile_number, u.email, u.type AS user_type, u.next_of_kin_name, u.next_of_kin_mobile,
     u.next_of_kin_relationship, uc.county_name AS user_county, u.subcounty AS user_subcounty,
@@ -23,50 +23,79 @@ $sql = "SELECT
     d.name AS doctor_name, d.license_id AS doctor_license, d.email AS doctor_email,
     d.mobile_number AS doctor_mobile, d.type AS doctor_type,
 
-    -- Health Officer
-    ho.name AS health_officer_name, ho.license_id AS health_officer_license, ho.email AS health_officer_email,
-    ho.mobile_number AS health_officer_mobile, ho.type AS health_officer_type,
-
     h.name AS hospital_name, hc.county_name AS hospital_county, h.subcounty AS hospital_subcounty,
     h.address AS hospital_address,
 
-    mad.clinical_history,
-    mad.mental_status_evaluation,
-    mad.feeding_score,
-    mad.toileting_score,
-    mad.grooming_score,
-    mad.physical_disability_score,
-    mad.employability_score,
-    mad.duration_of_illness,
-    mad.major_cause_disability,
-    mad.recommended_assistive_products,
-    mad.other_services_required,
-    mad.document_path AS file_path,
+    vad.assistive_device,
+    vad.medical_history,
+    vad.ocular_history,
+    vad.right_eye_with_correction,
+    vad.right_eye_without_correction,
+    vad.left_eye_with_correction,
+    vad.left_eye_without_correction,
+    vad.near_vision_with_correction,
+    vad.near_vision_without_correction,
+
+    vad.present_eyeball_right,
+    vad.squint_right,
+    vad.nystagmus_right,
+    vad.tearing_right,
+    vad.lids_right,
+    vad.conjunctiva_right,
+    vad.cornea_right,
+    vad.anterior_chamber_right,
+    vad.iris_right,
+    vad.pupil_right,
+    vad.lens_right,
+    vad.fundus_right,
+
+    vad.present_eyeball_left,
+    vad.squint_left,
+    vad.nystagmus_left,
+    vad.tearing_left,
+    vad.lids_left,
+    vad.conjunctiva_left,
+    vad.cornea_left,
+    vad.anterior_chamber_left,
+    vad.iris_left,
+    vad.pupil_left,
+    vad.lens_left,
+    vad.fundus_left,
+
+    vad.hvf,
+    vad.colour_vision,
+    vad.stereopsis,
+
+    vad.category,
+    vad.cause_of_vision,
+    vad.percentage_disability,
+    vad.possible_intervention,
+    vad.recommendation,
+    vad.conclusion_duration,
 
     doc.document_type
 
 FROM users u
 JOIN assessments a ON a.user_id = u.id
-LEFT JOIN mental_assessment_details mad ON mad.assessment_id = a.id
+LEFT JOIN visual_assessment_details vad ON vad.assessment_id = a.id
 LEFT JOIN officials d ON a.medical_officer_id = d.id
-LEFT JOIN officials ho ON a.health_officer_id = ho.id
 LEFT JOIN hospitals h ON a.hospital_id = h.id
 LEFT JOIN counties uc ON u.county_id = uc.id
 LEFT JOIN counties hc ON h.county_id = hc.id
 LEFT JOIN documents doc ON doc.assessment_id = a.id
 
-WHERE u.id = ? AND a.disability_type = 'Mental'";
+WHERE u.id = ? AND a.disability_type = 'Visual'";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$data = $result->fetch_assoc();
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data   = $result->fetch_assoc();
 
-if (!$data) {
-    echo "<div class='alert alert-warning'>No Mental assessment data found for this user.</div>";
-    exit;
-}
+    if (! $data) {
+        echo "<div class='alert alert-warning'>No Visual assessment data found for this user.</div>";
+        exit;
+    }
 ?>
 
 
@@ -81,6 +110,7 @@ if (!$data) {
             <div class="form-divider mt-3">
                 <u>Personal Info</u>
             </div>
+
             <div class="row">
                 <div class="form-group col-md-4">
                     <label>Full Name</label>
@@ -235,29 +265,6 @@ if (!$data) {
             </div>
 
             <div class="form-divider mt-4">
-                <u>Approver Information</u>
-            </div>
-            <div class="row">
-                <div class="form-group col-md-4">
-                    <label>Name</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['health_officer_name']); ?>" readonly>
-                </div>
-
-                <div class="form-group col-md-4">
-                    <label> Email</label>
-                    <input type="email" class="form-control"
-                        value="<?php echo htmlspecialchars($data['health_officer_email']); ?>" readonly>
-                </div>
-
-                <div class="form-group col-md-4">
-                    <label> Mobile</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['health_officer_mobile']); ?>" readonly>
-                </div>
-            </div>
-
-            <div class="form-divider mt-4">
                 <u>Hospital Information</u>
             </div>
             <div class="row">
@@ -285,81 +292,165 @@ if (!$data) {
             </div>
 
             <div class="form-divider mt-4">
-                <u> Clinical History & Mental Status</u>
+                <u>Visual Assessment Details</u>
             </div>
+
             <div class="row">
                 <div class="form-group col-md-6">
-                    <label>Brief Clinical History (Past and Present Medical History)</label>
-                    <textarea class="form-control" rows="3"
-                        readonly><?php echo htmlspecialchars($data['clinical_history']); ?></textarea>
+                    <label>Assistive Device</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['assistive_device']); ?>" readonly>
                 </div>
                 <div class="form-group col-md-6">
-                    <label>Mental Status Evaluation</label>
-                    <textarea class="form-control" rows="3"
-                        readonly><?php echo htmlspecialchars($data['mental_status_evaluation']); ?></textarea>
+                    <label>Medical History</label>
+                    <textarea class="form-control" rows="2"
+                        readonly><?php echo htmlspecialchars($data['medical_history']); ?></textarea>
                 </div>
             </div>
-            <!-- #region -->
+
+            <div class="form-group">
+                <label>Ocular History</label>
+                <textarea class="form-control" rows="2"
+                    readonly><?php echo htmlspecialchars($data['ocular_history']); ?></textarea>
+            </div>
 
             <div class="form-divider mt-4">
-                <u>Functional Assessment Tool Score(s)</u>
+                <u>Vision Details</u>
             </div>
 
             <div class="row">
-                <div class="form-group col-md-2">
-                    <label>Feeding</label>
+                <div class="form-group col-md-3">
+                    <label>Right Eye (with correction)</label>
                     <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['feeding_score']); ?>" readonly>
+                        value="<?php echo htmlspecialchars($data['right_eye_with_correction']); ?>" readonly>
                 </div>
-                <div class="form-group col-md-2">
-                    <label>Toileting</label>
+                <div class="form-group col-md-3">
+                    <label>Right Eye (without correction)</label>
                     <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['toileting_score']); ?>" readonly>
+                        value="<?php echo htmlspecialchars($data['right_eye_without_correction']); ?>" readonly>
                 </div>
-                <div class="form-group col-md-2">
-                    <label>Grooming</label>
+                <div class="form-group col-md-3">
+                    <label>Left Eye (with correction)</label>
                     <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['grooming_score']); ?>" readonly>
+                        value="<?php echo htmlspecialchars($data['left_eye_with_correction']); ?>" readonly>
                 </div>
-                <div class="form-group col-md-2">
-                    <label>Employability</label>
+                <div class="form-group col-md-3">
+                    <label>Left Eye (without correction)</label>
                     <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['employability_score']); ?>" readonly>
-                </div>
-                <div class="form-group col-md-2">
-                    <label>Physical Disability</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['physical_disability_score']); ?>" readonly>
+                        value="<?php echo htmlspecialchars($data['left_eye_without_correction']); ?>" readonly>
                 </div>
             </div>
-
-
-            <div class="row" hidden>
-                <div class="form-group col-md-4">
-                    <label>Duration of illness</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['duration_of_illness']); ?>" readonly>
-                </div>
-                <div class="form-group col-md-4">
-                    <label>Major Cause of Disability</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['major_cause_disability']); ?>" readonly>
-                </div>
-            </div>
-
 
             <div class="row">
                 <div class="form-group col-md-6">
-                    <label>Recommended Assistive Products</label>
-                    <textarea class="form-control" rows="3"
-                        readonly><?php echo htmlspecialchars($data['recommended_assistive_products']); ?></textarea>
+                    <label>Near Vision (with correction)</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['near_vision_with_correction']); ?>" readonly>
                 </div>
                 <div class="form-group col-md-6">
-                    <label>Other required services</label>
-                    <textarea class="form-control" rows="3"
-                        readonly><?php echo htmlspecialchars($data['other_services_required']); ?></textarea>
+                    <label>Near Vision (without correction)</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['near_vision_without_correction']); ?>" readonly>
                 </div>
             </div>
+
+            <div class="form-divider mt-4">
+                <u>Eye Examination - Right Eye</u>
+            </div>
+
+            <div class="row">
+                <?php
+                                            $right_eye_fields = ['present_eyeball_right', 'squint_right', 'nystagmus_right', 'tearing_right', 'lids_right', 'conjunctiva_right', 'cornea_right', 'anterior_chamber_right', 'iris_right', 'pupil_right', 'lens_right', 'fundus_right'];
+                                            foreach ($right_eye_fields as $field) {
+                                                echo '<div class="form-group col-md-3">
+                                                    <label>' . ucwords(str_replace('_', ' ', str_replace('_right', '', $field))) . '</label>
+                                                    <input type="text" class="form-control"
+                                                        value="' . htmlspecialchars($data[$field]) . '" readonly>
+                                                </div>';
+                                            }
+                                        ?>
+            </div>
+
+            <div class="form-divider mt-4">
+                <u>Eye Examination - Left Eye</u>
+            </div>
+
+            <div class="row">
+                <?php
+                                            $left_eye_fields = ['present_eyeball_left', 'squint_left', 'nystagmus_left', 'tearing_left', 'lids_left', 'conjunctiva_left', 'cornea_left', 'anterior_chamber_left', 'iris_left', 'pupil_left', 'lens_left', 'fundus_left'];
+                                            foreach ($left_eye_fields as $field) {
+                                                echo '<div class="form-group col-md-3">
+                                                    <label>' . ucwords(str_replace('_', ' ', str_replace('_left', '', $field))) . '</label>
+                                                    <input type="text" class="form-control"
+                                                        value="' . htmlspecialchars($data[$field]) . '" readonly>
+                                                </div>';
+                                            }
+                                        ?>
+            </div>
+
+            <div class="form-divider mt-4">
+                <u>Visual Function Tests</u>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>HVF(Humphreys VIsual Field)</label>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['hvf']); ?>"
+                        readonly>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Colour Vision</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['colour_vision']); ?>" readonly>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Stereopsis</label>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['stereopsis']); ?>"
+                        readonly>
+                </div>
+            </div>
+
+            <div class="form-divider mt-4">
+                <u>Assessment Summary</u>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Disability Category</label>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($data['category']); ?>"
+                        readonly>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Cause of Vision Impairment</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['cause_of_vision']); ?>" readonly>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Disability Percentage</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['percentage_disability']); ?>" readonly>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label>Possible Intervention</label>
+                    <textarea class="form-control" rows="2"
+                        readonly><?php echo htmlspecialchars($data['possible_intervention']); ?></textarea>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Recommendation</label>
+                    <textarea class="form-control" rows="2"
+                        readonly><?php echo htmlspecialchars($data['recommendation']); ?></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Conclusion Duration</label>
+                <input type="text" class="form-control"
+                    value="<?php echo htmlspecialchars($data['conclusion_duration']); ?>" readonly>
+            </div>
+
 
             <div class="form-divider mt-4">
                 <u><strong>Uploaded Document</strong></u>
@@ -368,43 +459,43 @@ if (!$data) {
             <div class="row">
                 <div class="form-group col-md-12">
                     <label>Document</label>
-                    <?php if (!empty($data['file_path'])): ?>
-                        <?php
-                        $document_url = "" . htmlspecialchars($data['file_path']);
-                        $document_extension = pathinfo($data['file_path'], PATHINFO_EXTENSION);
-                        $file_name = basename($data['file_path']);
-                        ?>
+                    <?php if (! empty($data['file_path'])): ?>
+                    <?php
+    $document_url       = "" . htmlspecialchars($data['file_path']);
+    $document_extension = pathinfo($data['file_path'], PATHINFO_EXTENSION);
+    $file_name          = basename($data['file_path']);
+?>
 
-                        <div class="mb-2">
-                            <span class="font-weight-bold">File:</span>
-                            <?php echo htmlspecialchars($file_name); ?>
-                            <span class="badge badge-secondary ml-2"><?php echo strtoupper($document_extension); ?></span>
-                        </div>
+                    <div class="mb-2">
+                        <span class="font-weight-bold">File:</span>
+                        <?php echo htmlspecialchars($file_name); ?>
+                        <span class="badge badge-secondary ml-2"><?php echo strtoupper($document_extension); ?></span>
+                    </div>
 
-                        <div class="btn-group">
-                            <?php if ($document_extension == 'pdf'): ?>
-                                <a href="<?php echo $document_url; ?>" target="_blank" class="btn btn-primary">
-                                    <i class="fas fa-file-pdf"></i> View PDF
-                                </a>
-                            <?php elseif (in_array($document_extension, ['jpg', 'jpeg', 'png', 'gif'])): ?>
-                                <a href="<?php echo $document_url; ?>" target="_blank" class="btn btn-success">
-                                    <i class="fas fa-image"></i> View Image
-                                </a>
-                            <?php else: ?>
-                                <a href="<?php echo $document_url; ?>" target="_blank" class="btn btn-primary">
-                                    <i class="fas fa-file"></i> View Document
-                                </a>
-                            <?php endif; ?>
+                    <div class="btn-group">
+                        <?php if ($document_extension == 'pdf'): ?>
+                        <a href="<?php echo $document_url; ?>" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> View PDF
+                        </a>
+                        <?php elseif (in_array($document_extension, ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                        <a href="<?php echo $document_url; ?>" target="_blank" class="btn btn-success">
+                            <i class="fas fa-image"></i> View Image
+                        </a>
+                        <?php else: ?>
+                        <a href="<?php echo $document_url; ?>" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-file"></i> View Document
+                        </a>
+                        <?php endif; ?>
 
-                            <a href="<?php echo $document_url; ?>" download class="btn btn-warning">
-                                <i class="fas fa-download"></i> Download
-                            </a>
-                        </div>
+                        <a href="<?php echo $document_url; ?>" download class="btn btn-warning">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
 
                     <?php else: ?>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> No document uploaded
-                        </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No document uploaded
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 <style>
-    body {
+     body {
         background: #f8fafb;
     }
     .accordion-item {
@@ -79,7 +79,7 @@
 </style>
 
 <div class="container mt-5">
-    <h4 class="mb-4 text-center fw-bold display-5">Assessment Form for Vision / Visual Impairment</h4>
+    <h6 class="mb-4 text-center fw-bold display-66">Assessment Form for Vision / Visual Impairment</h6>
     <form action="" method="POST" enctype="multipart/form-data">
         <div class="accordion" id="visualAssessmentAccordion">
 
@@ -94,8 +94,8 @@
                         <input type="hidden" name="assessment_id" value="<?php echo $_GET['assessment_id'] ?? '' ?>">
                         <input type="hidden" name="disability_type" value="visual">
                         <input type="hidden" name="user_id" value="<?php echo $pwdUser['id'] ?? '' ?>">
-                        <label>History</label>
-                        <textarea name="history" class="form-control" rows="2"></textarea>
+                        <!-- <label>History</label>
+                        <textarea name="history" class="form-control" rows="2"></textarea> -->
                         <label>Assistive Device</label>
                         <input type="text" name="assistive_device" class="form-control">
                         <label>Medical History</label>
@@ -112,8 +112,35 @@
                      data-target="#collapseTwo" aria-expanded="false" id="headingTwo">
                     <h4>2. Vision & Eye Examination</h4>
                 </div>
+
+
                 <div id="collapseTwo" class="accordion-collapse collapse">
-                    <div class="accordion-body">
+                     <div class="accordion-body">
+                        <div class="fw-bold mb-3">Distance Visual Acuity</div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="eye-section-label">Right Eye</div>
+                                <label>With Correction</label>
+                                <input type="text" name="right_eye_with_correction" class="form-control">
+                                <label>Without Correction</label>
+                                <input type="text" name="right_eye_without_correction" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="eye-section-label">Left Eye</div>
+                                <label>With Correction</label>
+                                <input type="text" name="left_eye_with_correction" class="form-control">
+                                <label>Without Correction</label>
+                                <input type="text" name="left_eye_without_correction" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="eye-section-label">Near Vision Test</div>
+                                <label>With Correction</label>
+                                <input type="text" name="near_vision_with_correction" class="form-control">
+                                <label>Without Correction</label>
+                                <input type="text" name="near_vision_without_correction" class="form-control">
+                            </div>
+                        </div>
+
                         <div class="fw-bold mb-3">Ophthalmic Examination</div>
                         <div class="row">
                             <!-- Right Eye -->

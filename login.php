@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (password_verify($password, $user['password'])) {
           // Check if account is inactive (status = 0) for medical/health officers
-          if (($user['active'] == 0) && ($user['type'] === 'medical_officer' || $user['type'] === 'health_officer')) {
+          if ((@$user['status'] == 1) && ($user['type'] === 'medical_officer' || $user['type'] === 'health_officer')) {
             $swal_script = "
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {

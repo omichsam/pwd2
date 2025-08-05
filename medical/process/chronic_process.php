@@ -1,50 +1,55 @@
 <?php
 
-function processChronicDisabilityAssessment($conn)
+function processProgressiveAssessment($conn)
 {
+    // session_start(); // uncomment if session needed
+
     $assessment_id = $_POST['assessment_id'] ?? null;
     $user_id       = $_POST['user_id'] ?? null;
 
-    // Summary Fields
-    $medical_history        = $_POST['medical_history'] ?? '';
-    $onset_date             = $_POST['onset_date'] ?? '';
-    $last_intervention_date = $_POST['last_intervention_date'] ?? '';
+    // Summary Findings
+    $onset_date             = $_POST['onset_date'] ?? null;
+    $last_intervention_date = $_POST['last_intervention_date'] ?? null;
     $interventions          = $_POST['interventions'] ?? '';
     $cause_of_disability    = $_POST['cause_of_disability'] ?? '';
 
-    // Structural Scores
-    $scores = [
-        'cardiovascular', 'respiratory', 'cancer', 'musculoskeletal',
-        'neurological', 'gastrointestinal', 'dermatological',
-        'hematologic', 'lymphatic', 'genitourinary', 'frailty', 'other',
+    // Structural / Clinical Assessment
+    $structural_impairments = $_POST['structural_impairments'] ?? '';
+    $regions_affected       = $_POST['regions_affected'] ?? '';
+
+    $score_fields = [
+        'cardiovascular', 'respiratory', 'cancer', 'musculoskeletal', 'neurological',
+        'gastrointestinal', 'dermatological', 'hematologic', 'lymphatic',
+        'genitourinary', 'frailty', 'other',
     ];
-    foreach ($scores as $area) {
-        $$area = $_POST['score_' . $area] ?? '';
+
+    foreach ($score_fields as $field) {
+        ${"score_" . $field} = $_POST["score_" . $field] ?? '';
     }
+
     $findings_clinical = $_POST['findings_clinical'] ?? '';
     $remarks_clinical  = $_POST['remarks_clinical'] ?? '';
 
-    // Functional Scores
-    $functional_areas = ['mobility', 'selfcare', 'domestic', 'majorlife', 'community'];
-    foreach ($functional_areas as $area) {
-        $$area = $_POST['difficulty_' . $area] ?? '';
+    // Functional Assessment
+    $difficulty_fields = ['mobility', 'selfcare', 'domestic', 'majorlife', 'community'];
+    foreach ($difficulty_fields as $field) {
+        ${"difficulty_" . $field} = $_POST["difficulty_" . $field] ?? '';
     }
+
     $findings_functional = $_POST['findings_functional'] ?? '';
     $remarks_functional  = $_POST['remarks_functional'] ?? '';
 
-    // Ratings
-    $rating_none         = $_POST['rating_none'] ?? 0;
-    $rating_mild         = $_POST['rating_mild'] ?? 0;
-    $rating_moderate     = $_POST['rating_moderate'] ?? 0;
-    $rating_severe       = $_POST['rating_severe'] ?? 0;
-    $rating_complete     = $_POST['rating_complete'] ?? 0;
-    $conclusion_duration = $_POST['conclusion_duration'] ?? '';
+    $rating_none     = $_POST['rating_none'] ?? 0;
+    $rating_mild     = $_POST['rating_mild'] ?? 0;
+    $rating_moderate = $_POST['rating_moderate'] ?? 0;
+    $rating_severe   = $_POST['rating_severe'] ?? 0;
+    $rating_complete = $_POST['rating_complete'] ?? 0;
 
-    $status     = "checked";
-    $disability = "Structural/Functional Disability";
-    $file_path  = null;
+    $conclusion_duration            = $_POST['conclusion_duration'] ?? '';
+    $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
+    $other_services_required        = $_POST['other_services_required'] ?? '';
 
-    // Upload file
+    $file_path = null;
     if (! empty($_FILES['supporting_document']['name'])) {
         $ext = strtolower(pathinfo($_FILES['supporting_document']['name'], PATHINFO_EXTENSION));
         if (in_array($ext, ['pdf', 'jpg', 'jpeg', 'png'])) {
@@ -52,10 +57,11 @@ function processChronicDisabilityAssessment($conn)
             if (! is_dir($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
             }
+
             $file_path = $upload_dir . uniqid() . '.' . $ext;
             move_uploaded_file($_FILES['supporting_document']['tmp_name'], $file_path);
 
-            $document_type = "chronic_supporting";
+            $document_type = "progressive_supporting";
             $doc_sql       = "INSERT INTO documents (assessment_id, file_path, document_type) VALUES (?, ?, ?)";
             if ($doc_stmt = mysqli_prepare($conn, $doc_sql)) {
                 mysqli_stmt_bind_param($doc_stmt, "iss", $assessment_id, $file_path, $document_type);
@@ -65,9 +71,11 @@ function processChronicDisabilityAssessment($conn)
         }
     }
 
-    // Insert into chronic_disability_assessments
-    $sql = "INSERT INTO chronic_disability_assessments (
-        assessment_id, user_id, medical_history, onset_date, last_intervention_date, interventions, cause_of_disability,
+    // INSERT QUERY
+        $sql = "INSERT INTO progressive_assessment_details (
+        assessment_id, user_id,
+        onset_date, last_intervention_date, interventions, cause_of_disability,
+        structural_impairments, regions_affected,
         score_cardiovascular, score_respiratory, score_cancer, score_musculoskeletal,
         score_neurological, score_gastrointestinal, score_dermatological,
         score_hematologic, score_lymphatic, score_genitourinary, score_frailty, score_other,
@@ -75,27 +83,40 @@ function processChronicDisabilityAssessment($conn)
         difficulty_mobility, difficulty_selfcare, difficulty_domestic, difficulty_majorlife, difficulty_community,
         findings_functional, remarks_functional,
         rating_none, rating_mild, rating_moderate, rating_severe, rating_complete,
-        conclusion_duration, document_path
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        conclusion_duration, recommended_assistive_products, other_services_required,
+        supporting_document
+    ) VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?
+    )";
 
     if ($stmt = mysqli_prepare($conn, $sql)) {
         mysqli_stmt_bind_param(
             $stmt,
-            "isssssssssssssssssssssssssssiissss",
-            $assessment_id, $user_id, $medical_history, $onset_date, $last_intervention_date, $interventions, $cause_of_disability,
-            $cardiovascular, $respiratory, $cancer, $musculoskeletal,
-            $neurological, $gastrointestinal, $dermatological,
-            $hematologic, $lymphatic, $genitourinary, $frailty, $other,
+            "iissssssssssssssssssssssssssiissssssss",
+            $assessment_id, $user_id,
+            $onset_date, $last_intervention_date, $interventions, $cause_of_disability,
+            $structural_impairments, $regions_affected,
+            $score_cardiovascular, $score_respiratory, $score_cancer, $score_musculoskeletal,
+            $score_neurological, $score_gastrointestinal, $score_dermatological,
+            $score_hematologic, $score_lymphatic, $score_genitourinary, $score_frailty, $score_other,
             $findings_clinical, $remarks_clinical,
-            $mobility, $selfcare, $domestic, $majorlife, $community,
+            $difficulty_mobility, $difficulty_selfcare, $difficulty_domestic,
+            $difficulty_majorlife, $difficulty_community,
             $findings_functional, $remarks_functional,
             $rating_none, $rating_mild, $rating_moderate, $rating_severe, $rating_complete,
-            $conclusion_duration, $file_path
+            $conclusion_duration, $recommended_assistive_products, $other_services_required, $file_path
         );
 
         if (mysqli_stmt_execute($stmt)) {
+            $disability         = "Progressive_Chronic";
+            $status             = "checked";
             $medical_officer_id = $_SESSION['user_id'] ?? 1;
-            $update_sql         = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
+
+            $update_sql = "UPDATE assessments SET disability_type = ?, medical_officer_id = ?, status = ? WHERE id = ?";
             if ($update_stmt = mysqli_prepare($conn, $update_sql)) {
                 mysqli_stmt_bind_param($update_stmt, "sisi", $disability, $medical_officer_id, $status, $assessment_id);
                 if (mysqli_stmt_execute($update_stmt)) {
@@ -103,8 +124,8 @@ function processChronicDisabilityAssessment($conn)
                         document.addEventListener('DOMContentLoaded', function() {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Success!',
-                                text: 'Assessment saved.',
+                                title: 'Saved',
+                                text: 'Progressive assessment saved successfully.',
                                 confirmButtonText: 'OK'
                             }).then(() => {
                                 window.location.href = 'complete_assessment';
@@ -121,7 +142,6 @@ function processChronicDisabilityAssessment($conn)
         }
         mysqli_stmt_close($stmt);
     } else {
-        echo "SQL error: " . mysqli_error($conn);
+        echo "Prepare error: " . mysqli_error($conn);
     }
 }
-?>
