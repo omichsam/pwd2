@@ -214,12 +214,26 @@ document.addEventListener('DOMContentLoaded', function () {
         <?php
             $functions = [
                 'mobility'      => 'Mobility',
-                'hand_use'      => 'Hand Use',
-                'grip_strength' => 'Grip Strength',
+                'hand_use'      => 'Domestic Life',
+                'grip_strength' => 'Community Social Civic',
                 'selfcare'      => 'Self-care',
-                'daily_life'    => 'Daily Life',
-                'work'          => 'Work/Tasks',
+                'daily_life'    => 'Major Life Areas',
+                'work'          => 'Score For Function and Participation Restriction',
             ];
+// Mobility 
+// Self-Care 
+// Domestic Life 
+// Major Life Areas 
+// Community Social Civic
+// Score Fr fuvction and Participation Restriction
+            //  $functions = [
+            //     'mobility'      => 'Mobility',  Mobility 
+            //     'hand_use'      => 'Hand Use',   Domestic Life 
+            //     'grip_strength' => 'Grip Strength',  Community Social Civic
+            //     'selfcare'      => 'Self-care',    Self-Care 
+            //     'daily_life'    => 'Daily Life',  Major Life Areas 
+            //     'work'          => 'Work/Tasks',   Score Fr fuvction and Participation Restriction
+            // ];
         foreach ($functions as $key => $label): ?>
             <div class="col-md-4">
               <label class="form-label small"><?php echo $label ?></label>
@@ -237,7 +251,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <!-- Score Summary -->
       <div class="border p-3 rounded bg-light mt-3 mb-2">
-        <label class="fw-bold mb-2 d-block">SCORE FOR FUNCTIONAL DIFFICULTIES</label>
+        <!-- <label class="fw-bold mb-2 d-block">SCORE FOR FUNCTIONAL DIFFICULTIES</label> -->
+        <label class="fw-bold mb-2 d-block">Disability Rating</label>
         <div class="row g-2">
           <div class="col-md-2">
             <label class="form-label small">No Difficulty</label>
