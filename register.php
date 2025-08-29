@@ -1,4 +1,26 @@
-<?php include 'files/register_user.php'; ?>
+<?php include 'files/register_user.php';
+// Handle AJAX request to fetch subcounties
+if (isset($_GET['county_id'])) {
+  $county_id = $_GET['county_id'];
+
+  // Fetch subcounties based on the county_id
+  $subcounties_query = mysqli_query($conn, "SELECT id, sub_county FROM sub_county WHERE county_id = '$county_id' ORDER BY sub_county");
+
+  // Output the subcounty options
+  if (mysqli_num_rows($subcounties_query) > 0) {
+    while ($row = mysqli_fetch_assoc($subcounties_query)) {
+      echo "<option value='{$row['id']}'>{$row['sub_county']}</option>";
+    }
+  } else {
+    echo "<option value='' disabled>No subcounties found</option>";
+  }
+  exit; // Exit the script after the AJAX response
+}
+
+// Fetch all counties for the initial dropdown
+$counties = mysqli_query($conn, "SELECT id, county_name FROM counties ORDER BY county_name");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -516,20 +538,27 @@
         <!-- Location -->
         <div class="section-divider"><span>Location Information</span></div>
         <div class="row g-3 mb-4">
-          <div class="col-md-6"><label class="form-label">County</label><select class="form-select" name="county_id"
-              required>
+          <div class="col-md-6">
+            <label class="form-label">County</label>
+            <select class="form-select" id="county_id" name="county_id" required>
               <option value="" disabled selected>Select your county</option>
               <?php
-              include 'files/db_connect.php';
-              $counties = mysqli_query($conn, "SELECT id, county_name FROM counties ORDER BY county_name");
               while ($row = mysqli_fetch_assoc($counties)) {
                 echo "<option value='{$row['id']}'>{$row['county_name']}</option>";
               }
               ?>
-            </select></div>
-          <div class="col-md-6"><label class="form-label">Subcounty</label><input type="text" class="form-control"
-              name="subcounty" placeholder="Your subcounty" required></div>
+            </select>
+          </div>
+
+          <!-- Subcounty Dropdown -->
+          <div class="col-md-6">
+            <label class="form-label">Subcounty</label>
+            <select class="form-select" id="subcounty_id" name="subcounty" required>
+              <option value="" disabled selected>Select your subcounty</option>
+            </select>
+          </div>
         </div>
+
         <!-- Account Security -->
         <div class="section-divider"><span>Account Security</span></div>
         <div class="row g-3 mb-4">
@@ -651,6 +680,34 @@
           confirmButtonColor: '#166534'
         });
       }
+    });
+  </script>
+  <!-- JavaScript for dynamic subcounty loading -->
+  <script>
+    $(document).ready(function () {
+      // When the county dropdown is changed
+      $('#county_id').change(function () {
+        var county_id = $(this).val(); // Get the selected county ID
+
+        // If a county is selected, fetch the corresponding subcounties
+        if (county_id) {
+          $.ajax({
+            url: '', // Send the request to the same file
+            type: 'GET',
+            data: { county_id: county_id }, // Send county_id to the server
+            success: function (response) {
+              // Clear the existing subcounty options
+              $('#subcounty_id').html('<option value="" disabled selected>Select your subcounty</option>');
+
+              // Append new options from the response (which contains subcounties)
+              $('#subcounty_id').append(response);
+            }
+          });
+        } else {
+          // If no county is selected, clear the subcounty dropdown
+          $('#subcounty_id').html('<option value="" disabled selected>Select your subcounty</option>');
+        }
+      });
     });
   </script>
 </body>

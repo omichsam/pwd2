@@ -1,4 +1,4 @@
-<div class="main-sidebar sidebar-style-2">
+<div class="main-sidebar sidebar-style-2 no-print">
     <aside id="sidebar-wrapper">
         <div class="sidebar-brand">
             <a href="index" class="border border-3 border-info p-2 bg-primary "
@@ -33,16 +33,25 @@
 
             <li class="menu-header">Hospital</li>
             <li class="dropdown">
-                <a href="" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Medical Sites</span></a>
+                <a href="" class="nav-link has-dropdown"><i class="fas fa-warehouse "></i> <span>Medical Sites</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="Add_Hospital.php">Add Hospital</a></li>
                     <li><a href="List_Hospitals.php">List hospital(s)</a></li>
                 </ul>
             </li>
 
+             <li class="menu-header">County</li>
+            <li class="dropdown">
+                <a href="" class="nav-link has-dropdown"><i class="fas fa-bullseye"></i> <span>County</span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="List_Counties.php">List County</a></li>
+                    <li><a href="add_subcounty.php">Add Sub county</a></li>
+                </ul>
+            </li>
+
             <li class="menu-header">Officers</li>
             <li class="dropdown">
-                <a href="" class="nav-link has-dropdown"><i class="far fa-eye"></i> <span>Manager Officers</span></a>
+                <a href="" class="nav-link has-dropdown"><i class="fas fa-user-circle "></i> <span>Manager Officers</span></a>
                 <ul class="dropdown-menu">
                     <li><a href="Approve_Officer.php">Approve Officers</a></li>
                     <li><a href="List_Officer.php">List Officer(s)</a></li>

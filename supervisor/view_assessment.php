@@ -21,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approval'])) {
         $popupMessage = 'Please provide a comment when rejecting the assessment.';
     } else {
         $status = ($decision === 'approve') ? 'approved_by_county_officer' : 'rejected';
-        if ($decision === 'approve') $comment = '';
+        if ($decision === 'approve')
+            $comment = '';
 
         $query = "UPDATE assessments SET status = ?, comment = ?, county_officer_id = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $query);
@@ -60,127 +61,173 @@ if (!$data) {
 ?>
 
 <body>
-<div id="app">
-    <div class="main-wrapper main-wrapper-1">
-        <div class="navbar-bg"></div>
+    <div id="app">
+        <div class="main-wrapper main-wrapper-1">
+            <div class="navbar-bg"></div>
 
-        <div class="main-content">
-            <section class="section">
-                <div class="section-header">
-                    <h1>Approval</h1>
-                </div>
-
-                <div class="section-body">
-                    <div class="row">
-                        <div class="col-8">
-                            <h2 class="section-title">Hi,
-                                <?php echo htmlspecialchars($pwdUser['name']); ?>!
-                            </h2>
-                            <p class="section-lead">View information about Assessment for
-                                <?php echo htmlspecialchars($data['user_name']); ?>.
-                            </p>
-                        </div>
-                        <div class="col-md-4 text-right mt-4">
-                            <?php if (isset($_GET['from']) && $_GET['from'] === 'assessment') { ?>
-                                <button class="btn btn-primary open-approval-modal shadow-sm" data-id="<?= $id ?>">
-                                    Approve/Reject Assessment
-                                </button>
-                            <?php } ?>
-                        </div>
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Approval</h1>
                     </div>
 
-                    <div class="row mt-sm-4">
-                        <div class="col-12">
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-8">
+                                <h2 class="section-title">Hi,
+                                    <?php echo htmlspecialchars($pwdUser['name']); ?>!
+                                </h2>
+                                <p class="section-lead">View information about Assessment for
+                                    <?php echo htmlspecialchars($data['user_name']); ?>.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-right mt-4">
+                                <?php if (isset($_GET['from']) && $_GET['from'] === 'assessment') { ?>
+                                    <button class="btn btn-primary open-approval-modal shadow-sm" data-id="<?= $id ?>">
+                                        Approve/Reject Assessment
+                                    </button>
+                                <?php } ?>
+                            </div>
+                        </div>
+
+                        <div class="row mt-sm-4">
+                            <div class="col-12">
+                                <?php
+                                $partial_file = 'partials/' . strtolower($disability_type) . '_view.php';
+                                if (file_exists($partial_file)) {
+                                    include $partial_file;
+                                } else {
+                                    echo "<div class='alert alert-warning'>View not available for this assessment type.</div>";
+                                }
+                                ?>
+                            </div>
                             <?php
-                            $partial_file = 'partials/' . strtolower($disability_type) . '_view.php';
-                            if (file_exists($partial_file)) {
-                                include $partial_file;
-                            } else {
-                                echo "<div class='alert alert-warning'>View not available for this assessment type.</div>";
+                            // Get the disability type from the assessment
+                            $disability_type = $_GET['type'];
+
+                            // Map disability types to their corresponding print form
+                            switch ($disability_type) {
+                                case 'Hearing':
+                                    $url = 'hearing_print.php';
+                                    break;
+                                case 'Mental':
+                                    $url = 'mental_print.php';
+                                    break;
+                                case 'Maxillofacial':
+                                    $url = 'maxillofacial_print.php';
+                                    break;
+                                case 'Physical':
+                                    $url = 'physical_print.php';
+                                    break;
+                                case 'Visual':
+                                    $url = 'visual_print.php';
+                                    break;
+                                case 'Progressive_Chronic':
+                                    $url = 'chronic_print.php';
+                                    break;
+                                case 'others':
+                                    $url = 'others_print.php';
+                                    break;
+                                default:
+                                    $url = 'default_print.php'; // Handle a default case if needed
+                                    break;
                             }
                             ?>
+
+
+                            <!-- <a href="checker.php" class="btn btn-success btn-lg action-btn px-4 py-3">
+                            <i class="fas fa-download mr-2"></i> Download Certificate                                                                                      <?php echo $assessment['disability_type']; ?>
+                          </a> -->
+
+                            <a href="#" class="btn btn-success btn-lg action-btn px-4 py-3"
+                                onclick="window.location.href='<?php echo $url; ?>?user_id=<?php echo urlencode($user_id); ?>';">
+                                <i class="fas fa-download mr-2"></i> Download Certificate
+                                <?php echo htmlspecialchars($disability_type); ?>
+                            </a>
+
+
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
-    </div>
 
-    <!-- Approval Modal -->
-    <div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-light">
-                    <h5 class="modal-title" id="approvalModalLabel">Approval/Reject</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="approvalForm" method="POST">
-                        <input type="hidden" name="assessment_id" value="<?= $id ?>">
-                        <input type="hidden" name="health_officer_id" value="<?= $pwdUser['id'] ?>">
-                        <div class="mb-3">
-                            <label for="decision" class="form-label">Decision</label>
-                            <select class="form-select form-control" id="decision" name="decision" required>
-                                <option value="">Select an option</option>
-                                <option value="approve">Approve</option>
-                                <option value="reject">Reject</option>
-                            </select>
-                        </div>
-                        <div class="mb-3 d-none" id="commentBox">
-                            <label for="comment" class="form-label">Comment</label>
-                            <textarea class="form-control" id="comment" name="comment" rows="3"
-                                      placeholder="Provide a comment for rejection"></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary" name="approval">Submit</button>
-                        </div>
-                    </form>
+        <!-- Approval Modal -->
+        <div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-light">
+                        <h5 class="modal-title" id="approvalModalLabel">Approval/Reject</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="approvalForm" method="POST">
+                            <input type="hidden" name="assessment_id" value="<?= $id ?>">
+                            <input type="hidden" name="health_officer_id" value="<?= $pwdUser['id'] ?>">
+                            <div class="mb-3">
+                                <label for="decision" class="form-label">Decision</label>
+                                <select class="form-select form-control" id="decision" name="decision" required>
+                                    <option value="">Select an option</option>
+                                    <option value="approve">Approve</option>
+                                    <option value="reject">Reject</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 d-none" id="commentBox">
+                                <label for="comment" class="form-label">Comment</label>
+                                <textarea class="form-control" id="comment" name="comment" rows="3"
+                                    placeholder="Provide a comment for rejection"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" name="approval">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- JS Dependencies -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- JS Dependencies -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        $(document).ready(function () {
-            $('#decision').on('change', function () {
-                if ($(this).val() === 'reject') {
-                    $('#commentBox').removeClass('d-none');
-                } else {
-                    $('#commentBox').addClass('d-none');
-                    $('#comment').val('');
-                }
-            });
-
-            $('.open-approval-modal').on('click', function () {
-                const id = $(this).data('id');
-                $('#assessment_id').val(id);
-                const modal = new bootstrap.Modal(document.getElementById('approvalModal'));
-                modal.show();
-            });
-        });
-    </script>
-
-    <!-- SweetAlert Logic -->
-    <?php if ($showPopup): ?>
         <script>
-            Swal.fire({
-                icon: '<?php echo $popupStatus; ?>',
-                title: '<?php echo ucfirst($popupStatus); ?>',
-                text: '<?php echo $popupMessage; ?>'
-            }).then(() => {
-                <?php if ($popupStatus === 'success'): ?>
-                window.location.href = 'complete_assessment.php';
-                <?php endif; ?>
+            $(document).ready(function () {
+                $('#decision').on('change', function () {
+                    if ($(this).val() === 'reject') {
+                        $('#commentBox').removeClass('d-none');
+                    } else {
+                        $('#commentBox').addClass('d-none');
+                        $('#comment').val('');
+                    }
+                });
+
+                $('.open-approval-modal').on('click', function () {
+                    const id = $(this).data('id');
+                    $('#assessment_id').val(id);
+                    const modal = new bootstrap.Modal(document.getElementById('approvalModal'));
+                    modal.show();
+                });
             });
         </script>
-    <?php endif; ?>
 
-    <?php include 'files/footer.php'; ?>
-</div>
+        <!-- SweetAlert Logic -->
+        <?php if ($showPopup): ?>
+            <script>
+                Swal.fire({
+                    icon: '<?php echo $popupStatus; ?>',
+                    title: '<?php echo ucfirst($popupStatus); ?>',
+                    text: '<?php echo $popupMessage; ?>'
+                }).then(() => {
+                    <?php if ($popupStatus === 'success'): ?>
+                        window.location.href = 'complete_assessment.php';
+                    <?php endif; ?>
+                });
+            </script>
+        <?php endif; ?>
+
+        <?php include 'files/footer.php'; ?>
+    </div>
 </body>
