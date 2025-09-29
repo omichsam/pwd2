@@ -56,14 +56,14 @@ include 'files/add_hospital.php';
                         </div>
 
                         <div class="form-group col-md-6">
-                          <label for="county_name">Select County</label>
-                          <select name="county_name" class="form-control" id="county_name" required>
+                          <label for="county_id">Select County</label>
+                          <select name="county_id" class="form-control" id="county_id" required>
                             <option value="">-- Select County --</option>
                             <?php
                             $county_query = "SELECT id, county_name FROM counties ORDER BY county_name ASC";
                             $county_result = mysqli_query($conn, $county_query);
                             while ($row = mysqli_fetch_assoc($county_result)) {
-                              echo '<option value="' . $row['county_name'] . '">' . htmlspecialchars($row['county_name']) . '</option>';
+                              echo '<option value="' . $row['id'] . '">' . htmlspecialchars($row['county_name']) . '</option>';
                             }
                             ?>
                           </select>

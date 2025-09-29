@@ -3,7 +3,7 @@
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hospital_name = mysqli_real_escape_string($conn, trim($_POST['hospital_name']));
-    $county_name = mysqli_real_escape_string($conn, trim($_POST['county_name']));
+    $county_id = mysqli_real_escape_string($conn, trim($_POST['county_id']));
     $sub_county = mysqli_real_escape_string($conn, trim($_POST['sub_county']));
     $address = mysqli_real_escape_string($conn, trim($_POST['address']));
 
@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = mysqli_prepare($conn, $sql);
 
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssss", $hospital_name, $county_name, $sub_county, $address);
+            mysqli_stmt_bind_param($stmt, "ssss", $hospital_name, $county_id, $sub_county, $address);
             if (mysqli_stmt_execute($stmt)) {
                 mysqli_stmt_close($stmt);
                 mysqli_close($conn);
