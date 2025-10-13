@@ -2,8 +2,8 @@
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'pwd1');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_USER', 'newuser');
+define('DB_PASS', 'strong_password');
 
 // Create connection
 try {
