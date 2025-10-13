@@ -3,12 +3,66 @@ include 'files/header.php';
 // include 'files/nav.php';
 // include 'files/sidebar.php';
 
-@$user_id = intval($pwdUser['id']);
+?>
 
-// Updated SQL with JOINs to counties table
-$sql = "SELECT 
+
+
+
+<style>
+    body {
+        font-size: 13px;
+    }
+
+    .header-logo {
+        height: 60px;
+    }
+
+    .header-text {
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.3rem;
+    }
+
+    .form-control[readonly],
+    textarea[readonly] {
+        border: none;
+        background-color: transparent;
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+
+
+<body>
+    <div id="app">
+        <div class="main-wrapper main-wrapper-1">
+            <div class="navbar-bg sticky no-print"></div>
+
+
+            <!-- top navigation  -->
+            <?php include 'files/nav.php'; ?>
+
+
+            <!-- navigation -->
+            <?php include 'files/sidebar.php';
+
+
+            // @$user_id = intval($_GET['user_id']);
+             $user_id = $pwdUser['id'] ?? null;
+
+            // Updated SQL with JOINs to counties table
+            $sql = "SELECT 
     u.name AS user_name,  
-    a.id AS assessment_id, 
+    a.id AS assessment_id,
+    a.update_time,  
     u.gender, 
     u.dob, 
     u.marital_status, 
@@ -64,67 +118,19 @@ LEFT JOIN maxillofacial_assessment_details mfa ON mfa.assessment_id = a.id
 WHERE u.id = ?";
 
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$data = $result->fetch_assoc();
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
 
-// Create unique certificate code
-$assessmentId = $data['assessment_id'];
-$certPrefix = "MOH276C";
-$certHash = strtoupper(substr(md5($assessmentId . $data['id_number']), 0, 6)); // Short hash
-$certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
-?>
+            // Create unique certificate code
+            $assessmentId = $data['assessment_id'];
+            $certPrefix = "MOH276C";
+            $certHash = strtoupper(substr(md5($assessmentId . $data['id_number']), 0, 6)); // Short hash
+            $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
 
-
-
-
-<style>
-    body {
-        font-size: 13px;
-    }
-
-    .header-logo {
-        height: 60px;
-    }
-
-    .header-text {
-        font-weight: bold;
-        text-transform: uppercase;
-    }
-
-    .table th,
-    .table td {
-        padding: 0.3rem;
-    }
-
-    .form-control[readonly],
-    textarea[readonly] {
-        border: none;
-        background-color: transparent;
-    }
-
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-    }
-</style>
-
-
-<body>
-    <div id="app">
-        <div class="main-wrapper main-wrapper-1">
-            <div class="navbar-bg sticky no-print"></div>
-
-
-            <!-- top navigation  -->
-            <?php include 'files/nav.php'; ?>
-
-
-            <!-- navigation -->
-            <?php include 'files/sidebar.php'; ?>
+            ?>
 
             <!-- Main Content -->
             <div class="main-content">
@@ -167,9 +173,9 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 </p> -->
 
                                 <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?= $certificateCode ?> | Issued on <?= date('d M Y') ?>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
-
+                                
                                 <small>This document is officially generated from the Ministry of Health Disability
                                     Assessment
                                     System.</small>
@@ -393,6 +399,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
             height: 100,
         });
     </script> -->
-</body>
 
-</html>
+
+    <?php include 'files/footer.php'; ?>

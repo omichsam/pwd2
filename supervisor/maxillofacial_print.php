@@ -60,7 +60,8 @@ include 'files/header.php';
             // Updated SQL with JOINs to counties table
             $sql = "SELECT 
     u.name AS user_name,  
-    a.id AS assessment_id, 
+    a.id AS assessment_id,
+    a.update_time,  
     u.gender, 
     u.dob, 
     u.marital_status, 
@@ -171,9 +172,9 @@ WHERE u.id = ?";
                                 </p> -->
 
                                 <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?= $certificateCode ?> | Issued on <?= date('d M Y') ?>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
-
+                                
                                 <small>This document is officially generated from the Ministry of Health Disability
                                     Assessment
                                     System.</small>

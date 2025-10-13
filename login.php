@@ -36,11 +36,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         mysqli_stmt_bind_param($stmt, "ss", $id_number, $type);
       } else {
         $license_id = isset($_POST['license_id']) ? sanitize_input($_POST['license_id']) : '';
-        $official_type = isset($_POST['official_type']) ? sanitize_input($_POST['official_type']) : '';
 
-        $query = "SELECT * FROM officials WHERE license_id = ? AND type = ?";
+        // Modified query to find official by license_id only
+        $query = "SELECT * FROM officials WHERE license_id = ?";
         $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ss", $license_id, $official_type);
+        mysqli_stmt_bind_param($stmt, "s", $license_id);
       }
 
       mysqli_stmt_execute($stmt);
@@ -588,22 +588,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </form>
           </div>
 
-
-
-
           <!-- Official Login Form -->
           <div class="tab-pane fade" id="official" role="tabpanel">
             <form method="POST" action="" id="officialLoginForm">
               <input type="hidden" name="type" value="official">
-              <div class="form-group">
-                <label for="official_type">Official Type</label>
-                <select class="form-select" name="official_type" id="official_type" required>
-                  <option value="">-- Select Type --</option>
-                  <option value="medical_officer">Medical Officer</option>
-                  <option value="health_officer">Approval Officer</option>
-                  <option value="county_officer">County Officer</option>
-                </select>
-              </div>
               <div class="form-group">
                 <label for="license_id">License Number</label>
                 <input type="text" class="form-control" name="license_id" id="license_id"

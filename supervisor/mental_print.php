@@ -9,6 +9,7 @@
     $sql = "SELECT
     u.name AS user_name,
     a.id AS assessment_id,
+     a.update_time, 
     u.gender,
     u.dob,
     u.marital_status,
@@ -170,8 +171,8 @@ WHERE u.id = ?";
                                     < ?= date('d M Y') ?>
                                 </p> -->
 
-                                <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?php echo $certificateCode?> | Issued on <?php echo date('d M Y')?>
+                                 <p class="mb-1"><strong>Certificate ID:</strong>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
 
                                 <small>This document is officially generated from the Ministry of Health Disability

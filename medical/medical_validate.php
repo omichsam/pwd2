@@ -1,49 +1,54 @@
 <?php include 'files/header.php'; ?>
 
-
 <body>
-
   <div id="app">
     <div class="main-wrapper main-wrapper-1">
       <div class="navbar-bg"></div>
 
 
       <!-- top navigation  -->
+      <?php include 'files/nav.php'; ?>
+
+
+      <!-- navigation -->
+      <?php include 'files/sidebar.php'; ?>
+
       <?php
-          include 'files/nav.php';
-          include_once 'process/process_hearing_assessment.php';
-          include_once 'process/maxillofacial_process.php';
-          include_once 'process/mental_process.php';
-          include_once 'process/visual_process.php';
-          include_once 'process/chronic_process.php';
-          include_once 'process/physical_process.php';
-          // include_once 'process_visual_assessment.php';
-          // include_once 'process_physical_assessment.php';
+      // include 'files/header.php';
+      include_once 'process/process_hearing_assessment.php';
+      include_once 'process/maxillofacial_process.php';
+      include_once 'process/mental_process.php';
+      include_once 'process/visual_process.php';
+      include_once 'process/chronic_process.php';
+      include_once 'process/physical_process.php';
+      // include_once 'process_visual_assessment.php';
+      // include_once 'process_physical_assessment.php';
+      
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $type = $_POST['disability_type'] ?? '';
 
-          if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-              $type = $_POST['disability_type'] ?? '';
-
-              switch (strtolower($type)) {
-                  case 'hearing':
-                      processHearingAssessment($conn);
-                      break;
-                  case 'maxillofacial':
-                      processMaxillofacialAssessment($conn);
-                      break;
-                  case 'mental':
-                      processMentalAssessment($conn);
-                      break;
-                  case 'visual':
-                      processVisualAssessment($conn);
-                      break;
-                  case 'chronic':
-                      processProgressiveAssessment($conn);
-                      break;
-                  case 'physical':
-                      processPhysicalAssessment($conn);
-                      break;
-                  default:
-                      echo "<script>
+        switch (strtolower($type)) {
+          case 'hearing':
+            processHearingAssessment($conn);
+            break;
+          case 'maxillofacial':
+            processMaxillofacialAssessment($conn);
+            break;
+          case 'mental':
+            processMentalAssessment($conn);
+            break;
+          case 'visual':
+            processVisualAssessment($conn);
+            break;
+          case 'chronic':
+            processChronicAssessment($conn);
+            break;
+          case 'physical':
+            // processPhysicalAssessment($conn);   
+             processPhysicalDisabilityAssessment($conn);
+            break;
+          default:
+            echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
                     Swal.fire({
                         icon: 'error',
@@ -53,13 +58,9 @@
                     });
                 });
             </script>";
-              }
-          }
+        }
+      }
       ?>
-
-
-      <!-- navigation -->
-      <?php include 'files/sidebar.php'; ?>
 
       <!-- Main Content -->
       <div class="main-content">
@@ -78,21 +79,21 @@
                   <option value="Hearing Impairments">Hearing Impairments</option>
                   <option value="Maxillofacial Impairments">Maxillofacial Disabilities</option>
                   <option value="Physical Disabilities">Physical Disabilities</option>
-                  <!-- <option value="Multiple Disabilities">Multiple Disabilities</option> -->
                   <option value="Mental/Intellectual">Mental/Intellectual Disabilities</option>
                   <option value="Visual Impairments">Visual Impairments</option>
                   <option value="Progressive Chronic Disorders">Progressive Chronic Disorders</option>
                   <option value="Speech Disabilities">Speech Disabilities</option>
                 </select>
               </div>
+
               <div class="hr"></div>
               <!-- Physical Disabilities Form -->
               <div id="Physical Disabilities" class="disability-form card">
-                 <?php include 'physical_form.php'; ?>
+                <?php include 'physical_form.php'; ?>
               </div>
 
 
-               <!-- Hearing Impairments Form -->
+              <!-- Hearing Impairments Form -->
               <div id="Hearing Impairments" class="disability-form card">
                 <!-- <h5>Hearing Impairment Assessment</h5> -->
                 <?php include 'hearing_form.php'; ?>
@@ -104,21 +105,24 @@
                 <?php include 'maxillofacial_form.php'; ?>
               </div>
 
-               <!-- Mental/Intellectual Disabilities Form -->
+              <!-- Mental/Intellectual Disabilities Form -->
               <div id="Mental/Intellectual" class="disability-form card">
-                    <?php include 'mental_form.php'; ?>  
+                <!-- <h5>Mental/Intellectual Assessment</h5> -->
+                <?php include 'mental_form.php'; ?>
               </div>
 
-                <!-- Visual Impairments Form -->
+              <!-- Visual Impairments Form -->
               <div id="Visual Impairments" class="disability-form card">
-                    <?php include 'visual_form.php'; ?>  
+                <!-- <h5>Visual Assessment</h5> -->
+                <?php include 'visual_form.php'; ?>
               </div>
 
-               <!-- Visual Impairments Form -->
+              <!-- Progressive Chronic Impairments Form -->
               <div id="Progressive Chronic Disorders" class="disability-form card">
-                    <?php include 'chronic_form.php'; ?>  
-              </div> 
- 
+                <!-- <h5>Progressive Chronic Assessment</h5> -->
+                <?php include 'chronic_form.php'; ?>
+              </div>
+
 
               <!-- Speech Disabilities Form -->
               <div id="Speech Disabilities" class="disability-form card" disabled>

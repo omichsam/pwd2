@@ -22,7 +22,6 @@ $sql = "SELECT
 
         d.name AS doctor_name, d.email AS doctor_email, d.mobile_number AS doctor_mobile, d.type AS doctor_type,
 
-        
         -- Health Officer
         ho.name AS health_officer_name, ho.license_id AS health_officer_license, ho.email AS health_officer_email,
         ho.mobile_number AS health_officer_mobile, ho.type AS health_officer_type,   
@@ -31,20 +30,29 @@ $sql = "SELECT
         h.address AS hospital_address,
 
         pda.id AS pda_id, pda.assessment_id, pda.user_id AS pda_user_id, pda.disability_type AS pda_disability_type,
-        pda.onset_date, pda.last_intervention_date, pda.cause_of_disability, pda.region_assessed, pda.regions_affected,
-        pda.impairment_score_muscle_power, pda.impairment_score_joint_motion, pda.impairment_score_structural_deviation,
-        pda.impairment_score_limb_amputation, pda.impairment_score_limb_length, pda.impairment_score_balance_coordination,
-        pda.impairment_score_other_impairments, pda.structural_findings, pda.structural_remarks,
-        pda.score_none, pda.score_mild, pda.score_moderate, pda.score_severe, pda.score_complete,
-        pda.function_mobility, pda.function_hand_use, pda.function_grip_strength, pda.function_selfcare,
-        pda.function_daily_life, pda.function_work,
-        pda.count_no_difficulty, pda.count_mild, pda.count_moderate, pda.count_severe, pda.count_complete,
-        pda.remarks_functional, pda.conclusion_duration, pda.assistive_products, pda.other_services,
+        pda.onset_date, pda.last_intervention_date, pda.cause_of_disability, pda.regions_affected,
+        pda.impairment_score_muscle_power, pda.remark_muscle_power,
+        pda.impairment_score_joint_motion, pda.remark_joint_motion,
+        pda.impairment_score_structural_deviation, pda.remark_structural_deviation,
+        pda.impairment_score_limb_amputation, pda.remark_limb_amputation,
+        pda.impairment_score_limb_length, pda.remark_limb_length,
+        pda.impairment_score_balance_coordination, pda.remark_balance_coordination,
+        pda.impairment_score_other_impairments, pda.remark_other_impairments,
+        pda.impairment_rating,
+        pda.function_mobility, pda.remark_mobility,
+        pda.function_hand_use, pda.remark_hand_use,
+        pda.function_grip_strength, pda.remark_grip_strength,
+        pda.function_selfcare, pda.remark_selfcare,
+        pda.function_daily_life, pda.remark_daily_life,
+        pda.function_work, pda.remark_work,
+        pda.disability_rating,
+        pda.assistive_products, pda.other_services, pda.conclusion_decision,
+        pda.supporting_document AS file_path,
         pda.created_at AS pda_created_at
 
     FROM users u
     JOIN assessments a ON a.user_id = u.id
-    LEFT JOIN physical_disability_assessments pda ON pda.assessment_id = a.id
+    LEFT JOIN physical_disability_assessment pda ON pda.assessment_id = a.id
     LEFT JOIN officials d ON a.medical_officer_id = d.id
     LEFT JOIN officials ho ON a.health_officer_id = ho.id
     LEFT JOIN hospitals h ON a.hospital_id = h.id
@@ -60,12 +68,10 @@ $result = $stmt->get_result();
 $data = $result->fetch_assoc();
 
 if (!$data) {
-    echo "<div class='alert alert-warning'>No Physical assessment data found for this user.</div>";
+    echo "<div class='alert alert-warning'>No physical disability assessment data found for this user.</div>";
     exit;
 }
 ?>
-
-
 
 <div class="section-body">
     <div class="card">
@@ -74,6 +80,7 @@ if (!$data) {
         </div>
         <div class="card-body">
 
+            <!-- Personal Information Section -->
             <div class="form-divider mt-3">
                 <u>Personal Info</u>
             </div>
@@ -167,6 +174,7 @@ if (!$data) {
                 </div>
             </div>
 
+            <!-- Assessment Information -->
             <div class="form-divider mt-4">
                 <u>Assessment Information</u>
             </div>
@@ -188,6 +196,7 @@ if (!$data) {
                 </div>
             </div>
 
+            <!-- Doctor Information -->
             <div class="form-divider mt-4">
                 <u>Doctor Information</u>
             </div>
@@ -197,19 +206,11 @@ if (!$data) {
                     <input type="text" class="form-control"
                         value="<?php echo htmlspecialchars($data['doctor_name']); ?>" readonly>
                 </div>
-                <!-- <div class="form-group col-md-4">
-                                                <label>Doctor's License ID</label>
-                                                <input type="text" class="form-control"
-                                                    value="< ?php echo htmlspecialchars($data['doctor_license']); ?>"
-                                                    readonly>
-                                            </div> -->
-
                 <div class="form-group col-md-4">
                     <label>Doctor's Email</label>
                     <input type="email" class="form-control"
                         value="<?php echo htmlspecialchars($data['doctor_email']); ?>" readonly>
                 </div>
-
                 <div class="form-group col-md-4">
                     <label>Doctor's Mobile</label>
                     <input type="text" class="form-control"
@@ -217,19 +218,7 @@ if (!$data) {
                 </div>
             </div>
 
-            <div class="row" hidden>
-                <div class="form-group col-md-4">
-                    <label>Doctor's Mobile</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['doctor_mobile']); ?>" readonly>
-                </div>
-                <div class="form-group col-md-4">
-                    <label>Doctor's Type</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['doctor_type']); ?>" readonly>
-                </div>
-            </div>
-
+            <!-- Health Officer Information -->
             <div class="form-divider mt-4">
                 <u>Approver Information</u>
             </div>
@@ -239,21 +228,19 @@ if (!$data) {
                     <input type="text" class="form-control"
                         value="<?php echo htmlspecialchars($data['health_officer_name']); ?>" readonly>
                 </div>
-
                 <div class="form-group col-md-4">
-                    <label> Email</label>
+                    <label>Email</label>
                     <input type="email" class="form-control"
                         value="<?php echo htmlspecialchars($data['health_officer_email']); ?>" readonly>
                 </div>
-
                 <div class="form-group col-md-4">
-                    <label> Mobile</label>
+                    <label>Mobile</label>
                     <input type="text" class="form-control"
                         value="<?php echo htmlspecialchars($data['health_officer_mobile']); ?>" readonly>
                 </div>
             </div>
 
-
+            <!-- Hospital Information -->
             <div class="form-divider mt-4">
                 <u>Hospital Information</u>
             </div>
@@ -275,14 +262,7 @@ if (!$data) {
                 </div>
             </div>
 
-            <div class="form-group" hidden>
-                <label>Hospital Address</label>
-                <textarea class="form-control" rows="3"
-                    readonly><?php echo htmlspecialchars($data['hospital_address']); ?></textarea>
-            </div>
-
-            <!-- #region -->
-
+            <!-- Physical Disability Assessment -->
             <div class="form-divider mt-4">
                 <u>Physical Disability Assessment</u>
             </div>
@@ -306,18 +286,14 @@ if (!$data) {
             </div>
 
             <div class="row">
-                <div class="form-group col-md-6">
-                    <label>Region Assessed</label>
-                    <input type="text" class="form-control"
-                        value="<?php echo htmlspecialchars($data['region_assessed']); ?>" readonly>
-                </div>
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-12">
                     <label>Regions Affected</label>
                     <input type="text" class="form-control"
                         value="<?php echo htmlspecialchars($data['regions_affected']); ?>" readonly>
                 </div>
             </div>
 
+            <!-- Impairment Scores -->
             <div class="form-divider mt-4">
                 <u>Impairment Scores</u>
             </div>
@@ -325,58 +301,37 @@ if (!$data) {
             <div class="row">
                 <?php
                 $impairments = [
-                    'impairment_score_muscle_power' => 'Muscle Power',
-                    'impairment_score_joint_motion' => 'Joint Motion',
-                    'impairment_score_structural_deviation' => 'Structural Deviation',
-                    'impairment_score_limb_amputation' => 'Limb Amputation',
-                    'impairment_score_limb_length' => 'Limb Length',
-                    'impairment_score_balance_coordination' => 'Balance/Coordination',
-                    'impairment_score_other_impairments' => 'Other Impairments',
+                    'impairment_score_muscle_power' => ['label' => 'Muscle Power', 'remark' => 'remark_muscle_power'],
+                    'impairment_score_joint_motion' => ['label' => 'Joint Motion', 'remark' => 'remark_joint_motion'],
+                    'impairment_score_structural_deviation' => ['label' => 'Structural Deviation', 'remark' => 'remark_structural_deviation'],
+                    'impairment_score_limb_amputation' => ['label' => 'Limb Amputation', 'remark' => 'remark_limb_amputation'],
+                    'impairment_score_limb_length' => ['label' => 'Limb Length', 'remark' => 'remark_limb_length'],
+                    'impairment_score_balance_coordination' => ['label' => 'Balance/Coordination', 'remark' => 'remark_balance_coordination'],
+                    'impairment_score_other_impairments' => ['label' => 'Other Impairments', 'remark' => 'remark_other_impairments'],
                 ];
 
-                foreach ($impairments as $field => $label) {
-                    echo '<div class="form-group col-md-4">
-                                                <label>' . $label . '</label>
-                                                <input type="text" class="form-control" value="' . htmlspecialchars($data[$field]) . '" readonly>
-                                            </div>';
+                foreach ($impairments as $field => $info) {
+                    echo '<div class="form-group col-md-6">
+                            <label>' . $info['label'] . ' Score</label>
+                            <input type="text" class="form-control" value="' . htmlspecialchars($data[$field]) . '" readonly>
+                        </div>';
+                    echo '<div class="form-group col-md-6">
+                            <label>' . $info['label'] . ' Remarks</label>
+                            <textarea class="form-control" rows="2" readonly>' . htmlspecialchars($data[$info['remark']]) . '</textarea>
+                        </div>';
                 }
                 ?>
-            </div>
-
-            <div class="form-group">
-                <label>Structural Findings</label>
-                <textarea class="form-control" rows="2"
-                    readonly><?php echo htmlspecialchars($data['structural_findings']); ?></textarea>
-            </div>
-            <div class="form-group">
-                <label>Structural Remarks</label>
-                <textarea class="form-control" rows="2"
-                    readonly><?php echo htmlspecialchars($data['structural_remarks']); ?></textarea>
-            </div>
-
-            <div class="form-divider mt-4">
-                <u>Severity Scores</u>
             </div>
 
             <div class="row">
-                <?php
-                $severity = [
-                    'score_none' => 'None',
-                    'score_mild' => 'Mild',
-                    'score_moderate' => 'Moderate',
-                    'score_severe' => 'Severe',
-                    'score_complete' => 'Complete',
-                ];
-
-                foreach ($severity as $field => $label) {
-                    echo '<div class="form-group col-md-2">
-                                                <label>' . $label . '</label>
-                                                <input type="text" class="form-control" value="' . htmlspecialchars($data[$field]) . '" readonly>
-                                            </div>';
-                }
-                ?>
+                <div class="form-group col-md-12">
+                    <label>Overall Impairment Rating</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['impairment_rating']); ?>" readonly>
+                </div>
             </div>
 
+            <!-- Functional Abilities -->
             <div class="form-divider mt-4">
                 <u>Functional Abilities</u>
             </div>
@@ -384,74 +339,62 @@ if (!$data) {
             <div class="row">
                 <?php
                 $functions = [
-                    'function_mobility' => 'Mobility',
-                    'function_hand_use' => 'Hand Use',
-                    'function_grip_strength' => 'Grip Strength',
-                    'function_selfcare' => 'Self Care',
-                    'function_daily_life' => 'Daily Life',
-                    'function_work' => 'Work',
+                    'function_mobility' => ['label' => 'Mobility', 'remark' => 'remark_mobility'],
+                    'function_hand_use' => ['label' => 'Hand Use', 'remark' => 'remark_hand_use'],
+                    'function_grip_strength' => ['label' => 'Grip Strength', 'remark' => 'remark_grip_strength'],
+                    'function_selfcare' => ['label' => 'Self Care', 'remark' => 'remark_selfcare'],
+                    'function_daily_life' => ['label' => 'Daily Life', 'remark' => 'remark_daily_life'],
+                    'function_work' => ['label' => 'Work', 'remark' => 'remark_work'],
                 ];
 
-                foreach ($functions as $field => $label) {
-                    echo '<div class="form-group col-md-4">
-                                                <label>' . $label . '</label>
-                                                <input type="text" class="form-control" value="' . htmlspecialchars($data[$field]) . '" readonly>
-                                            </div>';
+                foreach ($functions as $field => $info) {
+                    echo '<div class="form-group col-md-6">
+                            <label>' . $info['label'] . '</label>
+                            <input type="text" class="form-control" value="' . htmlspecialchars($data[$field]) . '" readonly>
+                        </div>';
+                    echo '<div class="form-group col-md-6">
+                            <label>' . $info['label'] . ' Remarks</label>
+                            <textarea class="form-control" rows="2" readonly>' . htmlspecialchars($data[$info['remark']]) . '</textarea>
+                        </div>';
                 }
                 ?>
-            </div>
-
-            <div class="form-divider mt-4">
-                <u>Functional Severity Count</u>
             </div>
 
             <div class="row">
-                <?php
-                $count_fields = [
-                    'count_no_difficulty' => 'No Difficulty',
-                    'count_mild' => 'Mild',
-                    'count_moderate' => 'Moderate',
-                    'count_severe' => 'Severe',
-                    'count_complete' => 'Complete',
-                ];
-
-                foreach ($count_fields as $field => $label) {
-                    echo '<div class="form-group col-md-2">
-                                                <label>' . $label . '</label>
-                                                <input type="text" class="form-control" value="' . htmlspecialchars($data[$field]) . '" readonly>
-                                            </div>';
-                }
-                ?>
+                <div class="form-group col-md-12">
+                    <label>Overall Disability Rating</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['disability_rating']); ?>" readonly>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Functional Remarks</label>
-                <textarea class="form-control" rows="2"
-                    readonly><?php echo htmlspecialchars($data['remarks_functional']); ?></textarea>
+            <!-- Recommendations -->
+            <div class="form-divider mt-4">
+                <u>Recommendations</u>
             </div>
 
             <div class="row">
                 <div class="form-group col-md-6">
                     <label>Assistive Products</label>
-                    <textarea class="form-control" rows="2"
+                    <textarea class="form-control" rows="3"
                         readonly><?php echo htmlspecialchars($data['assistive_products']); ?></textarea>
                 </div>
                 <div class="form-group col-md-6">
                     <label>Other Services</label>
-                    <textarea class="form-control" rows="2"
+                    <textarea class="form-control" rows="3"
                         readonly><?php echo htmlspecialchars($data['other_services']); ?></textarea>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Conclusion Duration</label>
-                <input type="text" class="form-control"
-                    value="<?php echo htmlspecialchars($data['conclusion_duration']); ?>" readonly>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label>Conclusion Decision</label>
+                    <input type="text" class="form-control"
+                        value="<?php echo htmlspecialchars($data['conclusion_decision']); ?>" readonly>
+                </div>
             </div>
 
-
-
-
+            <!-- Uploaded Document -->
             <div class="form-divider mt-4">
                 <u><strong>Uploaded Document</strong></u>
             </div>

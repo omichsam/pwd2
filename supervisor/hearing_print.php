@@ -58,7 +58,7 @@ include 'files/header.php';
 
             // Updated SQL with JOINs to counties table
             $sql = "SELECT 
-    u.name AS user_name,  a.id AS assessment_id, u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
+    u.name AS user_name,  a.id AS assessment_id, a.update_time,  u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
     u.mobile_number, u.email, u.next_of_kin_name, u.next_of_kin_mobile, u.next_of_kin_relationship,
     uc.county_name AS user_county, u.subcounty AS user_subcounty,
     a.assessment_date,
@@ -149,7 +149,7 @@ WHERE u.id = ?";
                                 </p> -->
 
                                 <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?= $certificateCode ?> | Issued on <?= date('d M Y') ?>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
 
                                 <small>This document is officially generated from the Ministry of Health Disability
@@ -266,27 +266,28 @@ WHERE u.id = ?";
                             <table class="table table-bordered">
                                 <tr>
                                     <th>Right dBHL</th>
-                                    <td><?= $data['hearing_level_dbhl_right'] ?></td>
-                                    <th>%</th>
+                                    <td><?= $data['hearing_level_dbhl_right'] ?> %</td>
+                                    <!-- <th>%</th> -->
                                     <td><?= $data['monaural_percentage_right'] ?>%</td>
                                 </tr>
                                 <tr>
                                     <th>Left dBHL</th>
-                                    <td><?= $data['hearing_level_dbhl_left'] ?></td>
-                                    <th>%</th>
+                                    <td><?= $data['hearing_level_dbhl_left'] ?> %</td>
+                                    <!-- <th>%</th> -->
                                     <td><?= $data['monaural_percentage_left'] ?>%</td>
                                 </tr>
                                 <tr>
-                                    <th colspan="3 ">Overall Binaural %</th>
-                                    <td><?= $data['overall_binaural_percentage'] ?>%</td>
+                                    <th colspan="2">Overall Binaural %</th>
+                                    <td class="fw-bold"><b><?= $data['overall_binaural_percentage'] ?>%</b></td></tr></td>
                                 </tr>
                             </table>
 
                             <h6 class="mt-1">7. Conclusion</h6>
-                            <table class="table table-bordered ">
+                            <table class="table table-bordered text-left">
                                 <tr>
                                     <th>Conclusion</th>
-                                    <td><?= $data['conclusion'] ?></td>
+                                    <td><b><?= $data['conclusion'] ?></b></td>
+                                    <td colspan="4"></td>
                                 </tr>
                             </table>
 

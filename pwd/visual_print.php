@@ -3,12 +3,13 @@ include 'files/header.php';
 // include 'files/nav.php';
 // include 'files/sidebar.php';
 
-@$user_id = intval($pwdUser['id']);
+@$user_id = intval($_GET['user_id']);
 
 // Updated SQL with JOINs to counties table
 $sql = "SELECT
     u.name AS user_name,
     a.id AS assessment_id,
+    a.update_time, 
     u.gender,
     u.dob,
     u.marital_status,
@@ -209,7 +210,7 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 </p> -->
 
                                 <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?php echo $certificateCode ?> | Issued on <?php echo date('d M Y') ?>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
 
                                 <small>This document is officially generated from the Ministry of Health Disability
@@ -647,6 +648,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
             height: 100,
         });
     </script> -->
-</body>
 
-</html>
+    
+    <?php include 'files/footer.php'; ?>

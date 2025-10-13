@@ -139,11 +139,21 @@ if (!$data) {
                             <i class="fas fa-download mr-2"></i> Download Certificate                                                                                      <?php echo $assessment['disability_type']; ?>
                           </a> -->
 
-                            <a href="#" class="btn btn-success btn-lg action-btn px-4 py-3"
-                                onclick="window.location.href='<?php echo $url; ?>?user_id=<?php echo urlencode($user_id); ?>';">
-                                <i class="fas fa-download mr-2"></i> Download Certificate
-                                <?php echo htmlspecialchars($disability_type); ?>
-                            </a>
+
+                            <?php
+                            // Check if 'get' parameter is set to 'true'
+                            if (isset($_GET['from']) && $_GET['from'] == 'assessment') {
+                                // Show the button only if 'get=true'
+                            
+                            } else { ?>
+                                <a href="#" class="btn btn-success btn-lg action-btn px-4 py-3"
+                                    onclick="window.location.href='<?php echo $url; ?>?user_id=<?php echo urlencode($user_id); ?>';">
+                                    <i class="fas fa-download mr-2"></i> Download Certificate
+                                    <?php echo htmlspecialchars($disability_type); ?>
+                                </a>
+                                <?php
+                            }
+                            ?>
 
 
                         </div>

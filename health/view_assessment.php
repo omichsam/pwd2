@@ -1,56 +1,65 @@
 <?php
 
-    include 'files/header.php';
-    // include 'files/nav.php';
+include 'files/header.php';
+// include 'files/nav.php';
 
-    if (! isset($_GET['user_id']) || ! isset($_GET['type'])) {
-        echo "<script>alert('User ID and Disability Type are required')</script>";
-        exit;
-    }
+?>
 
-    $user_id         = intval($_GET['user_id']);
-    $disability_type = $_GET['type'];
-    @$id             = $_GET['id'];
+
+
+<!-- navigation -->
+<?php include 'files/sidebar.php';
+
+
+
+if (!isset($_GET['user_id']) || !isset($_GET['type'])) {
+    echo "<script>alert('User ID and Disability Type are required')</script>";
+    exit;
+}
+
+$user_id = intval($_GET['user_id']);
+$disability_type = $_GET['type'];
+@$id = $_GET['id'];
 ?>
 
 <?php
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approval'])) {
-        // Get the form data
-        // assessment_id=1&health_officer_id+=1&decision=approve&comment=
-        $assessment_id     = $_POST['assessment_id'];
-        $health_officer_id = $_POST['health_officer_id'];
-        $decision          = $_POST['decision'];
-        $comment           = isset($_POST['comment']) ? $_POST['comment'] : '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approval'])) {
+    // Get the form data
+    // assessment_id=1&health_officer_id+=1&decision=approve&comment=
+    $assessment_id = $_POST['assessment_id'];
+    $health_officer_id = $_POST['health_officer_id'];
+    $decision = $_POST['decision'];
+    $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
 
-        // Validate input
-        if ($decision === 'reject' && empty($comment)) {
-            echo "<script>
+    // Validate input
+    if ($decision === 'reject' && empty($comment)) {
+        echo "<script>
                 Swal.fire({
                     icon: 'warning',
                     title: 'Rejection Reason Required',
                     text: 'Please provide a comment when rejecting the assessment.'
                 });
               </script>";
-            exit;
-        }
+        exit;
+    }
 
-        // Prepare the SQL query
-        if ($decision === 'approve') {
-            $status  = 'approved_by_health_officer';
-            $comment = ''; // No comment needed for approval
-        } else {
-            $status = 'rejected';
-        }
+    // Prepare the SQL query
+    if ($decision === 'approve') {
+        $status = 'approved_by_health_officer';
+        $comment = ''; // No comment needed for approval
+    } else {
+        $status = 'rejected';
+    }
 
-        // Update the assessment status and health officer ID in the database
-        $query = "UPDATE assessments SET status = ?, comment = ?, health_officer_id = ? WHERE id = ?";
-        $stmt  = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ssii", $status, $comment, $health_officer_id, $assessment_id);
+    // Update the assessment status and health officer ID in the database
+    $query = "UPDATE assessments SET status = ?, comment = ?, health_officer_id = ? WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "ssii", $status, $comment, $health_officer_id, $assessment_id);
 
-        if (mysqli_stmt_execute($stmt)) {
-            // Success
-            echo "<script>
+    if (mysqli_stmt_execute($stmt)) {
+        // Success
+        echo "<script>
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
@@ -59,26 +68,21 @@
                     window.location.href = 'complete_assessment'; // Redirect or reload
                 });
               </script>";
-        } else {
-            // Error
-            echo "<script>
+    } else {
+        // Error
+        echo "<script>
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'There was an issue updating the assessment.'
                 });
               </script>";
-        }
-
-        mysqli_stmt_close($stmt);
-
     }
+
+    mysqli_stmt_close($stmt);
+
+}
 ?>
-
-
-
-<!-- navigation -->
-<?php include 'files/sidebar.php'; ?>
 
 
 
@@ -116,7 +120,8 @@
                                 <h2 class="section-title">Hi,
                                     <?php echo htmlspecialchars($pwdUser['name']); ?>!
                                 </h2>
-                                <p class="section-lead">View information about Assessment for  Patient id(                                                                                                                                                                                                                     <?php echo $user_id; ?>)
+                                <p class="section-lead">View information about Assessment for Patient id(
+                                    <?php echo $user_id; ?>)
                                     <!-- < ?php echo htmlspecialchars($data['user_name']); ?>. -->
                                 </p>
                             </div>
@@ -129,12 +134,12 @@
                                 <!-- <a class="btn btn-primary shadow-sm text-right approve-btn" data-id="123">
                                     << Approve </a>  -->
 
-                                <?php if (isset($_GET['from']) && $_GET['from'] === 'assessment') {?>
+                                <?php if (isset($_GET['from']) && $_GET['from'] === 'assessment') { ?>
                                     <button class="btn btn-primary open-approval-modal approve-btn shadow-sm text-right"
                                         data-id="<?php echo $id; ?>">
                                         Approve/Reject Assessment
                                     </button>
-                                <?php }?>
+                                <?php } ?>
 
 
                             </div>
@@ -147,16 +152,16 @@
                         <div class="row mt-sm-4">
 
 
-                                 <div class="col-12">
-                                    <?php
-                                        $partial_file = 'partials/' . strtolower($disability_type) . '_view.php';
-                                        if (file_exists($partial_file)) {
-                                            include $partial_file;
-                                        } else {
-                                            echo "<div class='alert alert-warning'>View not available for this assessment type.</div>";
-                                        }
-                                    ?>
-                                </div>
+                            <div class="col-12">
+                                <?php
+                                $partial_file = 'partials/' . strtolower($disability_type) . '_view.php';
+                                if (file_exists($partial_file)) {
+                                    include $partial_file;
+                                } else {
+                                    echo "<div class='alert alert-warning'>View not available for this assessment type.</div>";
+                                }
+                                ?>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -180,7 +185,7 @@
                     </div>
                     <div class="modal-body">
                         <form id="approvalForm" action="" method="POST">
-                            <input type="text" class="form-control"name="assessment_id" id="assessment_id"
+                            <input type="text" class="form-control" name="assessment_id" id="assessment_id"
                                 value="<?php echo $id; ?>" hidden>
                             <input type="hidden" name="health_officer_id" id="health_officer_id"
                                 value="<?php echo $pwdUser['id'] ?>">

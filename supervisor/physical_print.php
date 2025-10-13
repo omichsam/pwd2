@@ -5,10 +5,11 @@ include 'files/header.php';
 
 @$user_id = intval($_GET['user_id']);
 
-// Updated SQL with JOINs to counties table
+// Updated SQL with correct field mappings for physical_disability_assessment table
 $sql = "SELECT
     u.name AS user_name,
     a.id AS assessment_id,
+    a.update_time, 
     u.gender,
     u.dob,
     u.marital_status,
@@ -42,47 +43,48 @@ $sql = "SELECT
     h.name AS hospital_name,
     hc.county_name AS hospital_county,
 
-    /* Physical Assessment Details */
+    /* Physical Assessment Details - CORRECTED FIELDS */
     pda.onset_date,
     pda.last_intervention_date,
     pda.cause_of_disability,
-    pda.region_assessed,
     pda.regions_affected,
 
+    /* Impairment Scores with Remarks */
     pda.impairment_score_muscle_power,
+    pda.remark_muscle_power,
     pda.impairment_score_joint_motion,
+    pda.remark_joint_motion,
     pda.impairment_score_structural_deviation,
+    pda.remark_structural_deviation,
     pda.impairment_score_limb_amputation,
+    pda.remark_limb_amputation,
     pda.impairment_score_limb_length,
+    pda.remark_limb_length,
     pda.impairment_score_balance_coordination,
+    pda.remark_balance_coordination,
     pda.impairment_score_other_impairments,
+    pda.remark_other_impairments,
+    pda.impairment_rating,
 
-    pda.structural_findings,
-    pda.structural_remarks,
-
-    pda.score_none,
-    pda.score_mild,
-    pda.score_moderate,
-    pda.score_severe,
-    pda.score_complete,
-
+    /* Functional Abilities with Remarks */
     pda.function_mobility,
+    pda.remark_mobility,
     pda.function_hand_use,
+    pda.remark_hand_use,
     pda.function_grip_strength,
+    pda.remark_grip_strength,
     pda.function_selfcare,
+    pda.remark_selfcare,
     pda.function_daily_life,
+    pda.remark_daily_life,
     pda.function_work,
+    pda.remark_work,
 
-    pda.count_no_difficulty,
-    pda.count_mild,
-    pda.count_moderate,
-    pda.count_severe,
-    pda.count_complete,
-
-    pda.remarks_functional,
-    pda.conclusion_duration,
+    pda.disability_rating,
     pda.assistive_products,
     pda.other_services,
+    pda.conclusion_decision,
+    pda.supporting_document,
     pda.created_at,
     pda.id AS physical_assessment_id
 
@@ -94,7 +96,7 @@ LEFT JOIN officials ho ON a.health_officer_id = ho.id
 LEFT JOIN hospitals h ON a.hospital_id = h.id
 LEFT JOIN counties uc ON u.county_id = uc.id
 LEFT JOIN counties hc ON h.county_id = hc.id
-LEFT JOIN physical_disability_assessments pda ON pda.assessment_id = a.id
+LEFT JOIN physical_disability_assessment pda ON pda.assessment_id = a.id
 WHERE u.id = ?";
 
 
@@ -178,7 +180,8 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <div class="header-text ">Republic of Kenya</div>
                             <div>Ministry of Health</div>
                             <h6 class="mt-2 "> ASSESSMENT FORM FOR PHYSICAL DISABILITIES
-                                <m class="text-danger">(MOH/276A)</m></h6>
+                                <m class="text-danger">(MOH/276A)</m>
+                            </h6>
                         </div>
 
                         <div class="text-right my-2 no-print ">
@@ -195,16 +198,10 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
 
                             <!-- Centered text -->
                             <div class="text-center h-100 d-flex flex-column justify-content-center">
-                                <!-- <p class="mb-1"><strong>Certificate ID:</strong>
-                                    CERT-< ?= strtoupper(substr(md5($data['id_number'] . $data['assessment_date']), 0, 8)) ?>
-                                    | Issued on
-                                    < ?= date('d M Y') ?>
-                                </p> -->
-
                                 <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?php echo $certificateCode ?> | Issued on <?php echo date('d M Y') ?>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
-
+                                
                                 <small>This document is officially generated from the Ministry of Health Disability
                                     Assessment
                                     System.</small>
@@ -245,8 +242,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                     <td><input class="form-control " readonly value="<?php echo $data['dob'] ?> "></td>
                                 </tr>
                                 <tr>
-                                    <!-- <th>Occupation</th>
-                                    <td><input class="form-control " readonly value="< ?= $data['occupation'] ?> "></td> -->
                                     <th>Phone</th>
                                     <td><input class="form-control " readonly
                                             value="<?php echo $data['mobile_number'] ?> ">
@@ -256,20 +251,10 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                             value="<?php echo $data['user_county'] ?>/<?php echo $data['user_subcounty'] ?> ">
                                     </td>
                                 </tr>
-                                <tr>
-                                    <!-- <th>County/Subcounty</th>
-                                    <td><input class="form-control " readonly
-                                            value="< ?= $data['user_county'] ?>/< ?= $data['user_subcounty'] ?> "></td> -->
-                                    <!-- <th>Marital Status</th>
-                                    <td><input class="form-control " readonly value="< ?= $data['marital_status'] ?> ">
-                                    </td> -->
-                                </tr>
-
                             </table>
 
                             <h6 class="mt-1">3. Next of Kin Details:</h6>
                             <table class="table table-bordered ">
-
                                 <tr>
                                     <th>Next of Kin</th>
                                     <td><input class="form-control " readonly
@@ -283,23 +268,14 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                             value="<?php echo $data['next_of_kin_mobile'] ?> ">
                                     </td>
                                 </tr>
-
                             </table>
-
-
-                            <!-- <h5 class="mt-4">SUMMARY FINDINGS</h5> -->
-
 
                             <h5 class="mt-4">SUMMARY FINDINGS</h5>
                             <table class="table table table-bordered">
                                 <tr>
-                                    <th style="width: 25%">Brief Medical History</th>
-                                    <td colspan="3"><?php echo nl2br(htmlspecialchars(@$data['interventions'])); ?></td>
-                                </tr>
-                                <tr>
-                                    <th>Date of Injury/Onset of Illness</th>
+                                    <th style="width: 25%">Date of Injury/Onset of Illness</th>
                                     <td><?php echo htmlspecialchars(@$data['onset_date']); ?></td>
-                                    <th>Date of Last Intervention</th>
+                                    <th style="width: 25%">Date of Last Intervention</th>
                                     <td><?php echo htmlspecialchars(@$data['last_intervention_date']); ?></td>
                                 </tr>
                                 <tr>
@@ -309,26 +285,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             </table>
 
                             <h5 class="mt-4">STRUCTURAL IMPAIRMENTS</h5>
-                            <table class="table table table-bordere">
-                                <tr>
-                                    <th style="width: 30%">Structural Impairments</th>
-                                    <td><?php echo nl2br(htmlspecialchars(@$data['structural_impairments'])); ?></td>
-                                </tr>
-                            </table>
-
-                            <h6 class="mt-3"><b>S7. STRUCTURE:</b> Region(s) Being Assessed</h6>
-                            <ul class="smalll">
-                                <?php
-                                $assessed = json_decode($data['region_assessed'] ?? '[]');
-                                if (!empty($assessed)) {
-                                    foreach ($assessed as $region) {
-                                        echo '<li>' . htmlspecialchars($region) . '</li>';
-                                    }
-                                } else {
-                                    echo '<li>No regions selected.</li>';
-                                }
-                                ?>
-                            </ul>
 
                             <h6><b>S8. SKIN AND RELATED STRUCTURES / OTHER BODY STRUCTURES</b></h6>
                             <p class="small"><?php echo nl2br(htmlspecialchars($data['regions_affected'])); ?></p>
@@ -338,39 +294,37 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 <thead>
                                     <tr class="small">
                                         <th>Area</th>
-                                        <th>✓ Score</th>
+                                        <th>Score</th>
+                                        <th>Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $impairments = [
-                                        'Muscle Power of affected muscle groups' => $data['impairment_score_muscle_power'],
-                                        'Range of motion of joints affected' => $data['impairment_score_joint_motion'],
-                                        'Degree of structural angulation / deviation' => $data['impairment_score_structural_deviation'],
-                                        'Level of limb amputation' => $data['impairment_score_limb_amputation'],
-                                        'Bilateral lower limb length' => $data['impairment_score_limb_length'],
-                                        'Balance and coordination' => $data['impairment_score_balance_coordination'],
-                                        'Other physical impairments' => $data['impairment_score_other_impairments']
+                                        'impairment_score_muscle_power' => ['label' => 'Muscle Power of affected muscle groups', 'remark' => 'remark_muscle_power'],
+                                        'impairment_score_joint_motion' => ['label' => 'Range of motion of joints affected', 'remark' => 'remark_joint_motion'],
+                                        'impairment_score_structural_deviation' => ['label' => 'Degree of structural angulation / deviation', 'remark' => 'remark_structural_deviation'],
+                                        'impairment_score_limb_amputation' => ['label' => 'Level of limb amputation', 'remark' => 'remark_limb_amputation'],
+                                        'impairment_score_limb_length' => ['label' => 'Bilateral lower limb length', 'remark' => 'remark_limb_length'],
+                                        'impairment_score_balance_coordination' => ['label' => 'Balance and coordination', 'remark' => 'remark_balance_coordination'],
+                                        'impairment_score_other_impairments' => ['label' => 'Other physical impairments', 'remark' => 'remark_other_impairments']
                                     ];
-                                    foreach ($impairments as $label => $score): ?>
+                                    foreach ($impairments as $score_field => $info): ?>
                                         <tr>
-                                            <td><?php echo $label; ?></td>
-                                            <td><?php echo ucfirst(htmlspecialchars($score)); ?></td>
+                                            <td><?php echo $info['label']; ?></td>
+                                            <td><?php echo ucfirst(htmlspecialchars($data[$score_field])); ?></td>
+                                            <td><?php echo nl2br(htmlspecialchars($data[$info['remark']])); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
 
                             <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="mt-3">Findings (Structural)</h6>
+                                <div class="col-md-12">
+                                    <h6 class="mt-3">Overall Impairment Rating</h6>
                                     <p class="borderr p-2 smalll">
-                                        <?php echo nl2br(htmlspecialchars($data['structural_findings'])); ?></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="mt-3">Remarks (Structural)</h6>
-                                    <p class="borderr p-2 smalll">
-                                        <?php echo nl2br(htmlspecialchars($data['structural_remarks'])); ?></p>
+                                        <?php echo nl2br(htmlspecialchars($data['impairment_rating'])); ?>
+                                    </p>
                                 </div>
                             </div>
 
@@ -379,57 +333,42 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 <thead>
                                     <tr class="small">
                                         <th>Area</th>
-                                        <th>✓ Score</th>
+                                        <th>Score</th>
+                                        <th>Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $functions = [
-                                        'Mobility' => 'difficulty_mobility',
-                                        'Self-Care' => 'difficulty_selfcare',
-                                        'Domestic Life' => 'difficulty_domestic',
-                                        'Major Life Areas' => 'difficulty_majorlife',
-                                        'Community, Social, Civic Life' => 'difficulty_community'
+                                        'function_mobility' => ['label' => 'Mobility', 'remark' => 'remark_mobility'],
+                                        'function_hand_use' => ['label' => 'Hand Use', 'remark' => 'remark_hand_use'],
+                                        'function_grip_strength' => ['label' => 'Grip Strength', 'remark' => 'remark_grip_strength'],
+                                        'function_selfcare' => ['label' => 'Self-Care', 'remark' => 'remark_selfcare'],
+                                        'function_daily_life' => ['label' => 'Daily Life Activities', 'remark' => 'remark_daily_life'],
+                                        'function_work' => ['label' => 'Work', 'remark' => 'remark_work']
                                     ];
-                                    foreach ($functions as $label => $field): ?>
+                                    foreach ($functions as $func_field => $info): ?>
                                         <tr>
-                                            <td><?php echo $label; ?></td>
-                                            <td><?php echo ucwords(str_replace('_', ' ', $data[$field] ?? '')); ?></td>
+                                            <td><?php echo $info['label']; ?></td>
+                                            <td><?php echo ucwords(str_replace('_', ' ', $data[$func_field] ?? '')); ?></td>
+                                            <td><?php echo nl2br(htmlspecialchars($data[$info['remark']])); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
 
                             <div class="mt-3">
-                                <h6>Remarks (Functional)</h6>
+                                <h6>Overall Disability Rating</h6>
                                 <p class="borders p-2 smalll">
-                                    <?php echo nl2br(htmlspecialchars($data['remarks_functional'])); ?></p>
+                                    <?php echo nl2br(htmlspecialchars($data['disability_rating'])); ?>
+                                </p>
                             </div>
-
-                            <h6 class="mt-3">Disability Rating</h6>
-                            <table class="table table-smm table-borderedd text-centerr">
-                                <thead>
-                                    <tr>
-                                        <th>No Disability</th>
-                                        <th>Mild</th>
-                                        <th>Moderate</th>
-                                        <th>Severe</th>
-                                        <th>Complete</th>
-                                    </tr>
-                                </thead>
-                                <tr>
-                                    <td><?php echo @$data['rating_none']; ?></td>
-                                    <td><?php echo @$data['rating_moderate']; ?></td>
-                                    <td><?php echo @$data['rating_severe']; ?></td>
-                                    <td><?php echo @$data['rating_complete']; ?></td>
-                                </tr>
-                            </table>
 
                             <h6 class="mt-3">Conclusion</h6>
                             <table class="table table-smm table-borderedd">
                                 <tr>
-                                    <th>Conclusion Duration</th>
-                                    <td><?php echo htmlspecialchars($data['conclusion_duration']); ?></td>
+                                    <th>Conclusion Decision</th>
+                                    <td><?php echo htmlspecialchars($data['conclusion_decision']); ?></td>
                                 </tr>
                                 <tr>
                                     <th>Recommended Assistive Product(s)</th>
@@ -441,9 +380,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 </tr>
                             </table>
 
-
-
-
                             <h6 class="mt-1">9.Approval </h6>
                             <h6 class="mt-1 small"><b>Review By the Medical Assessment Team</b></h6>
                             <table class="table table-bordered ">
@@ -454,7 +390,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                         <th>Assessment Date</th>
                                     </tr>
                                 </thead>
-
                                 <tr>
                                     <td><?php echo $data['health_officer_name'] ?> (Medical Officer)</td>
                                     <td><?php echo $data['health_license'] ?></td>
@@ -476,7 +411,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                         <th>Approval Date</th>
                                     </tr>
                                 </thead>
-
                                 <tr>
                                     <td><?php echo $data['county_officer_name'] ?> (County Officer)</td>
                                     <td><?php echo $data['user_county'] ?></td>
@@ -484,9 +418,6 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                     <td><?php echo $data['assessment_date'] ?></td>
                                 </tr>
                             </table>
-                            </tr>
-
-
 
                         </form>
                     </div>
@@ -497,15 +428,15 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
     </div>
 
     <script>
-        // function exportPDF() {
-        //     const element = document.getElementById('assessmentForm');
-        //     html2pdf().from(element).set({
-        //         filename: 'Hearing_Assessment_Form.pdf',
-        //         margin: 0.5,
-        //         html2canvas: { scale: 2 },
-        //         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        //     }).save();
-        // }
+        function exportPDF() {
+            const element = document.getElementById('assessmentForm');
+            html2pdf().from(element).set({
+                filename: 'Physical_Disability_Assessment_Form.pdf',
+                margin: 0.5,
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            }).save();
+        }
 
         // function toggleEdit() {
         //     document.querySelectorAll('#assessmentForm .form-control, #assessmentForm textarea').forEach(el => {
@@ -532,24 +463,12 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
         });
     </script>
 
-
     <script>
         QRCode.toCanvas(document.getElementById('qrcode'), "<?php echo $certificateCode ?>", function (error) {
             if (error) console.error(error);
         });
     </script>
 
-    <!-- <script>
-        const certId = "CERT-< ?= strtoupper(substr(md5($data['id_number'] . $data['assessment_date']), 0, 8)) ?>";
-        const issueDate = "Issued on < ?= date('d M Y') ?>";
-        const qrText = certId + " | " + issueDate;
-
-        new QRCode(document.getElementById("qrcode"), {
-            text: qrText,
-            width: 100,
-            height: 100,
-        });
-    </script> -->
 </body>
 
 </html>

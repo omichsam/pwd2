@@ -2,59 +2,6 @@
 include 'files/header.php';
 // include 'files/nav.php';
 // include 'files/sidebar.php';
-
-@$user_id = intval($pwdUser['id']);
-
-// Updated SQL with JOINs to counties table
-$sql = "SELECT 
-    u.name AS user_name,  a.id AS assessment_id, u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
-    u.mobile_number, u.email, u.next_of_kin_name, u.next_of_kin_mobile, u.next_of_kin_relationship,
-    uc.county_name AS user_county, u.subcounty AS user_subcounty,
-    a.assessment_date,
-
-    -- Medical Officer
-    mo.name AS medical_officer_name, mo.license_id AS medical_license, mo.email AS medical_email,
-
-    -- County Officer
-    co.name AS county_officer_name, co.license_id AS county_license, co.email AS county_email,
-
-    -- Health Officer
-    ho.name AS health_officer_name, ho.license_id AS health_license, ho.email AS health_email,
-
-    -- Hospital Details
-    h.name AS hospital_name, hc.county_name AS hospital_county,
-
-    -- Hearing Assessment Details
-    hda.history_of_hearing_loss, hda.history_of_hearing_devices,
-    hda.hearing_test_type_right, hda.hearing_test_type_left,
-    hda.hearing_loss_degree_right, hda.hearing_loss_degree_left,
-    hda.hearing_level_dbhl_right, hda.hearing_level_dbhl_left,
-    hda.monaural_percentage_right, hda.monaural_percentage_left,
-    hda.overall_binaural_percentage, hda.conclusion,
-    hda.recommended_assistive_products, hda.required_services
-
-FROM users u
-JOIN assessments a ON a.user_id = u.id
-LEFT JOIN officials mo ON a.medical_officer_id = mo.id
-LEFT JOIN officials co ON a.county_officer_id = co.id
-LEFT JOIN officials ho ON a.health_officer_id = ho.id
-LEFT JOIN hospitals h ON a.hospital_id = h.id
-LEFT JOIN counties uc ON u.county_id = uc.id
-LEFT JOIN counties hc ON h.county_id = hc.id
-LEFT JOIN hearing_disability_assessments hda ON hda.assessment_id = a.id
-WHERE u.id = ?";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$data = $result->fetch_assoc();
-
-// Create unique certificate code
-$assessmentId = $data['assessment_id'];
-$certPrefix = "MOH276C";
-$certHash = strtoupper(substr(md5($assessmentId . $data['id_number']), 0, 6)); // Short hash
-$certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
 ?>
 
 
@@ -104,7 +51,64 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
 
 
             <!-- navigation -->
-            <?php include 'files/sidebar.php'; ?>
+            <?php include 'files/sidebar.php';
+
+
+            // @$user_id = intval($_GET['user_id']);
+            // $user_id = $pwdUser['id'] ?? null;
+             $user_id = $pwdUser['id'] ?? null;
+
+            // Updated SQL with JOINs to counties table
+            $sql = "SELECT 
+    u.name AS user_name,  a.id AS assessment_id, a.update_time,  u.gender, u.dob, u.marital_status, u.id_number, u.occupation,
+    u.mobile_number, u.email, u.next_of_kin_name, u.next_of_kin_mobile, u.next_of_kin_relationship,
+    uc.county_name AS user_county, u.subcounty AS user_subcounty,
+    a.assessment_date,
+
+    -- Medical Officer
+    mo.name AS medical_officer_name, mo.license_id AS medical_license, mo.email AS medical_email,
+
+    -- County Officer
+    co.name AS county_officer_name, co.license_id AS county_license, co.email AS county_email,
+
+    -- Health Officer
+    ho.name AS health_officer_name, ho.license_id AS health_license, ho.email AS health_email,
+
+    -- Hospital Details
+    h.name AS hospital_name, hc.county_name AS hospital_county,
+
+    -- Hearing Assessment Details
+    hda.history_of_hearing_loss, hda.history_of_hearing_devices,
+    hda.hearing_test_type_right, hda.hearing_test_type_left,
+    hda.hearing_loss_degree_right, hda.hearing_loss_degree_left,
+    hda.hearing_level_dbhl_right, hda.hearing_level_dbhl_left,
+    hda.monaural_percentage_right, hda.monaural_percentage_left,
+    hda.overall_binaural_percentage, hda.conclusion,
+    hda.recommended_assistive_products, hda.required_services
+
+FROM users u
+JOIN assessments a ON a.user_id = u.id
+LEFT JOIN officials mo ON a.medical_officer_id = mo.id
+LEFT JOIN officials co ON a.county_officer_id = co.id
+LEFT JOIN officials ho ON a.health_officer_id = ho.id
+LEFT JOIN hospitals h ON a.hospital_id = h.id
+LEFT JOIN counties uc ON u.county_id = uc.id
+LEFT JOIN counties hc ON h.county_id = hc.id
+LEFT JOIN hearing_disability_assessments hda ON hda.assessment_id = a.id
+WHERE u.id = ?";
+
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
+
+            // Create unique certificate code
+            $assessmentId = $data['assessment_id'];
+            $certPrefix = "MOH276C";
+            $certHash = strtoupper(substr(md5($assessmentId . $data['id_number']), 0, 6)); // Short hash
+            $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
+            ?>
 
             <!-- Main Content -->
             <div class="main-content">
@@ -137,7 +141,7 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <div id="qrcode"
                                 style="position: absolute; top: 10px; right: 10px; width: 100px; height: 100px;"></div>
 
-                                
+
                             <!-- Centered text -->
                             <div class="text-center h-100 d-flex flex-column justify-content-center">
                                 <!-- <p class="mb-1"><strong>Certificate ID:</strong>
@@ -147,7 +151,7 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                 </p> -->
 
                                 <p class="mb-1"><strong>Certificate ID:</strong>
-                                    <?= $certificateCode ?> | Issued on <?= date('d M Y') ?>
+                                    <?= $certificateCode ?> | Approved on <?= date('d M Y', strtotime($data['update_time'])) ?>  
                                 </p>
 
                                 <small>This document is officially generated from the Ministry of Health Disability
@@ -161,10 +165,10 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <table class="table table-bordered ">
                                 <tr>
                                     <th class="font-weight-bold">Name of Health Facility</th>
-                                    <td><input class="form-control " readonly value="<?= $data['hospital_name'] ?> ">
+                                    <td><p><?= $data['hospital_name'] ?> </p>
                                     </td>
                                     <th>Date</th>
-                                    <td><input class="form-control " readonly value="<?= $data['assessment_date'] ?> ">
+                                    <td><p><?= $data['assessment_date'] ?></p> 
                                     </td>
                                 </tr>
                             </table>
@@ -174,25 +178,25 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <table class="table table-bordered ">
                                 <tr>
                                     <th>Name</th>
-                                    <td><input class="form-control " readonly value="<?= $data['user_name'] ?> "></td>
+                                    <td><p> <?= $data['user_name'] ?> </p></td>
                                     <th>ID No.</th>
-                                    <td><input class="form-control " readonly value="<?= $data['id_number'] ?> "></td>
+                                    <td><p> <?= $data['id_number'] ?> </p> </td>
                                 </tr>
                                 <tr>
                                     <th>Gender</th>
-                                    <td><input class="form-control " readonly value="<?= $data['gender'] ?> "></td>
+                                    <td><p><?= $data['gender'] ?> </p></td>
                                     <th>DOB</th>
-                                    <td><input class="form-control " readonly value="<?= $data['dob'] ?> "></td>
+                                    <td><p> <?= $data['dob'] ?> </p> <td>
                                 </tr>
                                 <tr>
                                     <!-- <th>Occupation</th>
                                     <td><input class="form-control " readonly value="< ?= $data['occupation'] ?> "></td> -->
                                     <th>Phone</th>
-                                    <td><input class="form-control " readonly value="<?= $data['mobile_number'] ?> ">
+                                    <td><p><?= $data['mobile_number'] ?></p>
                                     </td>
                                     <th>County/Subcounty</th>
-                                    <td><input class="form-control " readonly
-                                            value="<?= $data['user_county'] ?>/<?= $data['user_subcounty'] ?> "></td>
+                                    <td>  <p><?= $data['user_county'] ?>/<?= $data['user_subcounty'] ?> </p>
+                                        </td>
                                 </tr>
                                 <tr>
                                     <!-- <th>County/Subcounty</th>
@@ -208,16 +212,14 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <h6 class="mt-1">3. Next of Kin Details:</h6>
                             <table class="table table-bordered ">
 
-                                <tr>
+                                <tr >
                                     <th>Next of Kin</th>
-                                    <td><input class="form-control " readonly value="<?= $data['next_of_kin_name'] ?> ">
+                                    <td><p class="pt-3"><?= $data['next_of_kin_name'] ?> </p>
                                     </td>
                                     <th>Relation</th>
-                                    <td><input class="form-control " readonly
-                                            value="<?= $data['next_of_kin_relationship'] ?> "></td>
-                                    <th>NOK Phone</th>
-                                    <td colspan="3 "><input class="form-control " readonly
-                                            value="<?= $data['next_of_kin_mobile'] ?> ">
+                                    <td> <p class="pt-3"><?= $data['next_of_kin_relationship'] ?></p></td>
+                                    <th>Phone</th>
+                                    <td colspan="3" class="pt-3"> <p><?= $data['next_of_kin_mobile'] ?></p>
                                     </td>
                                 </tr>
 
@@ -227,14 +229,12 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                             <h6 class="mt-1">4. Hearing History</h6>
                             <table class="table table-bordered">
                                 <tr>
-                                    <th>History of Hearing Loss</th>
-                                    <td><textarea class="form-control "
-                                            readonly><?= $data['history_of_hearing_loss'] ?></textarea></td>
+                                    <th><p>History of Hearing Loss</p></th>
+                                    <td><p><?= $data['history_of_hearing_loss'] ?></p></td>
                                 </tr>
                                 <tr>
-                                    <th>Hearing Device Usage</th>
-                                    <td><textarea class="form-control "
-                                            readonly><?= $data['history_of_hearing_devices'] ?></textarea>
+                                    <th><p>Hearing Device Usage</p>p</th>
+                                    <td><p><?= $data['history_of_hearing_devices'] ?></p>
                                     </td>
                                 </tr>
                             </table>
@@ -249,42 +249,44 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
                                     </tr>
                                 </thead>
                                 <tr>
-                                    <th>Type of Hearing Loss</th>
+                                    <th >Type of Hearing Loss</th>
                                     <td><?= $data['hearing_test_type_right'] ?></td>
                                     <td><?= $data['hearing_test_type_left'] ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Degree</th>
+                                    <th >Degree</th>
                                     <td><?= $data['hearing_loss_degree_right'] ?></td>
                                     <td><?= $data['hearing_loss_degree_left'] ?></td>
                                 </tr>
+                                
                             </table>
 
                             <h6 class="mt-1">6. Disability Calculation</h6>
                             <table class="table table-bordered">
                                 <tr>
                                     <th>Right dBHL</th>
-                                    <td><?= $data['hearing_level_dbhl_right'] ?></td>
-                                    <th>%</th>
+                                    <td><?= $data['hearing_level_dbhl_right'] ?> %</td>
+                                    <!-- <th>%</th> -->
                                     <td><?= $data['monaural_percentage_right'] ?>%</td>
                                 </tr>
                                 <tr>
                                     <th>Left dBHL</th>
-                                    <td><?= $data['hearing_level_dbhl_left'] ?></td>
-                                    <th>%</th>
+                                    <td><?= $data['hearing_level_dbhl_left'] ?> %</td>
+                                    <!-- <th>%</th> -->
                                     <td><?= $data['monaural_percentage_left'] ?>%</td>
                                 </tr>
                                 <tr>
-                                    <th colspan="3 ">Overall Binaural %</th>
-                                    <td><?= $data['overall_binaural_percentage'] ?>%</td>
+                                    <th colspan="2">Overall Binaural %</th>
+                                    <td class="fw-bold"><b><?= $data['overall_binaural_percentage'] ?>%</b></td></tr></td>
                                 </tr>
                             </table>
 
                             <h6 class="mt-1">7. Conclusion</h6>
-                            <table class="table table-bordered ">
+                            <table class="table table-bordered text-left">
                                 <tr>
                                     <th>Conclusion</th>
-                                    <td><?= $data['conclusion'] ?></td>
+                                    <td><b><?= $data['conclusion'] ?></b></td>
+                                    <td colspan="4"></td>
                                 </tr>
                             </table>
 
@@ -380,13 +382,13 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-    const certCode = "<?= $certificateCode ?>";
-    const qrcode = new QRCode(document.getElementById("qrcode"), {
-        text: certCode,
-        width: 100,
-        height: 100
-    });
-</script>
+        const certCode = "<?= $certificateCode ?>";
+        const qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: certCode,
+            width: 100,
+            height: 100
+        });
+    </script>
 
 
     <script>
@@ -406,6 +408,4 @@ $certificateCode = "CERT-$certPrefix-$assessmentId-$certHash";
             height: 100,
         });
     </script> -->
-</body>
-
-</html>
+<?php include 'files/footer.php'; ?>

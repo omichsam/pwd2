@@ -6,23 +6,23 @@ function processMaxillofacialAssessment($conn)
 
     $error_message = "";
 
-    $assessment_id                  = $_POST['assessment_id'] ?? null;
-    $medical_history                = $_POST['medical_history'] ?? '';
-    $dental_history                 = $_POST['dental_history'] ?? '';
-    $dental_assessment              = $_POST['dental_assessment'] ?? '';
-    $conclusion                     = $_POST['conclusion'] ?? '';
+    $assessment_id = $_POST['assessment_id'] ?? null;
+    $medical_history = $_POST['medical_history'] ?? '';
+    $dental_history = $_POST['dental_history'] ?? '';
+    $dental_assessment = $_POST['dental_assessment'] ?? '';
+    $conclusion = $_POST['conclusion'] ?? '';
     $recommended_assistive_products = $_POST['recommended_assistive_products'] ?? '';
-    $other_services_required        = $_POST['other_services_required'] ?? '';
-    $status                         = "checked";
-    $disability                     = "Maxillofacial";
+    $other_services_required = $_POST['other_services_required'] ?? '';
+    $status = "checked";
+    $disability = "Maxillofacial";
 
     // File upload
     $file_path = null;
-    if (! empty($_FILES['supporting_document']['name'])) {
+    if (!empty($_FILES['supporting_document']['name'])) {
         $ext = strtolower(pathinfo($_FILES['supporting_document']['name'], PATHINFO_EXTENSION));
         if (in_array($ext, ['pdf', 'jpg', 'jpeg', 'png'])) {
             $upload_dir = "../uploads/";
-            if (! is_dir($upload_dir)) {
+            if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
             }
 
@@ -31,7 +31,7 @@ function processMaxillofacialAssessment($conn)
 
             // Insert into documents table
             $document_type = "maxillofacial_supporting";
-            $doc_sql       = "INSERT INTO documents (assessment_id, file_path, document_type) VALUES (?, ?, ?)";
+            $doc_sql = "INSERT INTO documents (assessment_id, file_path, document_type) VALUES (?, ?, ?)";
             if ($doc_stmt = mysqli_prepare($conn, $doc_sql)) {
                 mysqli_stmt_bind_param($doc_stmt, "iss", $assessment_id, $file_path, $document_type);
                 mysqli_stmt_execute($doc_stmt);
