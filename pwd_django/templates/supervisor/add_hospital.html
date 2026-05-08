@@ -1,0 +1,124 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Add Hospital{% endblock %}
+{% block page_title %}Add Hospital{% endblock %}
+{% block page_subtitle %}Register a new assessment center{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Overview</p>
+<a href="{% url 'supervisor:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span>
+</a>
+<a href="{% url 'supervisor:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-clipboard-check w-5 text-center text-sm"></i><span>Pending Approval</span>
+</a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'supervisor:hospital_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1">
+  <i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span>
+</a>
+<a href="{% url 'supervisor:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-user-md w-5 text-center text-sm"></i><span>Officers</span>
+</a>
+<a href="{% url 'supervisor:geography' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-map w-5 text-center text-sm"></i><span>Geography</span>
+</a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'supervisor:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span>
+</a>
+<a href="{% url 'supervisor:change_password' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-lock w-5 text-center text-sm"></i><span>Change Password</span>
+</a>
+{% endblock %}
+
+{% block dropdown_links %}
+<a href="{% url 'supervisor:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+  <i class="fas fa-user w-4 text-center text-gray-400"></i> My Profile
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'supervisor:hospital_list' %}" class="text-gray-400 hover:text-gray-600 transition-colors">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <h2 class="text-lg font-bold text-gray-800">Register New Hospital</h2>
+  </div>
+
+  {% if messages %}
+  {% for message in messages %}
+  <div class="mb-4 {% if 'error' in message.tags %}bg-red-50 border-red-200 text-red-700{% else %}bg-green-50 border-green-200 text-green-700{% endif %} border rounded-xl p-3">
+    <p class="text-xs font-semibold"><i class="fas fa-info-circle mr-1"></i>{{ message }}</p>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Hospital Name *</label>
+        <div class="relative">
+          <i class="fas fa-hospital absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="text" name="name" required placeholder="e.g. Nairobi General Hospital"
+                 value="{{ form.name.value|default:'' }}"
+                 class="w-full pl-8 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">County</label>
+        <div class="relative">
+          <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="text" value="{{ county.name }}" disabled
+                 class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Sub-County *</label>
+        <select name="subcounty"
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <option value="">Select sub-county</option>
+          {% for sc in subcounties %}
+          <option value="{{ sc.name }}" {% if form.subcounty.value == sc.name %}selected{% endif %}>{{ sc.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Address</label>
+        <textarea name="address" rows="2" placeholder="Street address or location description"
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none">{{ form.address.value|default:'' }}</textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+          <input type="tel" name="phone" placeholder="0700 000 000"
+                 value="{{ form.phone.value|default:'' }}"
+                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
+          <input type="email" name="email" placeholder="hospital@example.com"
+                 value="{{ form.email.value|default:'' }}"
+                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+                class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+          <i class="fas fa-plus text-xs"></i> Add Hospital
+        </button>
+        <a href="{% url 'supervisor:hospital_list' %}"
+           class="px-5 py-2.5 border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium rounded-xl text-sm transition-colors">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

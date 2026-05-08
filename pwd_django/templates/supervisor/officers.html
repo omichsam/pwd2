@@ -1,0 +1,96 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Officers{% endblock %}
+{% block page_title %}Officer Management{% endblock %}
+{% block page_subtitle %}Activate and manage medical & health officers{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Overview</p>
+<a href="{% url 'supervisor:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'supervisor:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-clipboard-check w-5 text-center text-sm"></i><span>Pending Approval</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'supervisor:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'supervisor:officer_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user-md w-5 text-center text-sm"></i><span>Officers</span></a>
+<a href="{% url 'supervisor:geography' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Geography</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'supervisor:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'supervisor:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+    <h3 class="font-semibold text-gray-800">Medical &amp; Health Officers</h3>
+    <span class="bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1 rounded-full">{{ officers.count }} officer{{ officers.count|pluralize }}</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table id="officersTable" class="w-full text-sm">
+      <thead class="bg-teal-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Officer</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Role</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">License ID</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Hospital</th>
+          <th class="px-6 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for officer in officers %}
+        <tr class="hover:bg-teal-50/30 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-semibold text-xs flex-shrink-0">
+                {{ officer.first_name|first|upper }}{{ officer.last_name|first|upper }}
+              </div>
+              <div>
+                <p class="font-semibold text-gray-800">{{ officer.get_full_name }}</p>
+                <p class="text-xs text-gray-400">{{ officer.email }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              {% if officer.role == 'medical_officer' %}bg-sky-100 text-sky-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+              {{ officer.get_role_display }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-gray-600 font-mono text-xs">{{ officer.license_id|default:"—" }}</td>
+          <td class="px-6 py-4 text-gray-600 text-xs">{{ officer.hospital.name|default:"—" }}</td>
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+              {% if officer.is_approved %}bg-emerald-100 text-emerald-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+              {% if officer.is_approved %}<i class="fas fa-check mr-1"></i>Active{% else %}<i class="fas fa-clock mr-1"></i>Pending{% endif %}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <form method="post" action="{% url 'supervisor:approve_officer' officer.pk %}" class="inline">
+              {% csrf_token %}
+              {% if officer.is_approved %}
+              <button type="submit" name="action" value="deactivate"
+                      class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors">
+                <i class="fas fa-ban text-xs"></i> Deactivate
+              </button>
+              {% else %}
+              <button type="submit" name="action" value="activate"
+                      class="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors">
+                <i class="fas fa-check text-xs"></i> Activate
+              </button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="px-6 py-12 text-center">
+          <div class="flex flex-col items-center">
+            <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mb-3"><i class="fas fa-user-md text-teal-300 text-2xl"></i></div>
+            <p class="font-semibold text-gray-700 mb-1">No Officers Registered</p>
+            <p class="text-sm text-gray-400">Officers register via the official registration page and await activation here.</p>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script>$(document).ready(function(){ $('#officersTable').DataTable(); });</script>{% endblock %}

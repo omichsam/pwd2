@@ -1,0 +1,72 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Assessment #{{ assessment.id }}{% endblock %}
+{% block page_title %}Assessment Details{% endblock %}
+{% block page_subtitle %}Select disability type to begin assessment{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'medical:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'medical:assessment_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Pending Assessments</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'medical:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'medical:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="grid lg:grid-cols-3 gap-6">
+  <!-- Patient Info -->
+  <div class="space-y-5">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-5">
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">
+          {{ assessment.user.first_name|first|upper }}{{ assessment.user.last_name|first|upper }}
+        </div>
+        <p class="text-center font-bold text-white text-lg">{{ assessment.user.get_full_name }}</p>
+        <p class="text-center text-teal-200 text-sm mt-1">ID: {{ assessment.user.id_number|default:"—" }}</p>
+      </div>
+      <div class="p-5 space-y-3">
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Gender</span><span class="font-medium text-gray-800">{{ assessment.user.get_gender_display|default:"—" }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">DOB</span><span class="font-medium text-gray-800">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Phone</span><span class="font-medium text-gray-800">{{ assessment.user.mobile_number|default:"—" }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">County</span><span class="font-medium text-gray-800">{{ assessment.user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Education</span><span class="font-medium text-gray-800">{{ assessment.user.get_education_level_display|default:"—" }}</span></div>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h4 class="font-semibold text-gray-800 mb-3 text-sm">Assessment Info</h4>
+      <div class="space-y-2.5">
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Hospital</span><span class="font-medium text-gray-800 text-right">{{ assessment.hospital.name|default:"—" }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Type</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">{{ assessment.get_disability_type_display }}</span>
+        </div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Booked</span><span class="font-medium text-gray-800">{{ assessment.assessment_date|date:"d M Y" }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">Submitted</span><span class="font-medium text-gray-800">{{ assessment.created_at|date:"d M Y" }}</span></div>
+      </div>
+    </div>
+    <a href="{% url 'medical:assessment_list' %}" class="flex items-center gap-2 text-sm text-gray-500 hover:text-teal-600 font-medium transition-colors">
+      <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+  </div>
+
+  <!-- Assessment Form Launch -->
+  <div class="lg:col-span-2">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-800">Complete Medical Assessment</h3>
+        <p class="text-sm text-gray-500 mt-1">The disability type is <strong class="text-teal-700">{{ assessment.get_disability_type_display }}</strong>. Click below to open the assessment form.</p>
+      </div>
+      <div class="p-6">
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <i class="fas fa-info-circle text-teal-600 mt-0.5 flex-shrink-0"></i>
+          <p class="text-sm text-teal-700">Fill in all assessment fields accurately. Once submitted, the assessment moves to the Health Officer for review and cannot be edited.</p>
+        </div>
+        <a href="{% url 'medical:assessment_form' assessment.pk assessment.disability_type %}"
+           class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-sm text-sm">
+          <i class="fas fa-stethoscope"></i>
+          Open {{ assessment.get_disability_type_display }} Assessment Form
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

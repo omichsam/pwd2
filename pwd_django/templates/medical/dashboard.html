@@ -1,0 +1,146 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Medical Dashboard{% endblock %}
+{% block page_title %}Medical Officer Dashboard{% endblock %}
+{% block page_subtitle %}{{ hospital.name|default:"No hospital assigned" }}{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'medical:dashboard' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1">
+  <i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span>
+</a>
+<a href="{% url 'medical:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Pending Assessments</span>
+</a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'medical:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span>
+</a>
+<a href="{% url 'medical:change_password' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-lock w-5 text-center text-sm"></i><span>Change Password</span>
+</a>
+{% endblock %}
+
+{% block dropdown_links %}
+<a href="{% url 'medical:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-center text-gray-400"></i> My Profile</a>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-gradient-to-r from-teal-800 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 80% 50%, white 1px, transparent 1px); background-size: 28px 28px;"></div>
+  <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold">Medical Officer Portal</h2>
+      <p class="text-teal-200 mt-1 text-sm flex items-center gap-2">
+        <i class="fas fa-hospital"></i> {{ hospital.name|default:"No hospital assigned" }}
+      </p>
+    </div>
+    <a href="{% url 'medical:assessment_list' %}"
+       class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm">
+      <i class="fas fa-clipboard-list"></i> View Pending
+    </a>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center"><i class="fas fa-file-medical text-teal-600 text-lg"></i></div>
+      <div><p class="text-xs text-gray-500 font-medium">Total</p><p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p></div>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fas fa-clock text-amber-600 text-lg"></i></div>
+      <div><p class="text-xs text-gray-500 font-medium">Pending</p><p class="text-2xl font-bold text-gray-900">{{ stats.pending }}</p></div>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center"><i class="fas fa-stethoscope text-sky-600 text-lg"></i></div>
+      <div><p class="text-xs text-gray-500 font-medium">In Review</p><p class="text-2xl font-bold text-gray-900">{{ stats.in_review }}</p></div>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center"><i class="fas fa-check-circle text-emerald-600 text-lg"></i></div>
+      <div><p class="text-xs text-gray-500 font-medium">Certified</p><p class="text-2xl font-bold text-gray-900">{{ stats.approved }}</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6">
+  <!-- Disability Distribution Chart -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="font-semibold text-gray-800">Disability Distribution</h3>
+    </div>
+    <div class="p-6">
+      {% if disability_labels %}
+      <canvas id="disabilityChart" height="220"></canvas>
+      {% else %}
+      <div class="flex flex-col items-center py-10 text-center">
+        <i class="fas fa-chart-bar text-gray-200 text-4xl mb-3"></i>
+        <p class="text-sm text-gray-400">No assessment data yet</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Pending Assessments -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-800">Pending Assessments</h3>
+      <a href="{% url 'medical:assessment_list' %}" class="text-xs text-teal-600 font-medium hover:text-teal-700">View All</a>
+    </div>
+    <div class="divide-y divide-gray-100">
+      {% for a in pending_list %}
+      <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-teal-50 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user text-teal-600 text-sm"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">{{ a.user.get_full_name }}</p>
+            <p class="text-xs text-gray-400">{{ a.get_disability_type_display }} · {{ a.assessment_date|date:"d M Y" }}</p>
+          </div>
+        </div>
+        <a href="{% url 'medical:view_assessment' a.pk %}"
+           class="inline-flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors">
+          <i class="fas fa-eye text-xs"></i> Review
+        </a>
+      </div>
+      {% empty %}
+      <div class="px-6 py-10 text-center">
+        <i class="fas fa-check-circle text-emerald-300 text-3xl mb-3"></i>
+        <p class="text-sm text-gray-400">All assessments up to date!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+{% if disability_labels %}
+const ctx = document.getElementById('disabilityChart').getContext('2d');
+new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: {{ disability_labels|safe }},
+    datasets: [{
+      data: {{ disability_counts|safe }},
+      backgroundColor: ['#0d9488','#2dd4bf','#0f766e','#5eead4','#115e59','#99f6e4'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, cutout: '65%',
+    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 12 }, padding: 16 } } }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

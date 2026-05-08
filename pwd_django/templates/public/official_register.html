@@ -1,0 +1,207 @@
+{% extends "base/base.html" %}
+{% block title %}Official Registration — PWD Access{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex">
+
+  <!-- Left hero panel -->
+  <div class="hidden lg:flex lg:w-5/12 xl:w-2/5 bg-gradient-to-br from-teal-950 via-teal-800 to-teal-600 flex-col justify-between p-10 fixed top-0 left-0 h-full">
+    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image:radial-gradient(circle at 30% 40%,white 1px,transparent 1px);background-size:36px 36px;"></div>
+
+    <a href="{% url 'landing' %}" class="flex items-center gap-2.5 relative z-10">
+      <div class="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center">
+        <i class="fas fa-wheelchair text-white"></i>
+      </div>
+      <span class="font-bold text-lg text-white">PWD Access</span>
+    </a>
+
+    <div class="relative z-10">
+      <h2 class="text-3xl font-bold text-white mb-2 leading-tight">Official Registration</h2>
+      <p class="text-teal-200 text-sm leading-relaxed mb-7">Register as a medical or health officer to begin serving PWD citizens in your county.</p>
+      <div class="space-y-3">
+        <div class="bg-white/10 border border-white/15 rounded-xl p-3.5 flex items-start gap-3">
+          <div class="w-8 h-8 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user-md text-teal-200 text-sm"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-white text-sm">Medical Officers</p>
+            <p class="text-teal-300 text-xs mt-0.5">Conduct disability assessments at your hospital</p>
+          </div>
+        </div>
+        <div class="bg-white/10 border border-white/15 rounded-xl p-3.5 flex items-start gap-3">
+          <div class="w-8 h-8 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-heartbeat text-teal-200 text-sm"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-white text-sm">Health Officers</p>
+            <p class="text-teal-300 text-xs mt-0.5">Review and approve medical assessments county-wide</p>
+          </div>
+        </div>
+        <div class="bg-amber-400/20 border border-amber-300/30 rounded-xl p-3.5 flex items-start gap-3">
+          <i class="fas fa-info-circle text-amber-300 text-sm mt-0.5 flex-shrink-0"></i>
+          <p class="text-amber-200 text-xs">Your account will be activated by a County Officer before you can log in.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="relative z-10 text-teal-400 text-xs">© {% now "Y" %} PWD Access Kenya</p>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="flex-1 lg:ml-[41.666%] xl:ml-[40%] bg-white min-h-screen p-6 flex items-start justify-center py-10">
+    <div class="w-full max-w-md">
+
+      <!-- Mobile logo -->
+      <div class="lg:hidden flex items-center gap-2.5 mb-6">
+        <div class="w-8 h-8 bg-teal-600 rounded-xl flex items-center justify-center">
+          <i class="fas fa-wheelchair text-white text-sm"></i>
+        </div>
+        <span class="font-bold text-gray-900">PWD Access</span>
+      </div>
+
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Create Official Account</h1>
+        <p class="text-gray-500 text-xs mt-0.5">Fill in your details to register as an official</p>
+      </div>
+
+      {% if messages %}
+      {% for message in messages %}
+      <div class="mb-4 {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-green-50 border-green-200 text-green-700{% endif %} border rounded-xl p-3">
+        <p class="text-xs font-semibold"><i class="fas fa-exclamation-circle mr-1"></i>{{ message }}</p>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- Role Selection -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Role *</label>
+          <div class="grid grid-cols-2 gap-2" x-data="{ role: 'medical_officer' }">
+            <label class="cursor-pointer">
+              <input type="radio" name="role" value="medical_officer" class="sr-only peer" checked>
+              <div class="peer-checked:bg-teal-50 peer-checked:border-teal-500 peer-checked:text-teal-700 border-2 border-gray-200 rounded-lg p-3 text-center text-xs font-medium text-gray-600 transition-all">
+                <i class="fas fa-user-md block text-lg mb-1"></i>
+                Medical Officer
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="role" value="health_officer" class="sr-only peer">
+              <div class="peer-checked:bg-teal-50 peer-checked:border-teal-500 peer-checked:text-teal-700 border-2 border-gray-200 rounded-lg p-3 text-center text-xs font-medium text-gray-600 transition-all">
+                <i class="fas fa-heartbeat block text-lg mb-1"></i>
+                Health Officer
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Personal Info -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">First Name *</label>
+            <input type="text" name="first_name" required placeholder="First name"
+                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Last Name *</label>
+            <input type="text" name="last_name" required placeholder="Last name"
+                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">License / Staff ID *</label>
+          <div class="relative">
+            <i class="fas fa-id-badge absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" name="license_id" required placeholder="e.g. MED-12345"
+                   class="w-full pl-8 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Mobile Number *</label>
+          <div class="relative">
+            <i class="fas fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="tel" name="mobile_number" required placeholder="07xx xxx xxx"
+                   class="w-full pl-8 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          </div>
+        </div>
+
+        <!-- County & Hospital -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">County *</label>
+          <select name="county" required
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  onchange="filterHospitals(this.value)">
+            <option value="">Select county</option>
+            {% for c in counties %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Hospital / Facility *</label>
+          <select name="hospital" id="hospital-select"
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <option value="">Select hospital</option>
+            {% for h in hospitals %}
+            <option value="{{ h.id }}" data-county="{{ h.county_id }}">{{ h.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Password -->
+        <div x-data="{ show: false }">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Password *</label>
+          <div class="relative">
+            <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input :type="show ? 'text' : 'password'" name="password" required placeholder="Create a password"
+                   class="w-full pl-8 pr-9 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <button type="button" @click="show=!show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'" class="text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <div x-data="{ show: false }">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Confirm Password *</label>
+          <div class="relative">
+            <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input :type="show ? 'text' : 'password'" name="confirm_password" required placeholder="Confirm your password"
+                   class="w-full pl-8 pr-9 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <button type="button" @click="show=!show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'" class="text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 mt-2">
+          <i class="fas fa-user-plus text-xs"></i> Register as Official
+        </button>
+      </form>
+
+      <div class="mt-5 pt-5 border-t border-gray-100 text-center">
+        <p class="text-xs text-gray-500">
+          Already have an account? <a href="{% url 'accounts:login' %}" class="text-teal-600 font-semibold hover:text-teal-700">Sign In</a>
+          &nbsp;·&nbsp;
+          <a href="{% url 'accounts:register' %}" class="text-teal-600 font-semibold hover:text-teal-700">Register as PWD Citizen</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function filterHospitals(countyId) {
+  const select = document.getElementById('hospital-select');
+  Array.from(select.options).forEach(opt => {
+    if (!opt.value) return;
+    opt.style.display = (!countyId || opt.dataset.county === countyId) ? '' : 'none';
+  });
+  select.value = '';
+}
+</script>
+{% endblock %}

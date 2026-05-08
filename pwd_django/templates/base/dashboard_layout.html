@@ -1,0 +1,295 @@
+{% extends "base/base.html" %}
+
+{% block extra_head %}
+<style>
+  /* ── Desktop collapsed sidebar: icon-only mode ── */
+  @media (min-width: 1024px) {
+    .sidebar-collapsed .sidebar-link span,
+    .sidebar-collapsed nav p {
+      display: none !important;
+    }
+    .sidebar-collapsed .sidebar-link {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      gap: 0 !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+    /* Tooltip */
+    .sidebar-collapsed .sidebar-link {
+      position: relative;
+    }
+    .sidebar-collapsed .sidebar-link::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 5px 12px;
+      border-radius: 8px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .sidebar-collapsed .sidebar-link::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-right-color: #0f172a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 9999;
+    }
+    .sidebar-collapsed .sidebar-link:hover::after,
+    .sidebar-collapsed .sidebar-link:hover::before {
+      opacity: 1;
+    }
+    .sidebar-collapsed .brand-text { display: none; }
+  }
+
+  /* ── Compact SweetAlert2 icon ── */
+  .swal2-icon.swal-icon-sm {
+    width: 3rem !important;
+    height: 3rem !important;
+    margin: 0.5rem auto 0.25rem !important;
+  }
+  .swal2-icon.swal-icon-sm .swal2-icon-content {
+    font-size: 1.5rem !important;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="flex h-screen overflow-hidden"
+     x-data="{
+       sidebarOpen: true,
+       mobileOpen: false,
+       get isDesktop() { return window.innerWidth >= 1024; }
+     }"
+     @keydown.escape.window="mobileOpen = false"
+     @resize.window="if (window.innerWidth >= 1024) mobileOpen = false">
+
+  <!-- ── Mobile backdrop ── -->
+  <div x-show="mobileOpen"
+       x-transition:enter="ease-out duration-250"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+       @click="mobileOpen = false"
+       style="display:none"></div>
+
+  <!-- ── Sidebar ── -->
+  <!-- Mobile: full-width overlay, toggled by mobileOpen -->
+  <!-- Desktop: always visible, width toggled by sidebarOpen -->
+  <aside class="fixed left-0 top-0 h-full bg-teal-800 text-white flex flex-col z-40 overflow-hidden transition-all duration-300
+                w-64 -translate-x-full
+                lg:translate-x-0"
+         :class="{
+           'translate-x-0': mobileOpen,
+           '-translate-x-full': !mobileOpen,
+           'sidebar-collapsed': !sidebarOpen,
+         }"
+         :style="isDesktop ? (sidebarOpen ? 'width:16rem' : 'width:4rem') : 'width:16rem'">
+
+    <!-- Brand -->
+    <div class="flex items-center gap-3 px-4 py-5 border-b border-teal-700 flex-shrink-0 min-w-0">
+      <div class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-wheelchair text-white text-base"></i>
+      </div>
+      <div class="brand-text overflow-hidden min-w-0 transition-all duration-200"
+           :class="{ 'opacity-0 pointer-events-none': !sidebarOpen && isDesktop }">
+        <span class="font-bold text-lg leading-none block whitespace-nowrap">PWD Access</span>
+        <span class="text-teal-300 text-xs whitespace-nowrap">Kenya</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-4 px-2">
+      {% block sidebar_nav %}{% endblock %}
+    </nav>
+
+    <!-- Logout -->
+    <div class="p-3 border-t border-teal-700 flex-shrink-0">
+      <button type="button" onclick="confirmLogout()"
+              :class="(sidebarOpen || !isDesktop) ? 'px-3 justify-start gap-3' : 'justify-center px-0'"
+              class="flex items-center w-full py-2.5 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-200 hover:text-white transition-all"
+              data-tip="Logout">
+        <i class="fas fa-sign-out-alt text-sm flex-shrink-0 w-5 text-center"></i>
+        <span x-show="sidebarOpen || !isDesktop" class="text-sm font-medium whitespace-nowrap">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main area ── -->
+  <div class="flex-1 flex flex-col min-h-screen transition-all duration-300 ml-0 lg:ml-64"
+       :style="isDesktop ? (sidebarOpen ? 'margin-left:16rem' : 'margin-left:4rem') : 'margin-left:0'">
+
+    <!-- Top Navbar -->
+    <header class="fixed top-0 right-0 h-16 bg-white border-b border-gray-100 shadow-sm
+                   flex items-center justify-between px-4 sm:px-6 z-20 transition-all duration-300 left-0 lg:left-64"
+            :style="isDesktop ? (sidebarOpen ? 'left:16rem' : 'left:4rem') : 'left:0'">
+
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Mobile: toggle overlay | Desktop: collapse sidebar -->
+        <button @click="isDesktop ? sidebarOpen = !sidebarOpen : mobileOpen = !mobileOpen"
+                class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors">
+          <i class="fas fa-bars text-base"></i>
+        </button>
+        <div class="min-w-0">
+          <h1 class="text-sm font-semibold text-gray-800 truncate leading-tight">{% block page_title %}Dashboard{% endblock %}</h1>
+          <p class="text-xs text-gray-400 truncate hidden sm:block">{% block page_subtitle %}{% endblock %}</p>
+        </div>
+      </div>
+
+      <!-- Right side -->
+      <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0" x-data="{ dropOpen: false }">
+
+        <!-- Bell -->
+        <button class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors">
+          <i class="fas fa-bell text-base"></i>
+        </button>
+
+        <!-- Avatar + dropdown trigger -->
+        <button @click="dropOpen = !dropOpen" @click.outside="dropOpen = false"
+                class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+          <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+          </div>
+          <div class="hidden md:block text-left max-w-[160px]">
+            <p class="text-sm font-medium text-gray-800 leading-none truncate">{{ request.user.get_full_name }}</p>
+            <p class="text-xs text-gray-400 mt-0.5 truncate">{{ request.user.get_role_display }}</p>
+          </div>
+          <i class="fas fa-chevron-down text-xs text-gray-400 hidden sm:block"></i>
+        </button>
+
+        <!-- Dropdown -->
+        <div x-show="dropOpen" x-transition
+             class="absolute right-4 sm:right-6 top-14 bg-white rounded-xl shadow-lg border border-gray-100 py-2 w-52 z-50"
+             style="display:none">
+          <div class="px-4 py-2.5 border-b border-gray-100 mb-1">
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ request.user.get_full_name }}</p>
+            <span class="inline-block mt-1 bg-teal-100 text-teal-700 text-xs font-medium px-2 py-0.5 rounded-full">
+              {{ request.user.get_role_display }}
+            </span>
+          </div>
+          {% block dropdown_links %}{% endblock %}
+          <div class="border-t border-gray-100 mt-1 pt-1">
+            <button type="button" onclick="confirmLogout()"
+                    class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left">
+              <i class="fas fa-sign-out-alt w-4 text-center"></i> Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="flex-1 pt-16 overflow-y-auto">
+      <div class="p-4 sm:p-6">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-3 px-4 sm:px-6 text-xs text-gray-400 border-t border-gray-100 bg-white">
+      &copy; {% now "Y" %} PWD Access Kenya &mdash; Disability Certification System
+    </footer>
+  </div>
+</div>
+
+<!-- Hidden logout POST form -->
+<form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display:none">
+  {% csrf_token %}
+</form>
+
+<script>
+/* ── Logout confirmation ── */
+function confirmLogout() {
+  Swal.fire({
+    title: 'Sign Out?',
+    text: 'You will be logged out of your session.',
+    icon: 'question',
+    iconColor: '#0d9488',
+    width: '300px',
+    padding: '1.25rem',
+    showCancelButton: true,
+    confirmButtonText: '<i class="fas fa-sign-out-alt"></i> Sign out',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    reverseButtons: true,
+    focusCancel: true,
+    customClass: {
+      popup: 'rounded-xl',
+      title: 'text-base font-bold',
+      htmlContainer: 'text-xs text-gray-500',
+      confirmButton: 'rounded-lg text-xs font-semibold px-4 py-2',
+      cancelButton: 'rounded-lg text-xs font-semibold px-4 py-2',
+      icon: 'swal-icon-sm',
+    }
+  }).then(function(result) {
+    if (result.isConfirmed) {
+      document.getElementById('logout-form').submit();
+    }
+  });
+}
+
+/* ── Generic confirm for destructive actions ── */
+function pwdConfirm(opts) {
+  var defaults = { title: 'Are you sure?', text: '', icon: 'warning', confirmText: 'Yes, proceed', onConfirm: null };
+  var o = Object.assign({}, defaults, opts);
+  Swal.fire({
+    title: o.title, text: o.text, icon: o.icon,
+    showCancelButton: true,
+    confirmButtonText: o.confirmText,
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#0d9488',
+    cancelButtonColor: '#6b7280',
+    reverseButtons: true, focusCancel: true,
+    customClass: {
+      popup: 'rounded-2xl text-sm',
+      confirmButton: 'rounded-lg text-sm font-semibold px-5 py-2.5',
+      cancelButton: 'rounded-lg text-sm font-semibold px-5 py-2.5',
+    }
+  }).then(function(result) {
+    if (result.isConfirmed && typeof o.onConfirm === 'function') o.onConfirm();
+  });
+}
+
+/* ── Programmatic toast ── */
+function pwdToast(message, type) {
+  Swal.fire({
+    icon: type || 'success',
+    title: message,
+    toast: true, position: 'top-end',
+    showConfirmButton: false,
+    timer: 3500, timerProgressBar: true,
+  });
+}
+
+/* ── Auto-populate data-tip from span text for collapsed tooltips ── */
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.sidebar-link').forEach(function(link) {
+    var span = link.querySelector('span');
+    if (span && !link.dataset.tip) {
+      link.dataset.tip = span.textContent.trim();
+    }
+  });
+});
+</script>
+{% endblock %}

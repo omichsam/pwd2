@@ -1,0 +1,441 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}My Assessment Dashboard{% endblock %}
+{% block page_subtitle %}Track your certification journey{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Main</p>
+<a href="{% url 'pwd:dashboard' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1">
+  <i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span>
+</a>
+<a href="{% url 'pwd:application' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Book Assessment</span>
+</a>
+<a href="{% url 'pwd:hospitals' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-hospital w-5 text-center text-sm"></i><span>Assessment Centers</span>
+</a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'pwd:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span>
+</a>
+<a href="{% url 'pwd:change_password' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-lock w-5 text-center text-sm"></i><span>Change Password</span>
+</a>
+{% endblock %}
+
+{% block dropdown_links %}
+<a href="{% url 'pwd:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+  <i class="fas fa-user w-4 text-center text-gray-400"></i> My Profile
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero / Status Header ── -->
+{% if latest and latest.status == 'approved_by_county_officer' %}
+{# ── CERTIFIED ── #}
+<div class="bg-gradient-to-r from-emerald-700 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 80% 50%,white 1px,transparent 1px);background-size:28px 28px;"></div>
+  <div class="absolute right-0 top-0 h-full w-48 opacity-10 flex items-center justify-center">
+    <i class="fas fa-certificate text-9xl"></i>
+  </div>
+  <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <i class="fas fa-check-circle text-emerald-300"></i> PWD Certificate Issued
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold">Congratulations, {{ user.first_name }}!</h2>
+      <p class="text-emerald-100 mt-1 text-sm">Your PWD certificate has been fully certified and is ready to download.</p>
+    </div>
+    <a href="{% url 'pwd:certificate_print' latest.pk %}"
+       class="flex-shrink-0 flex items-center gap-2 bg-white text-emerald-700 hover:bg-emerald-50 font-bold px-6 py-3 rounded-xl text-sm transition-colors shadow-lg">
+      <i class="fas fa-print"></i> Print Certificate
+    </a>
+  </div>
+</div>
+
+{% elif latest and latest.status == 'rejected' %}
+{# ── REJECTED ── #}
+<div class="bg-gradient-to-r from-red-700 to-rose-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 80% 50%,white 1px,transparent 1px);background-size:28px 28px;"></div>
+  <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <i class="fas fa-times-circle text-red-300"></i> Application Rejected
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold">Application Unsuccessful</h2>
+      <p class="text-red-100 mt-1 text-sm">
+        {% if latest.rejection_reason %}Reason: {{ latest.rejection_reason }}{% else %}Your recent application was not approved. You may apply again.{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'pwd:application' %}"
+       class="flex-shrink-0 flex items-center gap-2 bg-white text-red-700 hover:bg-red-50 font-bold px-6 py-3 rounded-xl text-sm transition-colors shadow-lg">
+      <i class="fas fa-redo"></i> Apply Again
+    </a>
+  </div>
+</div>
+
+{% elif latest %}
+{# ── IN PROGRESS ── #}
+{% with step=latest.get_status_step %}
+<div class="bg-gradient-to-r from-teal-800 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 80% 50%,white 1px,transparent 1px);background-size:28px 28px;"></div>
+  <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <i class="fas fa-spinner fa-spin text-teal-300 text-xs"></i>
+          {% if latest.status == 'pending' %}Awaiting Medical Assessment
+          {% elif latest.status == 'checked' %}Awaiting Health Officer Review
+          {% elif latest.status == 'approved_by_health_officer' %}Awaiting County Officer Approval
+          {% endif %}
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold">Welcome back, {{ user.first_name }}!</h2>
+      <p class="text-teal-200 mt-1 text-sm">
+        Your <strong>{{ latest.get_disability_type_display }}</strong> disability application is being processed at <strong>{{ latest.hospital.name }}</strong>.
+      </p>
+    </div>
+    <a href="{% url 'pwd:view_application' latest.pk %}"
+       class="flex-shrink-0 flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
+      <i class="fas fa-eye"></i> View Application
+    </a>
+  </div>
+</div>
+{% endwith %}
+
+{% else %}
+{# ── NO APPLICATION YET ── #}
+<div class="bg-gradient-to-r from-teal-800 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 80% 50%,white 1px,transparent 1px);background-size:28px 28px;"></div>
+  <div class="absolute right-0 top-0 h-full w-48 opacity-10 flex items-center justify-end pr-6">
+    <i class="fas fa-wheelchair text-9xl"></i>
+  </div>
+  <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <i class="fas fa-id-card text-teal-300"></i> PWD Certification Portal
+        </span>
+      </div>
+      <h2 class="text-2xl font-bold">Hello, {{ user.first_name }}!</h2>
+      <p class="text-teal-200 mt-1 text-sm">You have no active application. Start your PWD certificate application today.</p>
+    </div>
+    <a href="{% url 'pwd:application' %}"
+       class="flex-shrink-0 flex items-center gap-2 bg-white text-teal-700 hover:bg-teal-50 font-bold px-6 py-3 rounded-xl text-sm transition-colors shadow-lg">
+      <i class="fas fa-plus"></i> Start Application
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── 4-Step Application Process ── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 mb-6">
+  <div class="flex items-center justify-between mb-5">
+    <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+      <i class="fas fa-route text-teal-500"></i> PWD Certificate Journey
+    </h3>
+    {% if latest %}
+    <span class="text-xs text-gray-400">Application #{{ latest.pk }}</span>
+    {% endif %}
+  </div>
+
+  {% with step=latest.get_status_step|default:0 %}
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+    {# Step 1: Book Assessment #}
+    <div class="relative flex flex-col items-center text-center p-4 rounded-xl border-2 transition-all
+      {% if step >= 1 %}border-teal-200 bg-teal-50
+      {% elif latest and step == 0 %}border-teal-400 bg-teal-50 ring-2 ring-teal-200
+      {% else %}border-gray-100 bg-gray-50{% endif %}">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center mb-3 text-lg
+        {% if step >= 1 %}bg-teal-600 text-white
+        {% elif latest and step == 0 %}bg-teal-100 text-teal-700 border-2 border-teal-500
+        {% else %}bg-gray-100 text-gray-400{% endif %}">
+        {% if step >= 1 %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-calendar-plus"></i>{% endif %}
+      </div>
+      <p class="text-xs font-bold {% if step >= 1 %}text-teal-700{% elif latest %}text-teal-800{% else %}text-gray-500{% endif %}">Step 1</p>
+      <p class="text-xs font-semibold mt-0.5 {% if step >= 1 %}text-teal-700{% elif latest %}text-teal-800{% else %}text-gray-500{% endif %}">Book Assessment</p>
+      <p class="text-xs text-gray-400 mt-1 leading-tight hidden sm:block">Select center &amp; disability type</p>
+      {% if latest and step == 0 %}
+      <span class="mt-2 text-xs bg-teal-600 text-white px-2 py-0.5 rounded-full font-semibold">Current</span>
+      {% elif step >= 1 %}
+      <span class="mt-2 text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-semibold">Done</span>
+      {% endif %}
+    </div>
+
+    {# Step 2: Medical Assessment #}
+    <div class="relative flex flex-col items-center text-center p-4 rounded-xl border-2 transition-all
+      {% if step >= 2 %}border-teal-200 bg-teal-50
+      {% elif latest and step == 1 %}border-teal-400 bg-teal-50 ring-2 ring-teal-200
+      {% else %}border-gray-100 bg-gray-50{% endif %}">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center mb-3 text-lg
+        {% if step >= 2 %}bg-teal-600 text-white
+        {% elif latest and step == 1 %}bg-teal-100 text-teal-700 border-2 border-teal-500
+        {% else %}bg-gray-100 text-gray-400{% endif %}">
+        {% if step >= 2 %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-stethoscope"></i>{% endif %}
+      </div>
+      <p class="text-xs font-bold {% if step >= 2 %}text-teal-700{% elif latest and step == 1 %}text-teal-800{% else %}text-gray-500{% endif %}">Step 2</p>
+      <p class="text-xs font-semibold mt-0.5 {% if step >= 2 %}text-teal-700{% elif latest and step == 1 %}text-teal-800{% else %}text-gray-500{% endif %}">Medical Review</p>
+      <p class="text-xs text-gray-400 mt-1 leading-tight hidden sm:block">Doctor completes disability assessment</p>
+      {% if latest and step == 1 %}
+      <span class="mt-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Waiting</span>
+      {% elif step >= 2 %}
+      <span class="mt-2 text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-semibold">Done</span>
+      {% endif %}
+    </div>
+
+    {# Step 3: Health Officer Review #}
+    <div class="relative flex flex-col items-center text-center p-4 rounded-xl border-2 transition-all
+      {% if step >= 3 %}border-teal-200 bg-teal-50
+      {% elif latest and step == 2 %}border-teal-400 bg-teal-50 ring-2 ring-teal-200
+      {% else %}border-gray-100 bg-gray-50{% endif %}">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center mb-3 text-lg
+        {% if step >= 3 %}bg-teal-600 text-white
+        {% elif latest and step == 2 %}bg-teal-100 text-teal-700 border-2 border-teal-500
+        {% else %}bg-gray-100 text-gray-400{% endif %}">
+        {% if step >= 3 %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-clipboard-check"></i>{% endif %}
+      </div>
+      <p class="text-xs font-bold {% if step >= 3 %}text-teal-700{% elif latest and step == 2 %}text-teal-800{% else %}text-gray-500{% endif %}">Step 3</p>
+      <p class="text-xs font-semibold mt-0.5 {% if step >= 3 %}text-teal-700{% elif latest and step == 2 %}text-teal-800{% else %}text-gray-500{% endif %}">Health Review</p>
+      <p class="text-xs text-gray-400 mt-1 leading-tight hidden sm:block">County health officer reviews findings</p>
+      {% if latest and step == 2 %}
+      <span class="mt-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Waiting</span>
+      {% elif step >= 3 %}
+      <span class="mt-2 text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-semibold">Done</span>
+      {% endif %}
+    </div>
+
+    {# Step 4: County Certification #}
+    <div class="relative flex flex-col items-center text-center p-4 rounded-xl border-2 transition-all
+      {% if latest and latest.status == 'approved_by_county_officer' %}border-emerald-300 bg-emerald-50
+      {% elif latest and step == 3 %}border-teal-400 bg-teal-50 ring-2 ring-teal-200
+      {% else %}border-gray-100 bg-gray-50{% endif %}">
+      <div class="w-11 h-11 rounded-full flex items-center justify-center mb-3 text-lg
+        {% if latest and latest.status == 'approved_by_county_officer' %}bg-emerald-600 text-white
+        {% elif latest and step == 3 %}bg-teal-100 text-teal-700 border-2 border-teal-500
+        {% else %}bg-gray-100 text-gray-400{% endif %}">
+        {% if latest and latest.status == 'approved_by_county_officer' %}<i class="fas fa-certificate"></i>{% else %}<i class="fas fa-award"></i>{% endif %}
+      </div>
+      <p class="text-xs font-bold {% if latest and latest.status == 'approved_by_county_officer' %}text-emerald-700{% elif latest and step == 3 %}text-teal-800{% else %}text-gray-500{% endif %}">Step 4</p>
+      <p class="text-xs font-semibold mt-0.5 {% if latest and latest.status == 'approved_by_county_officer' %}text-emerald-700{% elif latest and step == 3 %}text-teal-800{% else %}text-gray-500{% endif %}">Get Certificate</p>
+      <p class="text-xs text-gray-400 mt-1 leading-tight hidden sm:block">County officer issues your PWD certificate</p>
+      {% if latest and latest.status == 'approved_by_county_officer' %}
+      <span class="mt-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Certified!</span>
+      {% elif latest and step == 3 %}
+      <span class="mt-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Waiting</span>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endwith %}
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6 mb-6">
+  <!-- Current Application Progress -->
+  <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-800">Current Application</h3>
+      {% if latest %}
+      <span class="text-xs text-gray-400">ID #{{ latest.id }}</span>
+      {% endif %}
+    </div>
+    <div class="p-6">
+      {% if latest %}
+        <!-- Progress Steps -->
+        <div class="flex items-center mb-8">
+          {% with step=latest.get_status_step %}
+          {% for label, icon in steps %}
+          <div class="flex flex-col items-center flex-1 {% if not forloop.last %}relative{% endif %}">
+            {% if not forloop.first %}
+            <div class="absolute left-0 right-1/2 top-5 h-0.5 {% if forloop.counter0 <= step %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            {% endif %}
+            {% if not forloop.last %}
+            <div class="absolute left-1/2 right-0 top-5 h-0.5 {% if forloop.counter <= step %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            {% endif %}
+            <div class="w-10 h-10 rounded-full flex items-center justify-center relative z-10
+              {% if forloop.counter0 < step %}bg-teal-600 text-white
+              {% elif forloop.counter0 == step %}bg-white border-2 border-teal-600 text-teal-700 ring-4 ring-teal-50
+              {% else %}bg-gray-100 text-gray-400{% endif %}">
+              <i class="{{ icon }} text-sm"></i>
+            </div>
+            <p class="text-xs font-medium mt-2 text-center {% if forloop.counter0 <= step %}text-teal-700{% else %}text-gray-400{% endif %}">{{ label }}</p>
+          </div>
+          {% empty %}
+          <div class="flex flex-col items-center flex-1 relative">
+            <div class="absolute left-1/2 right-0 top-5 h-0.5 {% if step >= 1 %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center relative z-10 {% if step >= 1 %}bg-teal-600 text-white{% elif step == 0 %}bg-white border-2 border-teal-600 text-teal-700 ring-4 ring-teal-50{% else %}bg-gray-100 text-gray-400{% endif %}">
+              <i class="fas fa-calendar text-sm"></i>
+            </div>
+            <p class="text-xs font-medium mt-2 text-center {% if step >= 1 %}text-teal-700{% else %}text-gray-400{% endif %}">Booked</p>
+          </div>
+          <div class="flex flex-col items-center flex-1 relative">
+            <div class="absolute left-0 right-1/2 top-5 h-0.5 {% if step >= 1 %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            <div class="absolute left-1/2 right-0 top-5 h-0.5 {% if step >= 2 %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center relative z-10 {% if step > 1 %}bg-teal-600 text-white{% elif step == 1 %}bg-white border-2 border-teal-600 text-teal-700 ring-4 ring-teal-50{% else %}bg-gray-100 text-gray-400{% endif %}">
+              <i class="fas fa-stethoscope text-sm"></i>
+            </div>
+            <p class="text-xs font-medium mt-2 text-center {% if step >= 1 %}text-teal-700{% else %}text-gray-400{% endif %}">Medical</p>
+          </div>
+          <div class="flex flex-col items-center flex-1 relative">
+            <div class="absolute left-0 right-1/2 top-5 h-0.5 {% if step >= 2 %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            <div class="absolute left-1/2 right-0 top-5 h-0.5 {% if step >= 3 %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center relative z-10 {% if step > 2 %}bg-teal-600 text-white{% elif step == 2 %}bg-white border-2 border-teal-600 text-teal-700 ring-4 ring-teal-50{% else %}bg-gray-100 text-gray-400{% endif %}">
+              <i class="fas fa-clipboard-check text-sm"></i>
+            </div>
+            <p class="text-xs font-medium mt-2 text-center {% if step >= 2 %}text-teal-700{% else %}text-gray-400{% endif %}">Health Review</p>
+          </div>
+          <div class="flex flex-col items-center flex-1 relative">
+            <div class="absolute left-0 right-1/2 top-5 h-0.5 {% if step >= 3 %}bg-teal-500{% else %}bg-gray-200{% endif %} -translate-y-1/2 z-0"></div>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center relative z-10 {% if step >= 4 %}bg-emerald-600 text-white{% elif step == 3 %}bg-white border-2 border-teal-600 text-teal-700 ring-4 ring-teal-50{% else %}bg-gray-100 text-gray-400{% endif %}">
+              <i class="fas fa-certificate text-sm"></i>
+            </div>
+            <p class="text-xs font-medium mt-2 text-center {% if step >= 3 %}text-teal-700{% else %}text-gray-400{% endif %}">Certified</p>
+          </div>
+          {% endfor %}
+          {% endwith %}
+        </div>
+
+        <!-- Assessment details -->
+        <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-2"><i class="fas fa-hospital text-teal-400 w-4"></i> Center</span>
+            <span class="font-medium text-gray-800">{{ latest.hospital.name|default:"—" }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-2"><i class="fas fa-heartbeat text-teal-400 w-4"></i> Type</span>
+            <span class="font-medium text-gray-800">{{ latest.get_disability_type_display }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-2"><i class="fas fa-calendar text-teal-400 w-4"></i> Booked</span>
+            <span class="font-medium text-gray-800">{{ latest.assessment_date|date:"d M Y" }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-2"><i class="fas fa-clock text-teal-400 w-4"></i> Days</span>
+            <span class="font-medium text-gray-800">{{ latest.get_days_pending }} days ago</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-2"><i class="fas fa-info-circle text-teal-400 w-4"></i> Status</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              {% if latest.status == 'approved_by_county_officer' %}bg-emerald-100 text-emerald-800
+              {% elif latest.status == 'rejected' %}bg-red-100 text-red-800
+              {% elif latest.status == 'approved_by_health_officer' %}bg-teal-100 text-teal-800
+              {% elif latest.status == 'checked' %}bg-sky-100 text-sky-800
+              {% else %}bg-amber-100 text-amber-800{% endif %}">
+              {{ latest.get_status_display }}
+            </span>
+          </div>
+        </div>
+        {% if latest.status == 'approved_by_county_officer' %}
+        <a href="{% url 'pwd:certificate_print' latest.pk %}"
+           class="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+          <i class="fas fa-print"></i> Print Certificate
+        </a>
+        {% endif %}
+      {% else %}
+        <div class="flex flex-col items-center py-8 text-center">
+          <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center mb-4">
+            <i class="fas fa-file-medical text-teal-400 text-2xl"></i>
+          </div>
+          <p class="font-semibold text-gray-700 mb-1">No Applications Yet</p>
+          <p class="text-sm text-gray-400 mb-5">Book your first assessment to start the certification process.</p>
+          <a href="{% url 'pwd:application' %}"
+             class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+            <i class="fas fa-plus"></i> Book Assessment
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Nearby Centers -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-800">Nearby Centers</h3>
+      <a href="{% url 'pwd:hospitals' %}" class="text-xs text-teal-600 font-medium hover:text-teal-700">View All</a>
+    </div>
+    <div class="p-4 space-y-3">
+      {% for hospital in hospitals %}
+      <div class="flex items-start gap-3 p-3 rounded-xl border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all group">
+        <div class="w-9 h-9 bg-teal-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
+          <i class="fas fa-hospital text-teal-600 text-sm"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-gray-800 truncate">{{ hospital.name }}</p>
+          <p class="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+            <i class="fas fa-map-marker-alt text-teal-400"></i>
+            {{ hospital.subcounty|default:hospital.county.name }}
+          </p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center py-6">
+        <i class="fas fa-hospital text-gray-200 text-3xl mb-2"></i>
+        <p class="text-sm text-gray-400">No centers in your county yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Assessment History Table -->
+{% if assessments %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <div class="px-6 py-4 border-b border-gray-100">
+    <h3 class="font-semibold text-gray-800">Assessment History</h3>
+  </div>
+  <div class="overflow-x-auto">
+    <table id="historyTable" class="w-full text-sm">
+      <thead class="bg-teal-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">ID</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Center</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Type</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Date</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for a in assessments %}
+        <tr class="hover:bg-teal-50/30 transition-colors">
+          <td class="px-6 py-4 font-medium text-gray-700">#{{ a.id }}</td>
+          <td class="px-6 py-4 text-gray-600">{{ a.hospital.name|default:"—" }}</td>
+          <td class="px-6 py-4 text-gray-600">{{ a.get_disability_type_display }}</td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              {% if a.status == 'approved_by_county_officer' %}bg-emerald-100 text-emerald-800
+              {% elif a.status == 'rejected' %}bg-red-100 text-red-800
+              {% elif a.status == 'approved_by_health_officer' %}bg-teal-100 text-teal-800
+              {% elif a.status == 'checked' %}bg-sky-100 text-sky-800
+              {% else %}bg-amber-100 text-amber-800{% endif %}">
+              {{ a.get_status_display }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-gray-500">{{ a.created_at|date:"d M Y" }}</td>
+          <td class="px-6 py-4">
+            <a href="{% url 'pwd:view_application' a.pk %}"
+               class="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 font-medium text-xs">
+              <i class="fas fa-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    $('#historyTable').DataTable({ pageLength: 10, order: [[4, 'desc']] });
+  });
+</script>
+{% endblock %}

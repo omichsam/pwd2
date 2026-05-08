@@ -1,0 +1,160 @@
+{% extends "base/base.html" %}
+{% block title %}PWD Certificate — {{ assessment.user.get_full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white !important; }
+    .certificate { box-shadow: none !important; }
+  }
+  @page { size: A4; margin: 1cm; }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Print controls -->
+<div class="no-print bg-gray-100 p-4 flex items-center justify-between">
+  <a href="{% url 'pwd:view_application' assessment.pk %}" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+    <i class="fas fa-arrow-left"></i> Back to Application
+  </a>
+  <button onclick="window.print()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+    <i class="fas fa-print"></i> Print Certificate
+  </button>
+</div>
+
+<!-- Certificate -->
+<div class="min-h-screen bg-gray-50 flex items-center justify-center p-6 no-print-bg">
+  <div class="certificate bg-white w-full max-w-2xl shadow-xl rounded-2xl overflow-hidden" style="border: 3px solid #0d9488;">
+
+    <!-- Header Band -->
+    <div class="bg-gradient-to-r from-teal-800 to-teal-600 p-6 text-white text-center relative overflow-hidden">
+      <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 20px 20px;"></div>
+      <div class="relative z-10">
+        <div class="flex items-center justify-center gap-3 mb-2">
+          <i class="fas fa-wheelchair text-3xl text-teal-200"></i>
+        </div>
+        <h1 class="text-xl font-bold tracking-wide uppercase">Republic of Kenya</h1>
+        <h2 class="text-base font-semibold text-teal-200 mt-0.5">Ministry of Health</h2>
+        <p class="text-teal-300 text-xs mt-1">Persons with Disabilities (PWD) Certification</p>
+      </div>
+    </div>
+
+    <!-- Certificate Body -->
+    <div class="p-8">
+      <!-- Title -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 px-5 py-2 rounded-full mb-3">
+          <i class="fas fa-certificate text-teal-600 text-sm"></i>
+          <span class="text-teal-700 font-semibold text-sm uppercase tracking-wider">Certificate of Disability</span>
+        </div>
+        <p class="text-gray-500 text-xs">This is to certify that the following individual has been assessed and registered</p>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="flex-1 h-px bg-teal-200"></div>
+        <i class="fas fa-star text-teal-400 text-xs"></i>
+        <div class="flex-1 h-px bg-teal-200"></div>
+      </div>
+
+      <!-- Beneficiary Info -->
+      <div class="bg-teal-50 rounded-xl p-5 mb-6 border border-teal-100">
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Full Name</p>
+            <p class="font-bold text-gray-900 text-base">{{ assessment.user.get_full_name }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">National ID</p>
+            <p class="font-semibold text-gray-800">{{ assessment.user.id_number }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Date of Birth</p>
+            <p class="font-medium text-gray-800">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Gender</p>
+            <p class="font-medium text-gray-800">{{ assessment.user.gender|capfirst|default:"—" }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">County</p>
+            <p class="font-medium text-gray-800">{{ assessment.user.county.name|default:"—" }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Sub-County</p>
+            <p class="font-medium text-gray-800">{{ assessment.user.subcounty|default:"—" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disability Details -->
+      <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-wheelchair text-teal-600"></i>
+          </div>
+          <p class="text-xs text-gray-400">Disability Type</p>
+          <p class="text-sm font-bold text-gray-800 mt-0.5">{{ assessment.get_disability_type_display }}</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-hospital text-teal-600"></i>
+          </div>
+          <p class="text-xs text-gray-400">Assessed At</p>
+          <p class="text-sm font-bold text-gray-800 mt-0.5">{{ assessment.hospital.name }}</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-calendar text-teal-600"></i>
+          </div>
+          <p class="text-xs text-gray-400">Certified On</p>
+          <p class="text-sm font-bold text-gray-800 mt-0.5">{{ assessment.updated_at|date:"d M Y" }}</p>
+        </div>
+      </div>
+
+      <!-- Certificate Number -->
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-gray-400">Certificate Number</p>
+          <p class="text-base font-bold text-teal-700 font-mono">PWD-{{ assessment.hospital.county.name|upper|slice:":3" }}-{{ assessment.user.id_number }}-{{ assessment.pk|stringformat:"04d" }}</p>
+        </div>
+        {% if qr_code %}
+        <img src="{{ qr_code }}" alt="QR Code" class="w-16 h-16">
+        {% else %}
+        <div class="w-16 h-16 bg-teal-50 border border-teal-200 rounded-lg flex items-center justify-center">
+          <i class="fas fa-qrcode text-teal-400 text-2xl"></i>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Signatures -->
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <div class="text-center">
+          <div class="border-b-2 border-gray-300 mb-2 h-10"></div>
+          <p class="text-xs font-semibold text-gray-700">{{ assessment.medical_officer.get_full_name|default:"Medical Officer" }}</p>
+          <p class="text-xs text-gray-400">Medical Officer</p>
+        </div>
+        <div class="text-center">
+          <div class="border-b-2 border-gray-300 mb-2 h-10"></div>
+          <p class="text-xs font-semibold text-gray-700">{{ assessment.county_officer.get_full_name|default:"County Officer" }}</p>
+          <p class="text-xs text-gray-400">County Officer — {{ assessment.hospital.county.name }} County</p>
+        </div>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="text-center">
+        <span class="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide">
+          <i class="fas fa-check-circle"></i> Fully Certified
+        </span>
+        <p class="text-xs text-gray-400 mt-2">Valid for official use in Kenya. Issued under the Persons with Disabilities Act.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-teal-800 py-3 px-6 text-center">
+      <p class="text-teal-300 text-xs">PWD Access Kenya &nbsp;·&nbsp; {{ assessment.updated_at|date:"Y" }} &nbsp;·&nbsp; Verify at pwdaccess.go.ke</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
