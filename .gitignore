@@ -1,0 +1,23 @@
+# Claude Code internal (worktrees, settings, caches)
+.claude/
+
+# PHP uploads & user-generated content
+uploads/
+
+# Environment & credentials
+.env
+*.env
+config.local.php
+
+# XAMPP / IDE artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node / Composer (if ever added)
+node_modules/
+vendor/
+
+# OS artifacts
+desktop.ini
