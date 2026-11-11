@@ -1,0 +1,128 @@
+{% extends "base/base.html" %}
+{% block title %}Disability Certificate — {{ assessment.user.get_full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media print {
+    body { background: white !important; }
+    .no-print { display: none !important; }
+    .certificate { box-shadow: none !important; }
+  }
+  .certificate-border {
+    border: 12px solid #0d9488;
+    outline: 4px solid #99f6e4;
+    outline-offset: -20px;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Print controls -->
+<div class="no-print bg-teal-800 px-6 py-3 flex items-center justify-between">
+  <a href="{% url 'pwd:view_application' assessment.pk %}" class="flex items-center gap-2 text-teal-200 hover:text-white text-sm transition-colors">
+    <i class="fas fa-arrow-left"></i> Back to Application
+  </a>
+  <button onclick="window.print()"
+          class="flex items-center gap-2 bg-white text-teal-800 font-bold px-5 py-2 rounded-lg text-sm hover:bg-teal-50 transition-colors">
+    <i class="fas fa-print"></i> Print / Download PDF
+  </button>
+</div>
+
+<!-- Certificate -->
+<div class="min-h-screen bg-gray-100 flex items-center justify-center p-8 no-print-bg">
+  <div class="certificate bg-white w-full max-w-3xl certificate-border rounded-lg p-10 relative" style="min-height:700px;">
+
+    <!-- Watermark -->
+    <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+      <i class="fas fa-certificate text-teal-600" style="font-size:20rem;"></i>
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-8 relative z-10">
+      <div class="flex items-center justify-center gap-4 mb-4">
+        <div class="w-16 h-16 bg-teal-600 rounded-full flex items-center justify-center">
+          <i class="fas fa-wheelchair text-white text-2xl"></i>
+        </div>
+        <div class="text-left">
+          <p class="text-xs text-gray-500 uppercase tracking-widest">Republic of Kenya</p>
+          <p class="font-bold text-gray-800 text-lg">Ministry of Health</p>
+          <p class="text-teal-700 text-sm font-semibold">PWD Access — Disability Certification System</p>
+        </div>
+      </div>
+      <div class="border-t-2 border-b-2 border-teal-600 py-3 mt-4">
+        <h1 class="text-2xl font-bold text-teal-800 uppercase tracking-widest">Certificate of Disability</h1>
+        <p class="text-xs text-gray-500 mt-1">{{ assessment.get_disability_type_display }} Disability</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="relative z-10 text-center mb-8">
+      <p class="text-gray-600 text-sm mb-2">This is to certify that</p>
+      <p class="text-3xl font-bold text-gray-900 mb-1">{{ assessment.user.get_full_name|upper }}</p>
+      <p class="text-gray-500 text-sm mb-6">ID Number: <strong class="font-mono text-gray-800">{{ assessment.user.id_number|default:"—" }}</strong></p>
+
+      <p class="text-gray-600 text-sm leading-relaxed max-w-lg mx-auto">
+        has been duly assessed and certified as a person with <strong class="text-teal-700">{{ assessment.get_disability_type_display }} Disability</strong>
+        under the Persons with Disabilities Act, and is entitled to all rights and benefits provided thereunder.
+      </p>
+    </div>
+
+    <!-- Details grid -->
+    <div class="relative z-10 grid grid-cols-3 gap-4 mb-8 border border-gray-200 rounded-xl p-5 bg-teal-50/50">
+      <div class="text-center">
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Certificate No.</p>
+        <p class="font-bold text-gray-800 font-mono text-sm">PWD-{{ assessment.id|stringformat:"06d" }}</p>
+      </div>
+      <div class="text-center border-x border-gray-200">
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Issue Date</p>
+        <p class="font-bold text-gray-800 text-sm">{{ assessment.updated_at|date:"d F Y" }}</p>
+      </div>
+      <div class="text-center">
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">County</p>
+        <p class="font-bold text-gray-800 text-sm">{{ assessment.hospital.county.name|default:"—" }}</p>
+      </div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="relative z-10 grid grid-cols-3 gap-6 mb-8">
+      <div class="text-center">
+        <div class="border-b-2 border-gray-800 mb-2 h-10"></div>
+        <p class="text-xs font-semibold text-gray-700">{{ assessment.medical_officer.get_full_name|default:"Medical Officer" }}</p>
+        <p class="text-xs text-gray-500">Medical Officer</p>
+      </div>
+      <div class="text-center">
+        <div class="border-b-2 border-gray-800 mb-2 h-10"></div>
+        <p class="text-xs font-semibold text-gray-700">{{ assessment.health_officer.get_full_name|default:"Health Officer" }}</p>
+        <p class="text-xs text-gray-500">Health Officer</p>
+      </div>
+      <div class="text-center">
+        <div class="border-b-2 border-gray-800 mb-2 h-10"></div>
+        <p class="text-xs font-semibold text-gray-700">{{ assessment.county_officer.get_full_name|default:"County Officer" }}</p>
+        <p class="text-xs text-gray-500">County Officer</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="relative z-10 flex items-center justify-between border-t border-gray-200 pt-4">
+      <div>
+        <p class="text-xs text-gray-400">Hospital: {{ assessment.hospital.name|default:"—" }}</p>
+        <p class="text-xs text-gray-400">Assessment Date: {{ assessment.assessment_date|date:"d M Y"|default:"—" }}</p>
+      </div>
+      {% if qr_code %}
+      <div class="text-center">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-16 h-16 mx-auto">
+        <p class="text-xs text-gray-400 mt-1">Verify online</p>
+      </div>
+      {% else %}
+      <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+        <i class="fas fa-qrcode text-gray-300 text-2xl"></i>
+      </div>
+      {% endif %}
+      <div class="text-right">
+        <p class="text-xs text-gray-400">Ref: {{ assessment.hospital.county.name|default:"" }}/{{ assessment.get_disability_type_display|first|upper }}/{{ assessment.id }}</p>
+        <p class="text-xs text-gray-400">Printed: {% now "d M Y" %}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

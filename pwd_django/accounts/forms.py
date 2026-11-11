@@ -1,9 +1,10 @@
 from django import forms
+from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser
 
 
 class PWDRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, min_length=6)
+    password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
@@ -17,8 +18,11 @@ class PWDRegistrationForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        if cleaned.get('password') != cleaned.get('confirm_password'):
+        password = cleaned.get('password')
+        if password != cleaned.get('confirm_password'):
             raise forms.ValidationError('Passwords do not match.')
+        if password:
+            validate_password(password, self.instance)
         return cleaned
 
     def save(self, commit=True):
@@ -37,7 +41,7 @@ class OfficialRegistrationForm(forms.ModelForm):
         ('county_officer', 'County Officer'),
     ]
     role = forms.ChoiceField(choices=ROLE_CHOICES)
-    password = forms.CharField(widget=forms.PasswordInput, min_length=6)
+    password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
@@ -49,8 +53,11 @@ class OfficialRegistrationForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        if cleaned.get('password') != cleaned.get('confirm_password'):
+        password = cleaned.get('password')
+        if password != cleaned.get('confirm_password'):
             raise forms.ValidationError('Passwords do not match.')
+        if password:
+            validate_password(password, self.instance)
         return cleaned
 
     def save(self, commit=True):
@@ -74,11 +81,24 @@ class ProfileUpdateForm(forms.ModelForm):
 
 class ChangePasswordForm(forms.Form):
     current_password = forms.CharField(widget=forms.PasswordInput)
-    new_password = forms.CharField(widget=forms.PasswordInput, min_length=6)
+    new_password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_current_password(self):
+        current = self.cleaned_data['current_password']
+        if not self.user or not self.user.check_password(current):
+            raise forms.ValidationError('Current password is incorrect.')
+        return current
 
     def clean(self):
         cleaned = super().clean()
-        if cleaned.get('new_password') != cleaned.get('confirm_password'):
+        new_password = cleaned.get('new_password')
+        if new_password and new_password != cleaned.get('confirm_password'):
             raise forms.ValidationError('New passwords do not match.')
+        if new_password:
+            validate_password(new_password, self.user)
         return cleaned

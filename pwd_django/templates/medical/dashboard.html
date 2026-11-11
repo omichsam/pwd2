@@ -71,14 +71,14 @@
 </div>
 
 <div class="grid lg:grid-cols-2 gap-6">
-  <!-- Disability Distribution Chart -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <!-- Disability Distribution Chart (hidden on phones to keep the dashboard compact) -->
+  <div class="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="px-6 py-4 border-b border-gray-100">
       <h3 class="font-semibold text-gray-800">Disability Distribution</h3>
     </div>
     <div class="p-6">
       {% if disability_labels %}
-      <canvas id="disabilityChart" height="220"></canvas>
+      <div class="relative h-56 sm:h-64"><canvas id="disabilityChart"></canvas></div>
       {% else %}
       <div class="flex flex-col items-center py-10 text-center">
         <i class="fas fa-chart-bar text-gray-200 text-4xl mb-3"></i>
@@ -137,7 +137,7 @@ new Chart(ctx, {
     }]
   },
   options: {
-    responsive: true, cutout: '65%',
+    responsive: true, maintainAspectRatio: false, cutout: '65%',
     plugins: { legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 12 }, padding: 16 } } }
   }
 });

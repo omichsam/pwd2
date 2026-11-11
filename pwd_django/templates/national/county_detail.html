@@ -1,0 +1,281 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}{{ county.name }} County — Detail{% endblock %}
+{% block page_title %}{{ county.name }} County{% endblock %}
+{% block page_subtitle %}Deep analytics and officer breakdown{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Analytics</p>
+<a href="{% url 'national_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-globe w-5 text-center text-sm"></i><span>National Overview</span></a>
+<a href="{% url 'national_admin:county_breakdown' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Counties</span></a>
+<a href="{% url 'national_admin:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'national_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-users w-5 text-center text-sm"></i><span>Officials</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'national_admin:county_officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user-shield w-5 text-center text-sm"></i><span>County Officers</span></a>
+<a href="{% url 'national_admin:add_county' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Add County</span></a>
+<a href="{% url 'national_admin:chatbot_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-robot w-5 text-center text-sm"></i><span>Chatbot Settings</span></a>
+<a href="{% url 'national_admin:doc_checker_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-file-shield w-5 text-center text-sm"></i><span>Document Checker</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'national_admin:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'national_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="flex items-center gap-2 mb-5 text-sm text-gray-500">
+  <a href="{% url 'national_admin:county_breakdown' %}" class="hover:text-teal-600 transition-colors flex items-center gap-1">
+    <i class="fas fa-map text-xs"></i> Counties
+  </a>
+  <i class="fas fa-chevron-right text-xs text-gray-300"></i>
+  <span class="text-gray-800 font-medium">{{ county.name }}</span>
+</div>
+
+<!-- Hero -->
+<div class="bg-gradient-to-r from-teal-800 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 80% 50%,white 1px,transparent 1px);background-size:28px 28px;"></div>
+  <div class="relative z-10 flex items-center justify-between">
+    <div>
+      <p class="text-teal-200 text-sm mb-1">County Analytics</p>
+      <h2 class="text-2xl font-bold">{{ county.name }} County</h2>
+      <p class="text-teal-200 text-sm mt-1">{{ stats.total }} total assessments · {{ stats.approval_rate }}% approval rate</p>
+    </div>
+    <div class="text-right">
+      <div class="w-20 h-20 relative">
+        <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+          <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3.2"/>
+          <circle cx="18" cy="18" r="15.9" fill="none" stroke="white" stroke-width="3.2"
+                  stroke-dasharray="{{ stats.approval_rate }} {{ 100|add:0|floatformat:0 }}"
+                  stroke-linecap="round"/>
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-lg font-bold">{{ stats.approval_rate }}%</span>
+        </div>
+      </div>
+      <p class="text-teal-200 text-xs mt-1">Approval Rate</p>
+    </div>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center"><i class="fas fa-file-alt text-teal-600 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.total }}</span>
+    </div>
+    <p class="text-sm text-gray-500">Total Assessments</p>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center"><i class="fas fa-certificate text-emerald-500 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.certified }}</span>
+    </div>
+    <p class="text-sm text-gray-500">Certified</p>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center"><i class="fas fa-clock text-amber-500 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.pending }}</span>
+    </div>
+    <p class="text-sm text-gray-500">Pending</p>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center"><i class="fas fa-spinner text-sky-500 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.in_progress }}</span>
+    </div>
+    <p class="text-sm text-gray-500">In Pipeline</p>
+  </div>
+</div>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center"><i class="fas fa-times-circle text-red-400 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.rejected }}</span>
+    </div>
+    <p class="text-sm text-gray-500">Rejected</p>
+    <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5"><div class="bg-red-400 h-1.5 rounded-full" style="width:{{ stats.rejection_rate }}%"></div></div>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center"><i class="fas fa-stethoscope text-purple-500 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.medical_review }}</span>
+    </div>
+    <p class="text-sm text-gray-500">Medical Review</p>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center"><i class="fas fa-user-check text-indigo-500 text-sm"></i></div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.health_approved }}</span>
+    </div>
+    <p class="text-sm text-gray-500">Health Approved</p>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="flex items-center justify-between mb-2">
+      <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center"><i class="fas fa-percent text-teal-600 text-sm"></i></div>
+      <span class="text-2xl font-bold text-emerald-600">{{ stats.approval_rate }}%</span>
+    </div>
+    <p class="text-sm text-gray-500">Approval Rate</p>
+    <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:{{ stats.approval_rate }}%"></div></div>
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+  <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <i class="fas fa-chart-line text-teal-500"></i> Monthly Trend — Submitted vs Certified
+    </h3>
+    <canvas id="trendChart" height="130"></canvas>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <i class="fas fa-chart-pie text-teal-500"></i> Disability Distribution
+    </h3>
+    {% if dis_counts %}
+    <canvas id="disChart" height="190"></canvas>
+    {% else %}
+    <div class="flex flex-col items-center justify-center h-40 text-gray-300"><i class="fas fa-chart-pie text-4xl mb-2"></i><p class="text-sm">No data yet</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Hospital performance -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+  <div class="px-6 py-4 border-b border-gray-100">
+    <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-hospital text-teal-500"></i> Hospital Performance</h3>
+  </div>
+  <div class="overflow-x-auto">
+    <table id="hospitalTable" class="w-full min-w-[700px] text-sm whitespace-nowrap">
+      <thead class="bg-teal-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Hospital</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Med</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Hlth</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Total</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Certified</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Pending</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">In Prog</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Rejected</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Rate</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for h in hospitals %}
+        <tr class="hover:bg-teal-50/20 transition-colors">
+          <td class="px-6 py-3">
+            <div class="font-semibold text-gray-800">{{ h.name }}</div>
+          </td>
+          <td class="px-6 py-3 text-gray-600 text-center">{{ h.med_count }}</td>
+          <td class="px-6 py-3 text-gray-600 text-center">{{ h.hlt_count }}</td>
+          <td class="px-6 py-3 font-semibold text-gray-800">{{ h.total }}</td>
+          <td class="px-6 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">{{ h.h_certified }}</span></td>
+          <td class="px-6 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">{{ h.h_pending }}</span></td>
+          <td class="px-6 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">{{ h.h_in_prog }}</span></td>
+          <td class="px-6 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ h.h_rejected }}</span></td>
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-2">
+              <div class="w-14 bg-gray-100 rounded-full h-1.5 flex-shrink-0">
+                <div class="bg-emerald-500 h-1.5 rounded-full" style="width:{{ h.approval_rate }}%"></div>
+              </div>
+              <span class="text-xs font-medium text-gray-600">{{ h.approval_rate }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="px-6 py-10 text-center text-gray-400">No hospitals found in this county.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Officers -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <div class="px-6 py-4 border-b border-gray-100">
+    <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-users text-teal-500"></i> Officers in {{ county.name }}</h3>
+  </div>
+  <div class="overflow-x-auto">
+    <table id="officerTable" class="w-full min-w-[700px] text-sm whitespace-nowrap">
+      <thead class="bg-teal-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Name</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Role</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Hospital</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">License ID</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for o in officers %}
+        <tr class="hover:bg-teal-50/20 transition-colors">
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-xs flex-shrink-0">
+                {{ o.first_name|first|upper }}{{ o.last_name|first|upper }}
+              </div>
+              <span class="font-medium text-gray-800">{{ o.get_full_name }}</span>
+            </div>
+          </td>
+          <td class="px-6 py-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+              {% if o.role == 'medical_officer' %}bg-purple-100 text-purple-800
+              {% elif o.role == 'health_officer' %}bg-indigo-100 text-indigo-800
+              {% elif o.role == 'county_officer' %}bg-teal-100 text-teal-800
+              {% else %}bg-gray-100 text-gray-800{% endif %}">
+              {{ o.get_role_display }}
+            </span>
+          </td>
+          <td class="px-6 py-3 text-gray-600">{{ o.hospital.name|default:"—" }}</td>
+          <td class="px-6 py-3 text-gray-500 font-mono text-xs">{{ o.license_id|default:"—" }}</td>
+          <td class="px-6 py-3">
+            {% if o.is_approved %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><i class="fas fa-check-circle mr-1 text-xs"></i>Active</span>
+            {% else %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800"><i class="fas fa-clock mr-1 text-xs"></i>Pending</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">No officers found in this county.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function(){
+  $('#hospitalTable').DataTable({ order: [[3,'desc']], pageLength: 10, language: { emptyTable: 'No hospitals', zeroRecords: 'No matching hospitals' } });
+  $('#officerTable').DataTable({ order: [[1,'asc']], pageLength: 10, language: { emptyTable: 'No officers', zeroRecords: 'No matching officers' } });
+});
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: {{ monthly_labels|safe }},
+    datasets: [
+      { label: 'Submitted', data: {{ monthly_counts|safe }}, borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,0.08)', fill: true, tension: 0.4, pointBackgroundColor: '#0d9488', pointRadius: 4 },
+      { label: 'Certified', data: {{ monthly_cert_counts|safe }}, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.06)', fill: true, tension: 0.4, pointBackgroundColor: '#10b981', pointRadius: 4, borderDash: [4,3] }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+  }
+});
+
+{% if dis_counts %}
+new Chart(document.getElementById('disChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ dis_labels|safe }},
+    datasets: [{ data: {{ dis_counts|safe }}, backgroundColor: ['#0d9488','#2dd4bf','#14b8a6','#0f766e','#5eead4','#99f6e4'], borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+});
+{% endif %}
+</script>
+{% endblock %}

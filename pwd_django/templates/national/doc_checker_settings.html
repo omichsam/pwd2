@@ -1,0 +1,175 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Document Checker{% endblock %}
+{% block page_title %}Document Checker{% endblock %}
+{% block page_subtitle %}Screen documents uploaded during medical review{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Analytics</p>
+<a href="{% url 'national_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-globe w-5 text-center text-sm"></i><span>National Overview</span></a>
+<a href="{% url 'national_admin:county_breakdown' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Counties</span></a>
+<a href="{% url 'national_admin:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'national_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-users w-5 text-center text-sm"></i><span>Officials</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'national_admin:county_officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user-shield w-5 text-center text-sm"></i><span>County Officers</span></a>
+<a href="{% url 'national_admin:add_county' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Add County</span></a>
+<a href="{% url 'national_admin:chatbot_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-robot w-5 text-center text-sm"></i><span>Chatbot Settings</span></a>
+<a href="{% url 'national_admin:doc_checker_settings' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1" aria-current="page"><i class="fas fa-file-shield w-5 text-center text-sm"></i><span>Document Checker</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'national_admin:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'national_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+{% with input_cls="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" %}
+<div class="max-w-3xl">
+  {% for message in messages %}
+  <div role="status" class="mb-4 px-4 py-3 rounded-xl text-sm
+    {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+    {% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+
+  {% if form.errors %}
+  <div role="alert" class="mb-4 px-4 py-3 rounded-xl text-sm bg-red-50 text-red-700 border border-red-200">
+    <i class="fas fa-exclamation-circle mr-1"></i> Please fix the highlighted fields below.
+  </div>
+  {% endif %}
+
+  <!-- Live status -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
+    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Document Checker</p>
+    {% if live.active %}
+      <p class="mt-1 font-bold text-emerald-700"><i class="fas fa-circle text-[8px] align-middle mr-1"></i> On</p>
+      <p class="text-xs text-gray-500 mt-1">Runs on each document uploaded in medical review</p>
+    {% elif live.enabled %}
+      <p class="mt-1 font-bold text-amber-600"><i class="fas fa-circle text-[8px] align-middle mr-1"></i> Missing API key</p>
+      <p class="text-xs text-gray-500 mt-1">Enabled, but no key is set</p>
+    {% else %}
+      <p class="mt-1 font-bold text-gray-500"><i class="fas fa-circle text-[8px] align-middle mr-1"></i> Off</p>
+      <p class="text-xs text-gray-500 mt-1">Uploaded documents are not screened</p>
+    {% endif %}
+  </div>
+
+  <form method="post" id="dc-form" class="space-y-6" novalidate
+        data-try-url="{% url 'national_admin:doc_checker_settings_try' %}">
+    {% csrf_token %}
+    <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" aria-labelledby="dc-heading">
+      <div class="bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-5 flex items-center gap-3">
+        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><i class="fas fa-file-shield text-white"></i></div>
+        <div>
+          <h3 id="dc-heading" class="font-bold text-white">Document Checker API</h3>
+          <p class="text-teal-100 text-xs mt-0.5">Screens scan quality and possible alterations. Advisory only — the review still proceeds.</p>
+        </div>
+      </div>
+      <div class="p-6 space-y-5">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" name="enabled" {% if form.enabled.value %}checked{% endif %}
+                 class="mt-0.5 h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+          <span>
+            <span class="block text-sm font-semibold text-gray-800">Check documents uploaded during medical review</span>
+            <span class="block text-xs text-gray-500">When off, uploads are saved without screening.</span>
+          </span>
+        </label>
+
+        <div>
+          <label for="id_base_url" class="block text-xs font-semibold text-gray-600 mb-1">Base URL <span class="text-red-500">*</span></label>
+          <input type="url" name="base_url" id="id_base_url" value="{{ form.base_url.value|default:'' }}"
+                 class="{{ input_cls }}{% if form.base_url.errors %} border-red-400{% endif %}" placeholder="https://checker.example.org">
+          {% for e in form.base_url.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}
+          {% if form.base_url.value|slice:":7" == "http://" %}
+          <p class="text-xs text-amber-600 mt-1"><i class="fas fa-exclamation-triangle"></i> This address uses HTTP, so the key and documents are not encrypted. Use HTTPS in production.</p>
+          {% endif %}
+          <p class="text-xs text-gray-400 mt-1">The address the key was issued for, without a trailing <code>/</code>.</p>
+        </div>
+
+        <div>
+          <label for="id_api_key" class="block text-xs font-semibold text-gray-600 mb-1">API key</label>
+          <input type="password" name="api_key" id="id_api_key" autocomplete="new-password" spellcheck="false"
+                 class="{{ input_cls }} font-mono{% if form.api_key.errors %} border-red-400{% endif %}"
+                 placeholder="{% if saved_key_masked %}Leave blank to keep the saved key{% else %}Paste the key{% endif %}">
+          {% for e in form.api_key.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}
+          <p class="text-xs text-gray-500 mt-1">Sent as the <code>X-API-Key</code> header.
+            {% if saved_key_masked %}Saved key: <code class="font-mono">{{ saved_key_masked }}</code>.
+            {% elif env_key_masked %}Using the server's DOC_CHECKER_API_KEY (<code class="font-mono">{{ env_key_masked }}</code>). A key here replaces it.
+            {% else %}No key set yet.{% endif %}
+          </p>
+          {% if saved_key_masked %}
+          <label class="mt-2 inline-flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+            <input type="checkbox" name="clear_api_key" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500">
+            Remove the saved key{% if env_key_masked %} and use the server's key{% endif %}
+          </label>
+          {% endif %}
+        </div>
+
+        <div class="max-w-xs">
+          <label for="id_timeout_seconds" class="block text-xs font-semibold text-gray-600 mb-1">Wait for a result (seconds)</label>
+          <input type="number" min="1" max="120" name="timeout_seconds" id="id_timeout_seconds"
+                 value="{{ form.timeout_seconds.value|default:'' }}" class="{{ input_cls }}{% if form.timeout_seconds.errors %} border-red-400{% endif %}">
+          {% for e in form.timeout_seconds.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}
+          <p class="text-xs text-gray-500 mt-1">A new document takes about 5–40 seconds. Up to 120.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <button type="submit" name="action" value="test" data-dc-test
+                  class="px-4 py-2 bg-white border border-teal-600 text-teal-700 hover:bg-teal-50 font-semibold rounded-xl text-sm flex items-center gap-2 disabled:opacity-60">
+            <i class="fas fa-plug" data-dc-test-icon></i> <span data-dc-test-label>Test connection</span>
+          </button>
+          <span class="text-xs text-gray-500">Saves these settings first, so the key is kept.</span>
+        </div>
+        <div id="dc-test-result" aria-live="polite">{% if test_result %}{% include "national/_doc_checker_test_result.html" %}{% endif %}</div>
+      </div>
+    </section>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+      <button type="submit" name="action" value="save"
+              class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+        <i class="fas fa-save"></i> Save settings
+      </button>
+      <p class="text-xs text-gray-500">
+        {% if row %}Last saved {{ row.updated_at|date:"j M Y, H:i" }}{% if row.updated_by %} by {{ row.updated_by.get_full_name|default:row.updated_by.username }}{% endif %}.
+        {% else %}Not saved yet. These values come from the server's environment settings.{% endif %}
+      </p>
+    </div>
+
+    <div class="bg-teal-50 border border-teal-100 rounded-2xl p-4 text-sm text-teal-800">
+      <p class="font-semibold mb-2"><i class="fas fa-info-circle mr-1"></i> What the check does</p>
+      <ul class="list-disc list-inside space-y-1 text-xs">
+        <li><strong>Looks fine</strong> — proceed as normal.</li>
+        <li><strong>Rescan needed</strong> — the scan is too unclear to read; ask the applicant for a clearer copy.</li>
+        <li><strong>Manual review</strong> — possible alteration; worth a closer look.</li>
+      </ul>
+      <p class="text-xs mt-2">The result is a screening aid. The medical review always completes; officers see the result on the assessment.</p>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  var form = document.getElementById('dc-form');
+  if (!form || !window.fetch) return;
+  var tryUrl = form.dataset.tryUrl;
+  var csrfField = form.querySelector('[name=csrfmiddlewaretoken]');
+  var csrf = csrfField ? csrfField.value : '';
+  var btn = form.querySelector('[data-dc-test]');
+  var out = document.getElementById('dc-test-result');
+  if (!btn) return;
+
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    var label = btn.querySelector('[data-dc-test-label]'), icon = btn.querySelector('[data-dc-test-icon]');
+    var origLabel = label.textContent, origIcon = icon.className;
+    btn.disabled = true; label.textContent = 'Testing…'; icon.className = 'fas fa-spinner fa-spin';
+    var body = new FormData(form); body.set('action', 'test');
+    fetch(tryUrl, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf }, body: body, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { out.innerHTML = (d && d.html) || ''; })
+      .catch(function () {
+        out.innerHTML = '<p role="alert" class="mt-2 text-sm text-red-700"><i class="fas fa-times-circle mr-1"></i> Could not reach the server. Please try again.</p>';
+      })
+      .then(function () { btn.disabled = false; label.textContent = origLabel; icon.className = origIcon; });
+  });
+})();
+</script>
+{% endwith %}
+{% endblock %}

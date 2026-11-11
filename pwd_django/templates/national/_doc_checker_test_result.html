@@ -1,0 +1,9 @@
+<div role="status" class="rounded-xl border p-4 text-sm {% if test_result.ok %}bg-emerald-50 border-emerald-200 text-emerald-800{% else %}bg-red-50 border-red-200 text-red-700{% endif %}">
+  <p class="font-semibold"><i class="fas {% if test_result.ok %}fa-check-circle{% else %}fa-times-circle{% endif %} mr-1"></i> {{ test_result.summary }}</p>
+  {% if test_result.ok %}
+  <p class="text-xs mt-1">
+    Model <code class="font-mono">{{ test_result.model_sha }}…</code>
+    {% if test_result.warning_level is not None %} · warning level {{ test_result.warning_level }}{% endif %}
+  </p>
+  {% endif %}
+</div>

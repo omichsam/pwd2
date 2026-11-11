@@ -1,7 +1,7 @@
 {% extends "base/dashboard_layout.html" %}
 {% block title %}Health Dashboard{% endblock %}
 {% block page_title %}Health Officer Dashboard{% endblock %}
-{% block page_subtitle %}{{ county.name|default:"" }} County{% endblock %}
+{% block page_subtitle %}{{ hospital.name|default:"Health Officer Dashboard" }}{% endblock %}
 
 {% block sidebar_nav %}
 <p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
@@ -31,7 +31,7 @@
     <div>
       <h2 class="text-2xl font-bold">Health Officer Portal</h2>
       <p class="text-teal-200 mt-1 text-sm flex items-center gap-2">
-        <i class="fas fa-map-marker-alt"></i> {{ county.name|default:"No county assigned" }} County
+        <i class="fas fa-hospital"></i> {{ hospital.name|default:"No hospital assigned" }}
       </p>
     </div>
     <a href="{% url 'health:assessment_list' %}"

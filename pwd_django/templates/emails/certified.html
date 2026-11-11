@@ -1,0 +1,16 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<p class="greeting">Congratulations, {{ user.first_name }}!</p>
+<p>Your PWD disability certificate has been officially issued. You can now download and print your certificate from the portal.</p>
+<div class="info-box">
+  <p><strong>Certificate Details</strong><br>
+  Assessment #: <strong>{{ assessment.pk }}</strong><br>
+  Disability Type: <strong>{{ assessment.get_disability_type_display }}</strong><br>
+  Hospital: <strong>{{ assessment.hospital.name }}</strong><br>
+  Status: <span class="badge badge-success">Fully Certified</span></p>
+</div>
+<p>Your certificate is recognised across all government departments and entitles you to applicable disability benefits and services.</p>
+<a href="http://localhost:8000/pwd/certificate/{{ assessment.pk }}/print/" class="btn">Download My Certificate</a>
+<div class="divider"></div>
+<p style="font-size:13px;color:#9ca3af;">Keep this certificate safe. You can always re-print it from the portal at any time.</p>
+{% endblock %}

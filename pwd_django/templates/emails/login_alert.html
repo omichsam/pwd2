@@ -1,0 +1,13 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<p class="greeting">Hello, {{ user.first_name }}!</p>
+<p>A new login was detected on your PWD Access Kenya account.</p>
+<div class="info-box">
+  <p><strong>Login Details</strong><br>
+  Account: <strong>{{ user.get_full_name }}</strong><br>
+  Role: <strong>{{ user.get_role_display }}</strong><br>
+  Time: <strong>{% now "d M Y, H:i" %}</strong></p>
+</div>
+<p>If this was you, no action is needed. If you did not log in, please reset your password immediately.</p>
+<a href="http://localhost:8000/forgot-password/" class="btn">Reset My Password</a>
+{% endblock %}

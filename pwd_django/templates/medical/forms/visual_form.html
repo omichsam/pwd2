@@ -1,0 +1,486 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Visual Assessment — #{{ assessment.id }}{% endblock %}
+{% block page_title %}Visual Impairment Assessment{% endblock %}
+{% block page_subtitle %}Assessment #{{ assessment.id }} — {{ assessment.user.get_full_name }}{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'medical:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'medical:assessment_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Pending Assessments</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'medical:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media (min-width: 1024px) {
+    main > div { padding: 0 !important; }
+    main { overflow: hidden !important; }
+    footer { display: none !important; }
+  }
+  @media (max-width: 1023px) {
+    /* Relax the fixed-height two-pane shell so the form flows and scrolls on phones/tablets */
+    main { overflow: visible !important; }
+    main > div { height: auto !important; overflow: visible !important; }
+    main [style*="100vh"] { height: auto !important; min-height: 0 !important; }
+    main .overflow-hidden { overflow: visible !important; }
+    main .overflow-y-auto { overflow-y: visible !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-4 overflow-hidden" style="height:calc(100vh - 4rem); padding:1rem 1.25rem 1rem 1.25rem"
+     x-data="{ step: 1 }">
+
+  <!-- LEFT: Patient card -->
+  <div class="w-full lg:w-52 flex-shrink-0 flex flex-col gap-3 lg:overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex-shrink-0">
+      <div class="bg-gradient-to-br from-teal-700 to-teal-500 px-4 py-3 text-center">
+        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-1.5 text-sm">
+          {{ assessment.user.first_name|first|upper }}{{ assessment.user.last_name|first|upper }}
+        </div>
+        <p class="font-bold text-white text-sm leading-tight">{{ assessment.user.get_full_name }}</p>
+        <p class="text-teal-200 text-xs mt-0.5">ID: {{ assessment.user.id_number|default:"—" }}</p>
+      </div>
+      <div class="p-3 space-y-1 text-xs">
+        <div class="flex justify-between"><span class="text-gray-400">Gender</span><span class="font-medium text-gray-700">{{ assessment.user.get_gender_display|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">DOB</span><span class="font-medium text-gray-700">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Phone</span><span class="font-medium text-gray-700">{{ assessment.user.mobile_number|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">County</span><span class="font-medium text-gray-700">{{ assessment.user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Hospital</span><span class="font-medium text-gray-700 text-right leading-tight">{{ assessment.hospital.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Appt</span><span class="font-medium text-gray-700">{{ assessment.assessment_date|date:"d M Y" }}</span></div>
+      </div>
+    </div>
+
+    <!-- Section nav -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex-shrink-0">
+      <p class="text-xs font-semibold text-gray-500 mb-2 px-1">Sections</p>
+      <div class="space-y-1">
+        <button type="button" @click="step=1" :class="step==1?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>1?'bg-teal-600 text-white':step==1?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors">
+            <template x-if="step>1"><i class="fas fa-check" style="font-size:8px"></i></template>
+            <template x-if="step<=1"><span>1</span></template>
+          </span>History &amp; Background
+        </button>
+        <button type="button" @click="step=2" :class="step==2?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>2?'bg-teal-600 text-white':step==2?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors">
+            <template x-if="step>2"><i class="fas fa-check" style="font-size:8px"></i></template>
+            <template x-if="step<=2"><span>2</span></template>
+          </span>Visual Acuity
+        </button>
+        <button type="button" @click="step=3" :class="step==3?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>3?'bg-teal-600 text-white':step==3?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors">
+            <template x-if="step>3"><i class="fas fa-check" style="font-size:8px"></i></template>
+            <template x-if="step<=3"><span>3</span></template>
+          </span>Ophthalmic Exam
+        </button>
+        <button type="button" @click="step=4" :class="step==4?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-colors text-left">
+          <span :class="step==4?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+          Tests &amp; Conclusion
+        </button>
+      </div>
+    </div>
+
+    <a href="{% url 'medical:view_assessment' assessment.pk %}"
+       class="flex items-center gap-2 text-xs text-gray-400 hover:text-teal-600 font-medium transition-colors px-1">
+      <i class="fas fa-arrow-left"></i> Back to Assessment
+    </a>
+  </div>
+
+  <!-- RIGHT: Wizard -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-0">
+
+    <!-- Progress bar -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-2.5 mb-3 flex items-center gap-3 flex-shrink-0">
+      <div class="flex items-center gap-1 flex-1">
+        <template x-for="i in [1,2,3,4]" :key="i">
+          <div class="flex items-center gap-1 flex-1 last:flex-none">
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <div :class="step >= i ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-400'"
+                   class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors">
+                <template x-if="step > i"><i class="fas fa-check" style="font-size:8px"></i></template>
+                <template x-if="step <= i"><span x-text="i"></span></template>
+              </div>
+              <span :class="step >= i ? 'text-teal-700 font-semibold' : 'text-gray-400'"
+                    class="text-xs transition-colors hidden lg:block"
+                    x-text="i==1?'History':i==2?'Acuity':i==3?'Ophthalmic':'Conclusion'"></span>
+            </div>
+            <template x-if="i < 4">
+              <div class="flex-1 h-0.5 mx-1" :class="step > i ? 'bg-teal-500' : 'bg-gray-200'"></div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <span class="text-xs text-gray-400 flex-shrink-0 ml-2" x-text="'Step ' + step + ' of 4'"></span>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="flex-1 flex flex-col min-h-0">
+      {% csrf_token %}
+
+      <!-- ── STEP 1: History & Background ── -->
+      <div x-show="step==1" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-5 py-2.5 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-history"></i> 1. History &amp; Background</h3>
+        </div>
+        <div class="flex-1 p-5 flex flex-col gap-4 overflow-hidden min-h-0">
+          <div class="flex-1 flex flex-col min-h-0">
+            <label class="block text-xs font-semibold text-gray-600 mb-1 flex-shrink-0">Assistive Device</label>
+            <textarea name="assistive_devices" placeholder="e.g. Spectacles, magnifiers, white cane…"
+                      class="flex-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none transition">{{ form.assistive_devices.value|default:'' }}</textarea>
+          </div>
+          <div class="flex-1 flex flex-col min-h-0">
+            <label class="block text-xs font-semibold text-gray-600 mb-1 flex-shrink-0">Medical History</label>
+            <textarea name="medical_history" placeholder="General medical history relevant to visual impairment…"
+                      class="flex-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none transition">{{ form.medical_history.value|default:'' }}</textarea>
+          </div>
+          <div class="flex-1 flex flex-col min-h-0">
+            <label class="block text-xs font-semibold text-gray-600 mb-1 flex-shrink-0">Ocular History</label>
+            <textarea name="ocular_history" placeholder="Previous eye conditions, surgeries, injuries…"
+                      class="flex-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none transition">{{ form.ocular_history.value|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: Visual Acuity ── -->
+      <div x-show="step==2" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-5 py-2.5 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-eye"></i> 2. Visual Acuity</h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Distance Visual Acuity</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Right Eye -->
+            <div class="space-y-3">
+              <div class="bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 text-center">
+                <span class="text-xs font-bold text-sky-700">Right Eye</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">With Correction</label>
+                <input type="text" name="visual_acuity_right" value="{{ form.visual_acuity_right.value|default:'' }}" placeholder="e.g. 6/6"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Without Correction</label>
+                <input type="text" name="visual_acuity_right_uncorrected" value="{{ form.visual_acuity_right_uncorrected.value|default:'' }}" placeholder="e.g. 6/60"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Left Eye -->
+            <div class="space-y-3">
+              <div class="bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2 text-center">
+                <span class="text-xs font-bold text-indigo-700">Left Eye</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">With Correction</label>
+                <input type="text" name="visual_acuity_left" value="{{ form.visual_acuity_left.value|default:'' }}" placeholder="e.g. 6/6"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Without Correction</label>
+                <input type="text" name="visual_acuity_left_uncorrected" value="{{ form.visual_acuity_left_uncorrected.value|default:'' }}" placeholder="e.g. 6/60"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Near Vision -->
+            <div class="space-y-3">
+              <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 text-center">
+                <span class="text-xs font-bold text-emerald-700">Near Vision Test</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">With Correction</label>
+                <input type="text" name="near_vision_corrected" value="{{ form.near_vision_corrected.value|default:'' }}" placeholder="e.g. N6"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Without Correction</label>
+                <input type="text" name="near_vision_uncorrected" value="{{ form.near_vision_uncorrected.value|default:'' }}" placeholder="e.g. N12"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: Ophthalmic Examination ── -->
+      <div x-show="step==3" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-5 py-2.5 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-search"></i> 3. Ophthalmic Examination</h3>
+        </div>
+        <!-- Sticky column headers -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 pt-4 pb-2 flex-shrink-0">
+          <div class="bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 text-center">
+            <span class="text-xs font-bold text-sky-700">Right Eye</span>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2 text-center">
+            <span class="text-xs font-bold text-indigo-700">Left Eye</span>
+          </div>
+        </div>
+        <!-- Scrollable field rows -->
+        <div class="flex-1 overflow-y-auto px-5 pb-4 min-h-0">
+          <div class="space-y-3">
+            {% for field_name, label in field_pairs %}{% endfor %}
+            <!-- Present Eyeball -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Present Eyeball</label>
+                <input type="text" name="present_eyeball_right" value="{{ form.present_eyeball_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Present Eyeball</label>
+                <input type="text" name="present_eyeball_left" value="{{ form.present_eyeball_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Squint -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Squint</label>
+                <input type="text" name="squint_right" value="{{ form.squint_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Squint</label>
+                <input type="text" name="squint_left" value="{{ form.squint_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Nystagmus -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nystagmus</label>
+                <input type="text" name="nystagmus_right" value="{{ form.nystagmus_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nystagmus</label>
+                <input type="text" name="nystagmus_left" value="{{ form.nystagmus_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Tearing -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Tearing</label>
+                <input type="text" name="tearing_right" value="{{ form.tearing_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Tearing</label>
+                <input type="text" name="tearing_left" value="{{ form.tearing_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Lids -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Lids</label>
+                <input type="text" name="lids_right" value="{{ form.lids_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Lids</label>
+                <input type="text" name="lids_left" value="{{ form.lids_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Conjunctiva -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Conjunctiva</label>
+                <input type="text" name="conjunctiva_right" value="{{ form.conjunctiva_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Conjunctiva</label>
+                <input type="text" name="conjunctiva_left" value="{{ form.conjunctiva_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Cornea -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Cornea</label>
+                <input type="text" name="cornea_right" value="{{ form.cornea_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Cornea</label>
+                <input type="text" name="cornea_left" value="{{ form.cornea_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Anterior Chamber -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Anterior Chamber</label>
+                <input type="text" name="anterior_chamber_right" value="{{ form.anterior_chamber_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Anterior Chamber</label>
+                <input type="text" name="anterior_chamber_left" value="{{ form.anterior_chamber_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Iris -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Iris</label>
+                <input type="text" name="iris_right" value="{{ form.iris_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Iris</label>
+                <input type="text" name="iris_left" value="{{ form.iris_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Pupil -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Pupil</label>
+                <input type="text" name="pupil_right" value="{{ form.pupil_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Pupil</label>
+                <input type="text" name="pupil_left" value="{{ form.pupil_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Lens -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Lens</label>
+                <input type="text" name="lens_right" value="{{ form.lens_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Lens</label>
+                <input type="text" name="lens_left" value="{{ form.lens_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+            <!-- Fundus -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Fundus</label>
+                <input type="text" name="fundus_right" value="{{ form.fundus_right.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Fundus</label>
+                <input type="text" name="fundus_left" value="{{ form.fundus_left.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: Specialized Tests & Conclusion ── -->
+      <div x-show="step==4" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-5 py-2.5 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-flask"></i> 4. Specialized Tests &amp; Conclusion</h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Specialized Tests</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Humphreys Visual Field</label>
+              <input type="text" name="humphreys_visual_field" value="{{ form.humphreys_visual_field.value|default:'' }}" placeholder="e.g. Full, Constricted"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Colour Vision</label>
+              <input type="text" name="colour_vision" value="{{ form.colour_vision.value|default:'' }}" placeholder="e.g. Normal, Defective"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Stereopsis</label>
+              <input type="text" name="stereopsis" value="{{ form.stereopsis.value|default:'' }}" placeholder="e.g. Present, Absent"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+          </div>
+
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Conclusion</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Visual Category</label>
+              <input type="text" name="visual_category" value="{{ form.visual_category.value|default:'' }}" placeholder="e.g. Category I, II, III"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Cause of Vision Loss</label>
+              <input type="text" name="cause_of_vision_loss" value="{{ form.cause_of_vision_loss.value|default:'' }}" placeholder="e.g. Glaucoma, Cataract"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Percentage Disability (%)</label>
+              <input type="text" name="percentage_disability" value="{{ form.percentage_disability.value|default:'' }}" placeholder="e.g. 40"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Possible Intervention</label>
+              <input type="text" name="possible_intervention" value="{{ form.possible_intervention.value|default:'' }}" placeholder="e.g. Surgery, Optical aids"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Recommendations</label>
+              <textarea name="recommendations" rows="3" placeholder="Clinical recommendations…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none transition">{{ form.recommendations.value|default:'' }}</textarea>
+            </div>
+            <div class="flex flex-col gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Conclusion</label>
+                <select name="conclusion" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 transition">
+                  <option value="">— Select —</option>
+                  {% for val, label in form.conclusion.field.choices %}{% if val %}<option value="{{ val }}" {% if form.conclusion.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Upload Document <span class="font-normal text-gray-400">(optional)</span></label>
+                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png"
+                       class="w-full text-xs text-gray-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between mt-3 flex-shrink-0">
+        <button type="button" @click="step--" x-show="step > 1"
+                class="inline-flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm">
+          <i class="fas fa-arrow-left text-xs"></i> Back
+        </button>
+        <div x-show="step == 1"></div>
+        <div class="flex items-center gap-3">
+          <a href="{% url 'medical:view_assessment' assessment.pk %}" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</a>
+          <button type="button" @click="step++" x-show="step < 4"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+            Next <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+          <button type="submit" x-show="step == 4"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-2.5 rounded-xl transition-colors shadow-sm text-sm">
+            <i class="fas fa-paper-plane text-xs"></i> Submit Assessment
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,344 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Mental Assessment — #{{ assessment.id }}{% endblock %}
+{% block page_title %}Mental Health Disability Assessment{% endblock %}
+{% block page_subtitle %}Assessment #{{ assessment.id }} — {{ assessment.user.get_full_name }}{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'medical:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'medical:assessment_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Pending Assessments</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'medical:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media (min-width: 1024px) {
+    main > div { padding: 0 !important; }
+    main { overflow: hidden !important; }
+    footer { display: none !important; }
+  }
+  @media (max-width: 1023px) {
+    /* Relax the fixed-height two-pane shell so the form flows and scrolls on phones/tablets */
+    main { overflow: visible !important; }
+    main > div { height: auto !important; overflow: visible !important; }
+    main [style*="100vh"] { height: auto !important; min-height: 0 !important; }
+    main .overflow-hidden { overflow: visible !important; }
+    main .overflow-y-auto { overflow-y: visible !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-5 overflow-hidden" style="height:calc(100vh - 6.5rem)" x-data="{ step: 1 }">
+
+  <!-- LEFT: Patient card + step nav -->
+  <div class="w-full lg:w-56 flex-shrink-0 flex flex-col gap-3 lg:overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex-shrink-0">
+      <div class="bg-gradient-to-br from-teal-700 to-teal-500 px-4 py-4 text-center">
+        <div class="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2 text-base">
+          {{ assessment.user.first_name|first|upper }}{{ assessment.user.last_name|first|upper }}
+        </div>
+        <p class="font-bold text-white text-sm leading-tight">{{ assessment.user.get_full_name }}</p>
+        <p class="text-teal-200 text-xs mt-0.5">ID: {{ assessment.user.id_number|default:"—" }}</p>
+      </div>
+      <div class="p-3 space-y-1.5 text-xs">
+        <div class="flex justify-between"><span class="text-gray-400">Gender</span><span class="font-medium text-gray-700">{{ assessment.user.get_gender_display|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">DOB</span><span class="font-medium text-gray-700">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Phone</span><span class="font-medium text-gray-700">{{ assessment.user.mobile_number|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">County</span><span class="font-medium text-gray-700">{{ assessment.user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Hospital</span><span class="font-medium text-gray-700 text-right leading-tight">{{ assessment.hospital.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Appt</span><span class="font-medium text-gray-700">{{ assessment.assessment_date|date:"d M Y" }}</span></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex-shrink-0">
+      <p class="text-xs font-semibold text-gray-500 mb-2.5 px-1">Sections</p>
+      <div class="space-y-1">
+        <button type="button" @click="step=1" :class="step==1?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>1?'bg-teal-600 text-white':step==1?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>1"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=1"><span>1</span></template>
+          </span>Clinical History &amp; Mental Status
+        </button>
+        <button type="button" @click="step=2" :class="step==2?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>2?'bg-teal-600 text-white':step==2?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>2"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=2"><span>2</span></template>
+          </span>Functional Assessment
+        </button>
+        <button type="button" @click="step=3" :class="step==3?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step==3?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+          Summary &amp; Upload
+        </button>
+      </div>
+    </div>
+
+    <a href="{% url 'medical:view_assessment' assessment.pk %}" class="flex items-center gap-2 text-xs text-gray-400 hover:text-teal-600 font-medium transition-colors px-1">
+      <i class="fas fa-arrow-left"></i> Back to Assessment
+    </a>
+  </div>
+
+  <!-- RIGHT: Wizard -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-0">
+
+    <!-- Progress bar -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3 mb-4 flex items-center gap-4 flex-shrink-0">
+      <div class="flex items-center gap-2 flex-1">
+        <template x-for="i in [1,2,3]" :key="i">
+          <div class="flex items-center gap-2 flex-1 last:flex-none">
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <div :class="step >= i ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-400'"
+                   class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors">
+                <template x-if="step > i"><i class="fas fa-check" style="font-size:9px"></i></template>
+                <template x-if="step <= i"><span x-text="i"></span></template>
+              </div>
+              <span :class="step >= i ? 'text-teal-700 font-semibold' : 'text-gray-400'"
+                    class="text-xs transition-colors hidden lg:block"
+                    x-text="['Clinical History & Mental Status','Functional Assessment','Summary & Upload'][i-1]"></span>
+            </div>
+            <template x-if="i < 3">
+              <div class="flex-1 h-0.5 mx-1" :class="step > i ? 'bg-teal-500' : 'bg-gray-200'"></div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <span class="text-xs text-gray-400 flex-shrink-0" x-text="'Step ' + step + ' of 3'"></span>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="flex-1 flex flex-col min-h-0">
+      {% csrf_token %}
+
+      <!-- ══ STEP 1: Clinical History & Mental Status ══ -->
+      <div x-show="step==1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-brain"></i> 1. Clinical History &amp; Mental Status</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Brief Clinical History <span class="font-normal text-gray-400">(Past and Present Medical History)</span></label>
+            <textarea name="history" rows="6" placeholder="Onset, duration, previous episodes, hospitalisations, family psychiatric history…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.history.value|default:'' }}</textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Mental Status Evaluation</label>
+            <textarea name="mental_status_exam" rows="6" placeholder="Appearance, behaviour, speech, mood, affect, thought content, perception, cognition, insight…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.mental_status_exam.value|default:'' }}</textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: Functional Assessment Tool ══ -->
+      <div x-show="step==2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-tasks"></i> 2. Functional Assessment</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          <div class="bg-teal-50/50 border border-teal-100 rounded-2xl px-5 py-4">
+            <p class="text-sm font-semibold text-teal-800 mb-0.5">Complete the Assessment Tool Below by Scoring Appropriately</p>
+            <p class="text-xs text-teal-600">Knows how and when to feed, toilet or groom self</p>
+          </div>
+
+          <!-- Self-care row -->
+          <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Self-Care Activities</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Feeding</label>
+                <select name="feeding_score" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                  <option value="">— Select —</option>
+                  <option value="0" {% if form.feeding_score.value == "0" %}selected{% endif %}>0 — Completely Independent</option>
+                  <option value="1" {% if form.feeding_score.value == "1" %}selected{% endif %}>1 — Requires Minimal Assistance</option>
+                  <option value="2" {% if form.feeding_score.value == "2" %}selected{% endif %}>2 — Requires Moderate Assistance</option>
+                  <option value="3" {% if form.feeding_score.value == "3" %}selected{% endif %}>3 — Requires Maximum Assistance</option>
+                  <option value="4" {% if form.feeding_score.value == "4" %}selected{% endif %}>4 — Completely Dependent</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Toileting</label>
+                <select name="toileting_score" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                  <option value="">— Select —</option>
+                  <option value="0" {% if form.toileting_score.value == "0" %}selected{% endif %}>0 — Completely Independent</option>
+                  <option value="1" {% if form.toileting_score.value == "1" %}selected{% endif %}>1 — Requires Minimal Assistance</option>
+                  <option value="2" {% if form.toileting_score.value == "2" %}selected{% endif %}>2 — Requires Moderate Assistance</option>
+                  <option value="3" {% if form.toileting_score.value == "3" %}selected{% endif %}>3 — Requires Maximum Assistance</option>
+                  <option value="4" {% if form.toileting_score.value == "4" %}selected{% endif %}>4 — Completely Dependent</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Grooming</label>
+                <select name="grooming_score" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                  <option value="">— Select —</option>
+                  <option value="0" {% if form.grooming_score.value == "0" %}selected{% endif %}>0 — Completely Independent</option>
+                  <option value="1" {% if form.grooming_score.value == "1" %}selected{% endif %}>1 — Requires Minimal Assistance</option>
+                  <option value="2" {% if form.grooming_score.value == "2" %}selected{% endif %}>2 — Requires Moderate Assistance</option>
+                  <option value="3" {% if form.grooming_score.value == "3" %}selected{% endif %}>3 — Requires Maximum Assistance</option>
+                  <option value="4" {% if form.grooming_score.value == "4" %}selected{% endif %}>4 — Completely Dependent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Restriction row -->
+          <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Participation &amp; Restriction</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Physical / Daytime Disability</label>
+                <select name="physical_disability_score" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                  <option value="">— Select —</option>
+                  <option value="0" {% if form.physical_disability_score.value == "0" %}selected{% endif %}>0 — Completely Independent</option>
+                  <option value="1" {% if form.physical_disability_score.value == "1" %}selected{% endif %}>1 — Requires Minimal Assistance</option>
+                  <option value="2" {% if form.physical_disability_score.value == "2" %}selected{% endif %}>2 — Requires Moderate Assistance</option>
+                  <option value="3" {% if form.physical_disability_score.value == "3" %}selected{% endif %}>3 — Requires Maximum Assistance</option>
+                  <option value="4" {% if form.physical_disability_score.value == "4" %}selected{% endif %}>4 — Completely Dependent</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Employability / Schooling</label>
+                <select name="employability_score" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                  <option value="">— Select —</option>
+                  <option value="0" {% if form.employability_score.value == "0" %}selected{% endif %}>0 — No Restriction</option>
+                  <option value="1" {% if form.employability_score.value == "1" %}selected{% endif %}>1 — Mild Restriction</option>
+                  <option value="2" {% if form.employability_score.value == "2" %}selected{% endif %}>2 — Moderate Restriction</option>
+                  <option value="3" {% if form.employability_score.value == "3" %}selected{% endif %}>3 — Severe Restriction</option>
+                  <option value="4" {% if form.employability_score.value == "4" %}selected{% endif %}>4 — Complete Restriction</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scoring key reference -->
+          <div class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+            <p class="text-xs font-semibold text-gray-600 mb-2">Scoring Key</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-center">
+              <div class="bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-1.5"><p class="text-xs font-bold text-emerald-700">0</p><p class="text-xs text-emerald-600 leading-tight">Fully Independent</p></div>
+              <div class="bg-sky-50 border border-sky-100 rounded-lg px-2 py-1.5"><p class="text-xs font-bold text-sky-700">1</p><p class="text-xs text-sky-600 leading-tight">Minimal Aid</p></div>
+              <div class="bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5"><p class="text-xs font-bold text-amber-700">2</p><p class="text-xs text-amber-600 leading-tight">Moderate Aid</p></div>
+              <div class="bg-orange-50 border border-orange-100 rounded-lg px-2 py-1.5"><p class="text-xs font-bold text-orange-700">3</p><p class="text-xs text-orange-600 leading-tight">Maximum Aid</p></div>
+              <div class="bg-red-50 border border-red-100 rounded-lg px-2 py-1.5"><p class="text-xs font-bold text-red-700">4</p><p class="text-xs text-red-600 leading-tight">Fully Dependent</p></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: Summary & Upload ══ -->
+      <div x-show="step==3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-clipboard-check"></i> 3. Summary &amp; Upload</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Disorder Type</label>
+              <select name="disorder_type" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                <option value="">— Select —</option>
+                {% for val, label in form.disorder_type.field.choices %}{% if val %}<option value="{{ val }}" {% if form.disorder_type.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">IQ Score <span class="font-normal text-gray-400">(if applicable)</span></label>
+              <input type="number" name="iq_score" value="{{ form.iq_score.value|default:'' }}" placeholder="e.g. 65"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Current Medication</label>
+              <input type="text" name="current_medication" value="{{ form.current_medication.value|default:'' }}"
+                     placeholder="List medications and dosages"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Duration of Illness</label>
+              <input type="text" name="duration_of_illness" value="{{ form.duration_of_illness.value|default:'' }}"
+                     placeholder="e.g. 3 years, since 2019"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Major Cause of Disability</label>
+              <input type="text" name="major_cause_of_disability" value="{{ form.major_cause_of_disability.value|default:'' }}"
+                     placeholder="e.g. Schizophrenia, traumatic brain injury"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Recommended Assistive Products</label>
+              <input type="text" name="assistive_devices" value="{{ form.assistive_devices.value|default:'' }}"
+                     placeholder="e.g. Communication aids, sensory tools"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Other Required Services</label>
+              <input type="text" name="other_required_services" value="{{ form.other_required_services.value|default:'' }}"
+                     placeholder="e.g. Psychotherapy, community rehabilitation"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Conclusion</label>
+              <select name="conclusion" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                <option value="">— Select —</option>
+                {% for val, label in form.conclusion.field.choices %}{% if val %}<option value="{{ val }}" {% if form.conclusion.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Clinical Recommendations</label>
+              <textarea name="recommendations" rows="2" placeholder="e.g. Continued psychiatric care, caregiver support…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.recommendations.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Upload -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Upload Supporting Document <span class="text-gray-400 font-normal">(PDF, JPG, PNG — optional)</span></label>
+            <div class="border-2 border-dashed border-gray-200 hover:border-teal-400 rounded-xl px-5 py-4 flex items-center gap-4 transition-colors">
+              <i class="fas fa-cloud-upload-alt text-gray-300 text-2xl flex-shrink-0"></i>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-gray-500 mb-1">Psychiatric reports, psychological assessments, referral letters</p>
+                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png"
+                       class="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between mt-4 flex-shrink-0">
+        <button type="button" @click="step--" x-show="step > 1"
+                class="inline-flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm">
+          <i class="fas fa-arrow-left text-xs"></i> Back
+        </button>
+        <div x-show="step == 1"></div>
+        <div class="flex items-center gap-3">
+          <a href="{% url 'medical:view_assessment' assessment.pk %}" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</a>
+          <button type="button" @click="step++" x-show="step < 3"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+            Next <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+          <button type="submit" x-show="step == 3"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-2.5 rounded-xl transition-colors shadow-sm text-sm">
+            <i class="fas fa-paper-plane text-xs"></i> Submit Assessment
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Edit County Officer{% endblock %}
+{% block page_title %}Edit County Officer{% endblock %}
+{% block page_subtitle %}Update account details for {{ officer.get_full_name }}{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Analytics</p>
+<a href="{% url 'national_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-globe w-5 text-center text-sm"></i><span>National Overview</span></a>
+<a href="{% url 'national_admin:county_breakdown' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Counties</span></a>
+<a href="{% url 'national_admin:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'national_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-users w-5 text-center text-sm"></i><span>Officials</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'national_admin:county_officer_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user-shield w-5 text-center text-sm"></i><span>County Officers</span></a>
+<a href="{% url 'national_admin:add_county' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Add County</span></a>
+<a href="{% url 'national_admin:chatbot_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-robot w-5 text-center text-sm"></i><span>Chatbot Settings</span></a>
+<a href="{% url 'national_admin:doc_checker_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-file-shield w-5 text-center text-sm"></i><span>Document Checker</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'national_admin:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'national_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+
+  {% for message in messages %}
+  <div class="mb-4 px-4 py-3 rounded-xl text-sm
+    {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+    {% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+
+  <!-- Officer summary card -->
+  <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-5 flex items-center gap-4">
+    <div class="w-12 h-12 bg-purple-200 text-purple-800 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+      {{ officer.first_name|first|upper }}{{ officer.last_name|first|upper }}
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold text-gray-800">{{ officer.get_full_name }}</p>
+      <p class="text-xs text-gray-500">License ID: <span class="font-mono">{{ officer.license_id }}</span></p>
+      <p class="text-xs text-gray-500">County: {{ officer.county.name|default:"Not assigned" }}</p>
+    </div>
+    <span class="flex-shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium
+      {% if officer.is_approved %}bg-emerald-100 text-emerald-800{% else %}bg-gray-100 text-gray-600{% endif %}">
+      <span class="w-1.5 h-1.5 rounded-full {% if officer.is_approved %}bg-emerald-500{% else %}bg-gray-400{% endif %}"></span>
+      {% if officer.is_approved %}Active{% else %}Inactive{% endif %}
+    </span>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+          <i class="fas fa-edit text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-white">Edit Officer Details</h3>
+          <p class="text-teal-200 text-xs mt-0.5">License ID cannot be changed after creation</p>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" class="p-6 space-y-5">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">First Name <span class="text-red-500">*</span></label>
+          <input type="text" name="first_name" required value="{{ officer.first_name }}"
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Last Name <span class="text-red-500">*</span></label>
+          <input type="text" name="last_name" required value="{{ officer.last_name }}"
+                 class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">License / Staff ID</label>
+        <input type="text" value="{{ officer.license_id }}" disabled
+               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-400 cursor-not-allowed font-mono">
+        <p class="text-xs text-gray-400 mt-1">License ID is locked and cannot be changed.</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Email Address <span class="text-red-500">*</span></label>
+        <div class="relative">
+          <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input type="email" name="email" required value="{{ officer.email }}"
+                 class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Mobile Number</label>
+        <input type="text" name="mobile_number" value="{{ officer.mobile_number }}"
+               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">County <span class="text-red-500">*</span></label>
+        <select name="county_id" required
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          <option value="">— Select County —</option>
+          {% for c in counties %}
+          <option value="{{ c.pk }}" {% if officer.county_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">New Password</label>
+        <input type="password" name="password"
+               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+               placeholder="Leave blank to keep current password">
+        <p class="text-xs text-gray-400 mt-1">Only fill this in if you want to reset the password.</p>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+                class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+        <a href="{% url 'national_admin:county_officer_list' %}"
+           class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium rounded-xl transition-colors text-sm flex items-center gap-2">
+          <i class="fas fa-times"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Danger zone -->
+  <div class="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+      <i class="fas fa-exclamation-triangle text-amber-500"></i> Account Status
+    </h4>
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-gray-600">
+          This officer is currently <strong>{% if officer.is_approved %}active{% else %}inactive{% endif %}</strong>.
+        </p>
+        <p class="text-xs text-gray-400 mt-0.5">
+          {% if officer.is_approved %}Deactivating will prevent the officer from logging in.
+          {% else %}Activating will restore the officer's access.{% endif %}
+        </p>
+      </div>
+      <form method="post" action="{% url 'national_admin:toggle_officer' officer.pk %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors
+                  {% if officer.is_approved %}bg-red-50 hover:bg-red-100 text-red-700 border border-red-200
+                  {% else %}bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200{% endif %}"
+                onclick="return confirm('{% if officer.is_approved %}Deactivate{% else %}Activate{% endif %} {{ officer.get_full_name }}?')">
+          {% if officer.is_approved %}<i class="fas fa-ban mr-1"></i> Deactivate
+          {% else %}<i class="fas fa-check mr-1"></i> Activate{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

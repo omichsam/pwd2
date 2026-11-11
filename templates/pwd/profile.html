@@ -1,0 +1,85 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block page_subtitle %}View and manage your personal information{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">My Portal</p>
+<a href="{% url 'pwd:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'pwd:application' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Book Assessment</span></a>
+<a href="{% url 'pwd:hospitals' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Find Hospitals</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'pwd:profile' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'pwd:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="grid lg:grid-cols-3 gap-6">
+  <!-- Avatar & actions -->
+  <div class="space-y-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-br from-teal-700 to-teal-500 px-5 py-8 text-center">
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto mb-3">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        <p class="font-bold text-white">{{ user.get_full_name }}</p>
+        <p class="text-teal-200 text-xs mt-1">ID: {{ user.id_number|default:"—" }}</p>
+        <div class="mt-3 flex justify-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white">
+            Level {{ user.get_level }} — {{ user.get_points }} pts
+          </span>
+        </div>
+      </div>
+      <div class="p-4 space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-gray-500">County</span><span class="font-medium">{{ user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Sub-County</span><span class="font-medium">{{ user.subcounty|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Member Since</span><span class="font-medium">{{ user.date_joined|date:"M Y" }}</span></div>
+      </div>
+    </div>
+    <a href="{% url 'pwd:edit_profile' %}"
+       class="flex items-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-3 rounded-xl text-sm transition-colors justify-center">
+      <i class="fas fa-pen"></i> Edit Profile
+    </a>
+    <a href="{% url 'pwd:change_password' %}"
+       class="flex items-center gap-2 w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium px-4 py-3 rounded-xl text-sm transition-colors border border-gray-200">
+      <i class="fas fa-lock text-gray-400"></i> Change Password
+    </a>
+  </div>
+
+  <!-- Profile details -->
+  <div class="lg:col-span-2 space-y-5">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-800">Personal Information</h3>
+      </div>
+      <div class="p-6">
+        <dl class="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">
+          <div><dt class="text-gray-500 mb-0.5">First Name</dt><dd class="font-semibold text-gray-800">{{ user.first_name|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Last Name</dt><dd class="font-semibold text-gray-800">{{ user.last_name|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">ID Number</dt><dd class="font-semibold font-mono text-gray-800">{{ user.id_number|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Date of Birth</dt><dd class="font-semibold text-gray-800">{{ user.date_of_birth|date:"d M Y"|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Gender</dt><dd class="font-semibold text-gray-800 capitalize">{{ user.gender|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Marital Status</dt><dd class="font-semibold text-gray-800 capitalize">{{ user.marital_status|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Mobile Number</dt><dd class="font-semibold text-gray-800">{{ user.mobile_number|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Email Address</dt><dd class="font-semibold text-gray-800">{{ user.email|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Occupation</dt><dd class="font-semibold text-gray-800">{{ user.occupation|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Education Level</dt><dd class="font-semibold text-gray-800">{{ user.education_level|default:"—" }}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-800">Next of Kin</h3>
+      </div>
+      <div class="p-6">
+        <dl class="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">
+          <div><dt class="text-gray-500 mb-0.5">Full Name</dt><dd class="font-semibold text-gray-800">{{ user.next_of_kin_name|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Relationship</dt><dd class="font-semibold text-gray-800 capitalize">{{ user.next_of_kin_relationship|default:"—" }}</dd></div>
+          <div><dt class="text-gray-500 mb-0.5">Mobile Number</dt><dd class="font-semibold text-gray-800">{{ user.next_of_kin_mobile|default:"—" }}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

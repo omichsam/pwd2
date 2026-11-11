@@ -1,4 +1,5 @@
 from functools import wraps
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 
 
@@ -9,7 +10,7 @@ def role_required(*roles):
             if not request.user.is_authenticated:
                 return redirect('accounts:login')
             if request.user.role not in roles:
-                return redirect('accounts:login')
+                raise PermissionDenied
             return view_func(request, *args, **kwargs)
         return _wrapped
     return decorator
@@ -29,3 +30,11 @@ def health_required(view_func):
 
 def supervisor_required(view_func):
     return role_required('county_officer')(view_func)
+
+
+def hospital_admin_required(view_func):
+    return role_required('hospital_admin')(view_func)
+
+
+def national_admin_required(view_func):
+    return role_required('national_admin')(view_func)

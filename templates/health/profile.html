@@ -1,0 +1,61 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block page_subtitle %}Health Officer account details{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'health:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'health:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Review Assessments</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'health:profile' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'health:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="space-y-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-br from-teal-700 to-teal-500 px-5 py-8 text-center">
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto mb-3">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        <p class="font-bold text-white">{{ user.get_full_name }}</p>
+        <span class="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-200 text-purple-800">Health Officer</span>
+      </div>
+      <div class="p-4 text-sm space-y-2.5">
+        <div class="flex justify-between"><span class="text-gray-500">Hospital</span><span class="font-medium text-xs text-right">{{ user.hospital.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">License ID</span><span class="font-mono text-xs font-medium">{{ user.license_id|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">County</span><span class="font-medium">{{ user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Status</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"><i class="fas fa-check mr-1"></i>Active</span>
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'health:change_password' %}"
+       class="flex items-center gap-2 w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium px-4 py-3 rounded-xl text-sm transition-colors border border-gray-200">
+      <i class="fas fa-lock text-gray-400"></i> Change Password
+    </a>
+  </div>
+
+  <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="font-semibold text-gray-800">Account Information</h3>
+    </div>
+    <div class="p-6">
+      <dl class="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">
+        <div><dt class="text-gray-500 mb-0.5">First Name</dt><dd class="font-semibold text-gray-800">{{ user.first_name|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Last Name</dt><dd class="font-semibold text-gray-800">{{ user.last_name|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Email Address</dt><dd class="font-semibold text-gray-800">{{ user.email|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Mobile Number</dt><dd class="font-semibold text-gray-800">{{ user.mobile_number|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">License ID</dt><dd class="font-mono font-semibold text-gray-800">{{ user.license_id|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Hospital</dt><dd class="font-semibold text-gray-800">{{ user.hospital.name|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">County</dt><dd class="font-semibold text-gray-800">{{ user.county.name|default:"—" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Member Since</dt><dd class="font-semibold text-gray-800">{{ user.date_joined|date:"d M Y" }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Reviews Completed</dt><dd class="font-semibold text-gray-800">{{ total_reviews }}</dd></div>
+        <div><dt class="text-gray-500 mb-0.5">Last Login</dt><dd class="font-semibold text-gray-800">{{ user.last_login|date:"d M Y, H:i"|default:"—" }}</dd></div>
+      </dl>
+    </div>
+  </div>
+</div>
+{% endblock %}

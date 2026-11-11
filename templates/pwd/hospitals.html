@@ -1,0 +1,91 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Find Hospitals{% endblock %}
+{% block page_title %}Assessment Centers{% endblock %}
+{% block page_subtitle %}Find disability assessment hospitals near you{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">My Portal</p>
+<a href="{% url 'pwd:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'pwd:application' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Book Assessment</span></a>
+<a href="{% url 'pwd:hospitals' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Find Hospitals</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'pwd:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'pwd:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<!-- County filter -->
+<div class="mb-6 flex flex-wrap items-center gap-3">
+  <label class="text-sm font-medium text-gray-700">Filter by county:</label>
+  <select id="countyFilter" class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+    <option value="">All Counties</option>
+    {% for county in counties %}
+    <option value="{{ county.id }}" {% if selected_county == county.id %}selected{% endif %}>{{ county.name }}</option>
+    {% endfor %}
+  </select>
+  <span class="text-sm text-gray-500">{{ hospitals.count }} center{{ hospitals.count|pluralize }} found</span>
+</div>
+
+{% if hospitals %}
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for h in hospitals %}
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+    <div class="bg-teal-50 px-4 py-3 flex items-center gap-3 border-b border-gray-100">
+      <div class="w-9 h-9 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-hospital text-teal-600 text-sm"></i>
+      </div>
+      <div class="min-w-0">
+        <p class="font-semibold text-gray-800 text-sm truncate">{{ h.name }}</p>
+        <p class="text-xs text-teal-600">{{ h.county.name }}</p>
+      </div>
+    </div>
+    <div class="p-4 space-y-2 text-sm">
+      {% if h.subcounty %}
+      <div class="flex items-start gap-2 text-gray-600">
+        <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 w-4 text-center flex-shrink-0"></i>
+        <span>{{ h.subcounty }} Sub-County</span>
+      </div>
+      {% endif %}
+      {% if h.address %}
+      <div class="flex items-start gap-2 text-gray-500 text-xs">
+        <i class="fas fa-location-arrow text-gray-300 mt-0.5 w-4 text-center flex-shrink-0"></i>
+        <span>{{ h.address|truncatechars:60 }}</span>
+      </div>
+      {% endif %}
+      {% if h.phone %}
+      <div class="flex items-center gap-2 text-gray-600 text-xs">
+        <i class="fas fa-phone text-gray-400 w-4 text-center flex-shrink-0"></i>
+        <span>{{ h.phone }}</span>
+      </div>
+      {% endif %}
+    </div>
+    <div class="px-4 pb-4">
+      <a href="{% url 'pwd:application' %}?hospital={{ h.id }}"
+         class="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 rounded-xl text-xs transition-colors">
+        <i class="fas fa-calendar-plus"></i> Book Here
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 py-16 text-center">
+  <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+    <i class="fas fa-hospital text-teal-300 text-2xl"></i>
+  </div>
+  <p class="font-semibold text-gray-700 mb-1">No Centers Found</p>
+  <p class="text-sm text-gray-400">No assessment hospitals match your filter. Try selecting a different county.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('countyFilter').addEventListener('change', function(){
+  var url = new URL(window.location);
+  if(this.value) url.searchParams.set('county', this.value);
+  else url.searchParams.delete('county');
+  window.location = url;
+});
+</script>
+{% endblock %}

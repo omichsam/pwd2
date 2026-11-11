@@ -54,8 +54,18 @@
 
 <div class="max-w-2xl">
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <form method="post" x-data="{ county: '{{ request.user.county_id }}' }">
+    <form method="post" id="assessment-booking-form" data-prevent-double-submit x-data="{ county: '{{ request.user.county_id }}' }">
       {% csrf_token %}
+
+      {% if form.errors %}
+      <div id="form-errors" tabindex="-1" class="mb-5 bg-red-50 border-2 border-red-400 rounded-xl p-4" role="alert" aria-live="assertive">
+        <p class="text-sm font-bold text-red-800">Please correct the following:</p>
+        <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+          {% for field in form %}{% for error in field.errors %}<li><a class="underline" href="#{{ field.id_for_label }}">{{ field.label }}: {{ error }}</a></li>{% endfor %}{% endfor %}
+          {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
 
       {% if messages %}
       {% for message in messages %}
@@ -67,11 +77,11 @@
 
       <!-- Disability Type -->
       <div class="mb-5">
-        <label class="block text-sm font-semibold text-gray-700 mb-3">Disability Type *</label>
+        <fieldset><legend class="block text-sm font-semibold text-gray-700 mb-3">Disability Type <span aria-hidden="true">*</span></legend>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {% for value, label in form.disability_type.field.choices %}
           <label class="cursor-pointer">
-            <input type="radio" name="disability_type" value="{{ value }}" class="sr-only peer" {% if forloop.first %}checked{% endif %}>
+            <input type="radio" name="disability_type" value="{{ value }}" class="sr-only peer" {% if form.disability_type.value == value or not form.disability_type.value and forloop.first %}checked{% endif %}>
             <div class="peer-checked:bg-teal-50 peer-checked:border-teal-500 peer-checked:text-teal-700 border-2 border-gray-200 rounded-xl p-3 text-center text-xs font-medium text-gray-600 transition-all hover:border-gray-300">
               {% if value == 'physical' %}<i class="fas fa-wheelchair block text-xl mb-1.5 text-teal-500"></i>
               {% elif value == 'hearing' %}<i class="fas fa-deaf block text-xl mb-1.5 text-blue-500"></i>
@@ -86,12 +96,13 @@
           </label>
           {% endfor %}
         </div>
+        </fieldset>
       </div>
 
       <!-- County -->
       <div class="mb-4">
-        <label class="block text-xs font-medium text-gray-600 mb-1">County *</label>
-        <select name="county_filter" x-model="county"
+        <label for="county-filter" class="block text-xs font-medium text-gray-600 mb-1">County *</label>
+        <select name="county_filter" id="county-filter" x-model="county"
                 @change="loadHospitals(county)"
                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
           <option value="">Select county</option>
@@ -103,7 +114,7 @@
 
       <!-- Hospital -->
       <div class="mb-4">
-        <label class="block text-xs font-medium text-gray-600 mb-1">Assessment Center / Hospital *</label>
+        <label for="hospital-select" class="block text-xs font-medium text-gray-600 mb-1">Assessment Center / Hospital *</label>
         <select name="hospital" id="hospital-select" required
                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
           <option value="">Loading hospitals...</option>
@@ -112,16 +123,16 @@
 
       <!-- Date -->
       <div class="mb-6">
-        <label class="block text-xs font-medium text-gray-600 mb-1">Preferred Assessment Date *</label>
+        <label for="assessment-date" class="block text-xs font-medium text-gray-600 mb-1">Preferred Assessment Date *</label>
         <div class="relative">
           <i class="fas fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-          <input type="date" name="assessment_date" required min="{{ today }}"
+          <input type="date" id="assessment-date" name="assessment_date" value="{{ form.assessment_date.value|default:'' }}" required min="{{ today }}"
                  class="w-full pl-8 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
         </div>
       </div>
 
       <div class="flex gap-3">
-        <button type="submit" {% if existing_pending %}disabled{% endif %}
+        <button type="submit" data-submit-label="Booking…" {% if existing_pending %}disabled aria-disabled="true"{% endif %}
                 class="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
           <i class="fas fa-calendar-check text-xs"></i> Book Assessment
         </button>
@@ -157,6 +168,30 @@ function loadHospitals(countyId) {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadHospitals('{{ request.user.county_id }}');
+  const form = document.getElementById('assessment-booking-form');
+  const storageKey = 'pwd-assessment-booking-draft';
+  const saved = JSON.parse(sessionStorage.getItem(storageKey) || '{}');
+  ['disability_type', 'county_filter', 'hospital', 'assessment_date'].forEach(name => {
+    const control = form.elements[name];
+    if (!control || !saved[name]) return;
+    if (name === 'disability_type') {
+      const radio = form.querySelector(`[name="disability_type"][value="${CSS.escape(saved[name])}"]`);
+      if (radio) radio.checked = true;
+    } else if (name === 'county_filter') {
+      control.value = saved[name]; loadHospitals(saved[name]);
+    } else {
+      control.value = saved[name];
+    }
+  });
+  form.addEventListener('input', () => {
+    const data = new FormData(form);
+    sessionStorage.setItem(storageKey, JSON.stringify({
+      disability_type: data.get('disability_type'), county_filter: data.get('county_filter'),
+      hospital: data.get('hospital'), assessment_date: data.get('assessment_date')
+    }));
+  });
+  form.addEventListener('submit', () => sessionStorage.removeItem(storageKey));
+  document.getElementById('form-errors')?.focus();
 });
 </script>
 {% endblock %}

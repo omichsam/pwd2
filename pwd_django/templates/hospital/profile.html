@@ -1,0 +1,43 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block page_subtitle %}Hospital Admin account details{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Overview</p>
+<a href="{% url 'hospital_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'hospital_admin:assessment_summary' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Assessments</span></a>
+<a href="{% url 'hospital_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user-md w-5 text-center text-sm"></i><span>Officers</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'hospital_admin:profile' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+<a href="{% url 'hospital_admin:change_password' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-lock w-5 text-center text-sm"></i><span>Change Password</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'hospital_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-8 text-center">
+      <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+      </div>
+      <h2 class="text-xl font-bold text-white">{{ user.get_full_name }}</h2>
+      <p class="text-teal-200 text-sm mt-1">Hospital Admin</p>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div><p class="text-xs text-gray-400 mb-0.5">License ID</p><p class="font-medium text-gray-800">{{ user.license_id|default:"—" }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Mobile</p><p class="font-medium text-gray-800">{{ user.mobile_number|default:"—" }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Hospital</p><p class="font-medium text-gray-800">{{ user.hospital.name|default:"—" }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">County</p><p class="font-medium text-gray-800">{{ user.county.name|default:"—" }}</p></div>
+      </div>
+      <div class="pt-4 border-t border-gray-100">
+        <a href="{% url 'hospital_admin:change_password' %}"
+           class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm">
+          <i class="fas fa-lock"></i> Change Password
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

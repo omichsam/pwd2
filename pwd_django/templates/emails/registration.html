@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<p class="greeting">Welcome, {{ user.first_name }}!</p>
+<p>Your PWD Access Kenya account has been successfully created. You can now log in and submit your disability assessment application.</p>
+<div class="info-box">
+  <p><strong>Your Login Details</strong><br>
+  ID Number: <strong>{{ user.id_number }}</strong><br>
+  Role: PWD Citizen</p>
+</div>
+<p>To get started, log in and book an assessment at a registered hospital near you.</p>
+<a href="http://localhost:8000/login/" class="btn">Log In to Your Account</a>
+<div class="divider"></div>
+<p style="font-size:13px;color:#9ca3af;">If you did not create this account, please contact us immediately.</p>
+{% endblock %}

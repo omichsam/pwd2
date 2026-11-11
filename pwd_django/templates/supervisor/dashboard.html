@@ -11,12 +11,21 @@
 <a href="{% url 'supervisor:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-clipboard-check w-5 text-center text-sm"></i><span>Pending Approval</span>
 </a>
+<a href="{% url 'supervisor:certified_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-history w-5 text-center text-sm"></i><span>Approval Trail</span>
+</a>
 <p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
 <a href="{% url 'supervisor:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span>
 </a>
 <a href="{% url 'supervisor:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-user-md w-5 text-center text-sm"></i><span>Officers</span>
+</a>
+<a href="{% url 'supervisor:hospital_admin_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-user-cog w-5 text-center text-sm"></i><span>Hospital Admins</span>
+</a>
+<a href="{% url 'supervisor:designation_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-id-badge w-5 text-center text-sm"></i><span>Designations</span>
 </a>
 <a href="{% url 'supervisor:geography' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-map w-5 text-center text-sm"></i><span>Geography</span>
@@ -35,146 +44,121 @@
 {% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="bg-gradient-to-r from-teal-800 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
+
+<!-- Hero Header -->
+<div class="bg-gradient-to-r from-teal-900 to-teal-600 rounded-2xl p-6 mb-6 text-white relative overflow-hidden">
   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 80% 50%, white 1px, transparent 1px); background-size: 28px 28px;"></div>
-  <div class="absolute top-0 right-0 w-64 h-full opacity-10">
-    <i class="fas fa-map-marked-alt text-9xl absolute -right-4 top-1/2 -translate-y-1/2"></i>
+  <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-10 hidden lg:block">
+    <i class="fas fa-map-marked-alt text-8xl"></i>
   </div>
-  <div class="relative z-10">
-    <p class="text-teal-300 text-sm font-medium mb-1">County Officer Portal</p>
-    <h2 class="text-3xl font-bold">{{ county.name|default:"All Counties" }} County</h2>
-    <p class="text-teal-200 mt-2 text-sm">Full certification authority and analytics</p>
-  </div>
-</div>
-
-<!-- Top Stats Row -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center"><i class="fas fa-file-medical text-teal-600 text-lg"></i></div>
-      <div><p class="text-xs text-gray-500 font-medium">Total</p><p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p></div>
+  <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <p class="text-teal-300 text-xs font-semibold uppercase tracking-wider mb-1">County Officer Portal</p>
+      <h2 class="text-2xl font-bold">{{ county.name|default:"All Counties" }} County</h2>
+      <p class="text-teal-200 text-sm mt-1">Full certification authority · Analytics & management</p>
     </div>
-  </div>
-  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center"><i class="fas fa-hospital text-sky-600 text-lg"></i></div>
-      <div><p class="text-xs text-gray-500 font-medium">Hospitals</p><p class="text-2xl font-bold text-gray-900">{{ hospital_count }}</p></div>
-    </div>
-  </div>
-  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center"><i class="fas fa-user-md text-purple-600 text-lg"></i></div>
-      <div><p class="text-xs text-gray-500 font-medium">Medical Officers</p><p class="text-2xl font-bold text-gray-900">{{ medical_officers }}</p></div>
-    </div>
-  </div>
-  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fas fa-clipboard-check text-amber-600 text-lg"></i></div>
-      <div><p class="text-xs text-gray-500 font-medium">Awaiting Approval</p><p class="text-2xl font-bold text-gray-900">{{ stats.health_approved }}</p></div>
+    <div class="flex gap-3">
+      <a href="{% url 'supervisor:assessment_list' %}"
+         class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">
+        <i class="fas fa-gavel text-xs"></i> Certify Queue
+        {% if stats.health_approved > 0 %}
+        <span class="bg-amber-400 text-amber-900 text-xs font-bold px-1.5 py-0.5 rounded-full">{{ stats.health_approved }}</span>
+        {% endif %}
+      </a>
+      <a href="{% url 'supervisor:certified_list' %}"
+         class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">
+        <i class="fas fa-history text-xs"></i> Trail
+      </a>
     </div>
   </div>
 </div>
 
-<!-- Status Breakdown + Chart -->
-<div class="grid lg:grid-cols-3 gap-6 mb-6">
+<!-- KPI Row 1 — volume stats -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-start justify-between mb-3">
+      <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center"><i class="fas fa-file-medical text-teal-600 text-lg"></i></div>
+      <span class="text-xs text-gray-400 font-medium">Total</span>
+    </div>
+    <p class="text-3xl font-bold text-gray-900">{{ stats.total }}</p>
+    <p class="text-xs text-gray-500 mt-1">All assessments</p>
+  </div>
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-start justify-between mb-3">
+      <div class="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center"><i class="fas fa-certificate text-emerald-600 text-lg"></i></div>
+      <span class="text-xs font-bold text-emerald-600">{{ stats.approval_rate }}%</span>
+    </div>
+    <p class="text-3xl font-bold text-gray-900">{{ stats.fully_approved }}</p>
+    <p class="text-xs text-gray-500 mt-1">Fully certified</p>
+  </div>
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-start justify-between mb-3">
+      <div class="w-11 h-11 bg-sky-50 rounded-xl flex items-center justify-center"><i class="fas fa-spinner text-sky-500 text-lg"></i></div>
+      <span class="text-xs text-gray-400 font-medium">Active</span>
+    </div>
+    <p class="text-3xl font-bold text-gray-900">{{ stats.in_progress }}</p>
+    <p class="text-xs text-gray-500 mt-1">In pipeline</p>
+  </div>
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-start justify-between mb-3">
+      <div class="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center"><i class="fas fa-gavel text-amber-600 text-lg"></i></div>
+      {% if stats.health_approved > 0 %}<span class="text-xs font-bold text-amber-600 animate-pulse">Action needed</span>{% endif %}
+    </div>
+    <p class="text-3xl font-bold text-gray-900">{{ stats.health_approved }}</p>
+    <p class="text-xs text-gray-500 mt-1">Awaiting your approval</p>
+  </div>
+</div>
+
+<!-- KPI Row 2 — people stats (resource totals hidden on phones for a compact view) -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="hidden sm:block bg-teal-700 text-white rounded-2xl p-4">
+    <div class="flex items-center gap-2 mb-2"><i class="fas fa-hospital text-teal-300 text-sm"></i><span class="text-teal-200 text-xs">Hospitals</span></div>
+    <span class="text-2xl font-bold">{{ hospital_count }}</span>
+  </div>
+  <div class="hidden sm:block bg-teal-800 text-white rounded-2xl p-4">
+    <div class="flex items-center gap-2 mb-2"><i class="fas fa-stethoscope text-teal-300 text-sm"></i><span class="text-teal-200 text-xs">Medical Officers</span></div>
+    <span class="text-2xl font-bold">{{ medical_officers }}</span>
+  </div>
+  <div class="hidden sm:block bg-teal-600 text-white rounded-2xl p-4">
+    <div class="flex items-center gap-2 mb-2"><i class="fas fa-user-nurse text-teal-200 text-sm"></i><span class="text-teal-100 text-xs">Health Officers</span></div>
+    <span class="text-2xl font-bold">{{ health_officers }}</span>
+  </div>
+  <div class="col-span-2 sm:col-span-1 bg-white rounded-2xl p-4 border border-gray-100">
+    <div class="flex items-center gap-2 mb-2"><i class="fas fa-times-circle text-red-400 text-sm"></i><span class="text-gray-500 text-xs">Rejected</span></div>
+    <div class="flex items-baseline gap-2">
+      <span class="text-2xl font-bold text-gray-800">{{ stats.rejected }}</span>
+      <span class="text-xs text-red-500 font-semibold">{{ stats.rejection_rate }}%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row (hidden on phones to keep the dashboard compact) -->
+<div class="hidden sm:grid lg:grid-cols-3 gap-6 mb-6">
+
+  <!-- Monthly Trend -->
   <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
-    <div class="px-6 py-4 border-b border-gray-100">
-      <h3 class="font-semibold text-gray-800">Assessment Status Overview</h3>
-    </div>
-    <div class="p-6">
-      <div class="space-y-4">
-        {% for label, value, color, icon in status_rows %}
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-{{ color }}-50 flex items-center justify-center">
-              <i class="{{ icon }} text-{{ color }}-600 text-sm"></i>
-            </div>
-            <span class="text-sm text-gray-700 font-medium">{{ label }}</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="w-32 bg-gray-100 rounded-full h-2">
-              <div class="bg-{{ color }}-500 h-2 rounded-full" style="width: {% if stats.total > 0 %}{% widthratio value stats.total 100 %}%{% else %}0%{% endif %}"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ value }}</span>
-          </div>
-        </div>
-        {% empty %}
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center"><i class="fas fa-clock text-amber-600 text-sm"></i></div>
-            <span class="text-sm text-gray-700 font-medium">Pending</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="w-32 bg-gray-100 rounded-full h-2">
-              <div class="bg-amber-500 h-2 rounded-full" style="width: {% if stats.total > 0 %}{% widthratio stats.pending stats.total 100 %}%{% else %}0%{% endif %}"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ stats.pending }}</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center"><i class="fas fa-stethoscope text-sky-600 text-sm"></i></div>
-            <span class="text-sm text-gray-700 font-medium">Medical Review</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="w-32 bg-gray-100 rounded-full h-2">
-              <div class="bg-sky-500 h-2 rounded-full" style="width: {% if stats.total > 0 %}{% widthratio stats.medical_review stats.total 100 %}%{% else %}0%{% endif %}"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ stats.medical_review }}</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center"><i class="fas fa-clipboard-check text-teal-600 text-sm"></i></div>
-            <span class="text-sm text-gray-700 font-medium">Health Approved</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="w-32 bg-gray-100 rounded-full h-2">
-              <div class="bg-teal-500 h-2 rounded-full" style="width: {% if stats.total > 0 %}{% widthratio stats.health_approved stats.total 100 %}%{% else %}0%{% endif %}"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ stats.health_approved }}</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><i class="fas fa-certificate text-emerald-600 text-sm"></i></div>
-            <span class="text-sm text-gray-700 font-medium">Fully Certified</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="w-32 bg-gray-100 rounded-full h-2">
-              <div class="bg-emerald-500 h-2 rounded-full" style="width: {% if stats.total > 0 %}{% widthratio stats.fully_approved stats.total 100 %}%{% else %}0%{% endif %}"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ stats.fully_approved }}</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center"><i class="fas fa-times-circle text-red-500 text-sm"></i></div>
-            <span class="text-sm text-gray-700 font-medium">Rejected</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="w-32 bg-gray-100 rounded-full h-2">
-              <div class="bg-red-500 h-2 rounded-full" style="width: {% if stats.total > 0 %}{% widthratio stats.rejected stats.total 100 %}%{% else %}0%{% endif %}"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-900 w-8 text-right">{{ stats.rejected }}</span>
-          </div>
-        </div>
-        {% endfor %}
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h3 class="font-semibold text-gray-800">Monthly Activity</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Assessments submitted vs certified (last 6 months)</p>
       </div>
     </div>
+    <div class="p-6">
+      <div class="relative h-56 sm:h-64"><canvas id="trendChart"></canvas></div>
+    </div>
   </div>
 
-  <!-- Disability Chart -->
+  <!-- Disability Doughnut -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="px-6 py-4 border-b border-gray-100">
       <h3 class="font-semibold text-gray-800">Disability Types</h3>
+      <p class="text-xs text-gray-400 mt-0.5">Distribution of all assessments</p>
     </div>
-    <div class="p-6">
-      {% if disability_labels %}
-      <canvas id="disabilityChart" height="260"></canvas>
+    <div class="p-4">
+      {% if disability_counts != '[]' %}
+      <div class="relative h-56 sm:h-64"><canvas id="disabilityChart"></canvas></div>
       {% else %}
-      <div class="flex flex-col items-center py-8 text-center">
+      <div class="flex flex-col items-center py-10 text-center">
         <i class="fas fa-chart-pie text-gray-200 text-4xl mb-3"></i>
         <p class="text-sm text-gray-400">No data yet</p>
       </div>
@@ -183,21 +167,102 @@
   </div>
 </div>
 
-<!-- Hospital Performance + Pending Approval -->
-<div class="grid lg:grid-cols-2 gap-6">
+<!-- Pipeline Status + Approval Rate -->
+<div class="grid lg:grid-cols-5 gap-6 mb-6">
+
+  <!-- Pipeline breakdown -->
+  <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="font-semibold text-gray-800">Assessment Pipeline</h3>
+      <p class="text-xs text-gray-400 mt-0.5">Current status breakdown</p>
+    </div>
+    <div class="p-6 space-y-4">
+      {% with t=stats.total %}
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="flex items-center gap-1.5 text-gray-600 font-medium"><i class="fas fa-hourglass-start text-amber-400"></i> Pending</span>
+          <span class="font-bold text-gray-800">{{ stats.pending }}</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-amber-400 h-2 rounded-full" style="width: {% if t > 0 %}{% widthratio stats.pending t 100 %}%{% else %}0%{% endif %}"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="flex items-center gap-1.5 text-gray-600 font-medium"><i class="fas fa-stethoscope text-sky-500"></i> Medical Review</span>
+          <span class="font-bold text-gray-800">{{ stats.medical_review }}</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-sky-400 h-2 rounded-full" style="width: {% if t > 0 %}{% widthratio stats.medical_review t 100 %}%{% else %}0%{% endif %}"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="flex items-center gap-1.5 text-gray-600 font-medium"><i class="fas fa-user-nurse text-purple-500"></i> Health Approved</span>
+          <span class="font-bold text-gray-800">{{ stats.health_approved }}</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-purple-400 h-2 rounded-full" style="width: {% if t > 0 %}{% widthratio stats.health_approved t 100 %}%{% else %}0%{% endif %}"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="flex items-center gap-1.5 text-gray-600 font-medium"><i class="fas fa-certificate text-emerald-500"></i> Fully Certified</span>
+          <span class="font-bold text-gray-800">{{ stats.fully_approved }}</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-emerald-500 h-2 rounded-full" style="width: {% if t > 0 %}{% widthratio stats.fully_approved t 100 %}%{% else %}0%{% endif %}"></div>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="flex items-center gap-1.5 text-gray-600 font-medium"><i class="fas fa-times-circle text-red-400"></i> Rejected</span>
+          <span class="font-bold text-gray-800">{{ stats.rejected }}</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-red-400 h-2 rounded-full" style="width: {% if t > 0 %}{% widthratio stats.rejected t 100 %}%{% else %}0%{% endif %}"></div>
+        </div>
+      </div>
+      {% endwith %}
+
+      <!-- Approval Rate Gauge -->
+      <div class="mt-5 pt-5 border-t border-gray-100">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-gray-600">County Approval Rate</span>
+          <span class="text-lg font-bold {% if stats.approval_rate >= 70 %}text-emerald-600{% elif stats.approval_rate >= 40 %}text-amber-600{% else %}text-red-500{% endif %}">
+            {{ stats.approval_rate }}%
+          </span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-3">
+          <div class="h-3 rounded-full transition-all
+            {% if stats.approval_rate >= 70 %}bg-emerald-500{% elif stats.approval_rate >= 40 %}bg-amber-400{% else %}bg-red-400{% endif %}"
+            style="width: {{ stats.approval_rate }}%">
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">{{ stats.fully_approved }} certified of {{ stats.total }} total assessments</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Hospital Performance -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-      <h3 class="font-semibold text-gray-800">Hospital Performance</h3>
-      <a href="{% url 'supervisor:hospital_list' %}" class="text-xs text-teal-600 font-medium hover:text-teal-700">View All</a>
+      <div>
+        <h3 class="font-semibold text-gray-800">Hospital Performance</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Assessments & approval rates per hospital</p>
+      </div>
+      <a href="{% url 'supervisor:hospital_list' %}" class="text-xs text-teal-600 font-medium hover:text-teal-700">Manage</a>
     </div>
     <div class="overflow-x-auto">
-      <table class="w-full text-sm">
+      <table class="w-full min-w-[700px] text-sm whitespace-nowrap">
         <thead class="bg-teal-50">
           <tr>
             <th class="px-5 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Hospital</th>
-            <th class="px-5 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Total</th>
-            <th class="px-5 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Rate</th>
+            <th class="px-3 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Total</th>
+            <th class="px-3 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Certified</th>
+            <th class="px-3 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Pending</th>
+            <th class="px-3 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider">Rejected</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Rate</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -205,58 +270,122 @@
           <tr class="hover:bg-teal-50/30 transition-colors">
             <td class="px-5 py-3">
               <p class="font-semibold text-gray-800 text-xs">{{ h.name }}</p>
-              <p class="text-gray-400 text-xs">{{ h.county.name }}</p>
+              <p class="text-gray-400 text-xs">{{ h.subcounty|default:county.name }}</p>
             </td>
-            <td class="px-5 py-3 text-center font-bold text-gray-700">{{ h.total }}</td>
-            <td class="px-5 py-3 text-center">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
-                {% if h.get_approval_rate >= 70 %}bg-emerald-100 text-emerald-700
-                {% elif h.get_approval_rate >= 40 %}bg-amber-100 text-amber-700
-                {% else %}bg-red-100 text-red-700{% endif %}">
-                {{ h.get_approval_rate }}%
-              </span>
+            <td class="px-3 py-3 text-center font-bold text-gray-700 text-sm">{{ h.total }}</td>
+            <td class="px-3 py-3 text-center">
+              <span class="font-semibold text-emerald-600">{{ h.approved }}</span>
+            </td>
+            <td class="px-3 py-3 text-center">
+              <span class="font-semibold text-amber-600">{{ h.h_pending }}</span>
+            </td>
+            <td class="px-3 py-3 text-center">
+              <span class="font-semibold text-red-500">{{ h.h_rejected }}</span>
+            </td>
+            <td class="px-5 py-3">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 bg-gray-100 rounded-full h-1.5">
+                  <div class="h-1.5 rounded-full {% if h.approval_rate >= 70 %}bg-emerald-500{% elif h.approval_rate >= 40 %}bg-amber-400{% else %}bg-red-400{% endif %}"
+                       style="width: {{ h.approval_rate }}%"></div>
+                </div>
+                <span class="text-xs font-bold w-9 text-right {% if h.approval_rate >= 70 %}text-emerald-600{% elif h.approval_rate >= 40 %}text-amber-600{% else %}text-red-500{% endif %}">
+                  {{ h.approval_rate }}%
+                </span>
+              </div>
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="3" class="px-5 py-8 text-center text-sm text-gray-400">No hospitals yet.</td></tr>
+          <tr><td colspan="6" class="px-5 py-8 text-center text-sm text-gray-400">No hospitals in this county yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
+</div>
 
-  <!-- Pending Your Approval -->
+<!-- Bottom Row: Pending Queue + Recent Certifications -->
+<div class="grid lg:grid-cols-2 gap-6">
+
+  <!-- Pending Approval Queue -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-      <h3 class="font-semibold text-gray-800">Pending Your Approval</h3>
+      <div class="flex items-center gap-2">
+        <h3 class="font-semibold text-gray-800">Pending Your Approval</h3>
+        {% if stats.health_approved > 0 %}
+        <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">{{ stats.health_approved }}</span>
+        {% endif %}
+      </div>
       <a href="{% url 'supervisor:assessment_list' %}" class="text-xs text-teal-600 font-medium hover:text-teal-700">View All</a>
     </div>
     <div class="divide-y divide-gray-100">
       {% for a in pending_approval %}
-      <div class="px-6 py-4 flex items-center justify-between {% if a.get_days_pending > 7 %}bg-red-50/50{% endif %} hover:bg-gray-50 transition-colors">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 {% if a.get_days_pending > 7 %}bg-red-50{% else %}bg-teal-50{% endif %} rounded-lg flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-user {% if a.get_days_pending > 7 %}text-red-500{% else %}text-teal-600{% endif %} text-sm"></i>
+      <div class="px-5 py-3.5 flex items-center justify-between {% if a.get_days_pending > 7 %}bg-red-50/40{% endif %} hover:bg-gray-50 transition-colors">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center
+               {% if a.get_days_pending > 7 %}bg-red-100{% else %}bg-teal-50{% endif %}">
+            <i class="fas fa-user text-xs {% if a.get_days_pending > 7 %}text-red-500{% else %}text-teal-600{% endif %}"></i>
           </div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">{{ a.user.get_full_name }}</p>
-            <p class="text-xs text-gray-400">{{ a.get_disability_type_display }} · {{ a.get_days_pending }}d pending
-              {% if a.get_days_pending > 7 %}<span class="text-red-500 font-semibold">⚠ Overdue</span>{% endif %}
-            </p>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ a.user.get_full_name }}</p>
+            <p class="text-xs text-gray-400 truncate">{{ a.get_disability_type_display }} · {{ a.hospital.name|default:"—" }}</p>
           </div>
         </div>
-        <a href="{% url 'supervisor:view_assessment' a.pk %}"
-           class="inline-flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors">
-          <i class="fas fa-gavel text-xs"></i> Approve
-        </a>
+        <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+          <span class="text-xs font-bold {% if a.get_days_pending > 7 %}text-red-600{% else %}text-gray-500{% endif %}">
+            {{ a.get_days_pending }}d
+            {% if a.get_days_pending > 7 %}<i class="fas fa-exclamation-triangle"></i>{% endif %}
+          </span>
+          <a href="{% url 'supervisor:view_assessment' a.pk %}"
+             class="inline-flex items-center gap-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors">
+            <i class="fas fa-gavel text-xs"></i> Certify
+          </a>
+        </div>
       </div>
       {% empty %}
-      <div class="px-6 py-12 text-center">
-        <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-          <i class="fas fa-check-circle text-emerald-400 text-2xl"></i>
+      <div class="px-6 py-10 text-center">
+        <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <i class="fas fa-check-circle text-emerald-400 text-xl"></i>
         </div>
-        <p class="font-semibold text-gray-700 mb-1">No Pending Approvals</p>
-        <p class="text-sm text-gray-400">All assessments have been reviewed.</p>
+        <p class="font-semibold text-gray-700 text-sm mb-1">All Clear</p>
+        <p class="text-xs text-gray-400">No assessments awaiting your approval.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recently Certified -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-800">Recently Certified</h3>
+      <a href="{% url 'supervisor:certified_list' %}" class="text-xs text-teal-600 font-medium hover:text-teal-700">Full Trail</a>
+    </div>
+    <div class="divide-y divide-gray-100">
+      {% for a in recent_certified %}
+      <div class="px-5 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-8 h-8 bg-emerald-100 rounded-lg flex-shrink-0 flex items-center justify-center">
+            <i class="fas fa-certificate text-emerald-600 text-xs"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ a.user.get_full_name }}</p>
+            <p class="text-xs text-gray-400 truncate">{{ a.get_disability_type_display }} · {{ a.hospital.name|default:"—" }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+          <span class="text-xs text-gray-400 whitespace-nowrap">{{ a.updated_at|date:"d M" }}</span>
+          <a href="{% url 'supervisor:certificate_print' a.pk %}"
+             class="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-colors">
+            <i class="fas fa-print text-xs"></i> Print
+          </a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="px-6 py-10 text-center">
+        <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <i class="fas fa-certificate text-teal-300 text-xl"></i>
+        </div>
+        <p class="font-semibold text-gray-700 text-sm mb-1">No Certifications Yet</p>
+        <p class="text-xs text-gray-400">Certified assessments will appear here.</p>
       </div>
       {% endfor %}
     </div>
@@ -266,23 +395,70 @@
 
 {% block extra_js %}
 <script>
-{% if disability_labels %}
-new Chart(document.getElementById('disabilityChart').getContext('2d'), {
-  type: 'bar',
+const TEAL = ['#0f766e','#0d9488','#14b8a6','#2dd4bf','#5eead4','#99f6e4'];
+
+// Monthly trend
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
   data: {
-    labels: {{ disability_labels|safe }},
-    datasets: [{
-      label: 'Assessments',
-      data: {{ disability_counts|safe }},
-      backgroundColor: ['#0d9488','#2dd4bf','#0f766e','#5eead4','#115e59','#99f6e4'],
-      borderRadius: 8
-    }]
+    labels: {{ monthly_labels|safe }},
+    datasets: [
+      {
+        label: 'Submitted',
+        data: {{ monthly_counts|safe }},
+        borderColor: '#0d9488',
+        backgroundColor: 'rgba(13,148,136,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#0d9488',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.4
+      },
+      {
+        label: 'Certified',
+        data: {{ monthly_cert_counts|safe }},
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16,185,129,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#10b981',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.4,
+        borderDash: [5, 3]
+      }
+    ]
   },
   options: {
-    responsive: true, plugins: { legend: { display: false } },
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', labels: { font: { family: 'Poppins', size: 11 }, boxWidth: 12 } }
+    },
     scales: {
       x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 11 } } },
-      y: { grid: { color: '#f3f4f6' }, ticks: { font: { family: 'Poppins', size: 11 }, stepSize: 1 } }
+      y: { grid: { color: '#f3f4f6' }, ticks: { font: { family: 'Poppins', size: 11 }, stepSize: 1, precision: 0 }, beginAtZero: true }
+    }
+  }
+});
+
+{% if disability_counts != '[]' %}
+// Disability doughnut
+new Chart(document.getElementById('disabilityChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ disability_labels|safe }},
+    datasets: [{ data: {{ disability_counts|safe }}, backgroundColor: TEAL, borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { font: { family: 'Poppins', size: 10 }, boxWidth: 10, padding: 12 }
+      }
     }
   }
 });

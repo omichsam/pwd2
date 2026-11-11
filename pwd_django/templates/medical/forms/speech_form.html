@@ -1,0 +1,738 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Speech, Language & Communication Assessment — #{{ assessment.id }}{% endblock %}
+{% block page_title %}Speech, Language & Communication Assessment{% endblock %}
+{% block page_subtitle %}Ref: MOH/276D — Assessment #{{ assessment.id }} — {{ assessment.user.get_full_name }}{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'medical:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'medical:assessment_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Pending Assessments</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'medical:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media (min-width: 1024px) {
+    main > div { padding: 0 !important; }
+    main { overflow: hidden !important; }
+    footer { display: none !important; }
+  }
+  @media (max-width: 1023px) {
+    /* Relax the fixed-height two-pane shell so the form flows and scrolls on phones/tablets */
+    main { overflow: visible !important; }
+    main > div { height: auto !important; overflow: visible !important; }
+    main [style*="100vh"] { height: auto !important; min-height: 0 !important; }
+    main .overflow-hidden { overflow: visible !important; }
+    main .overflow-y-auto { overflow-y: visible !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-5 overflow-hidden" style="height:calc(100vh - 4rem); padding: 1.25rem"
+     x-data="{ step: 1 }">
+
+  <!-- LEFT: Patient card + step nav -->
+  <div class="w-full lg:w-56 flex-shrink-0 flex flex-col gap-3 lg:overflow-y-auto">
+
+    <!-- Patient card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex-shrink-0">
+      <div class="bg-gradient-to-br from-teal-700 to-teal-500 px-4 py-4 text-center">
+        <div class="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2 text-base">
+          {{ assessment.user.first_name|first|upper }}{{ assessment.user.last_name|first|upper }}
+        </div>
+        <p class="font-bold text-white text-sm leading-tight">{{ assessment.user.get_full_name }}</p>
+        <p class="text-teal-200 text-xs mt-0.5">ID: {{ assessment.user.id_number|default:"—" }}</p>
+      </div>
+      <div class="p-3 space-y-1.5 text-xs">
+        <div class="flex justify-between"><span class="text-gray-400">Gender</span><span class="font-medium text-gray-700">{{ assessment.user.get_gender_display|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">DOB</span><span class="font-medium text-gray-700">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Phone</span><span class="font-medium text-gray-700">{{ assessment.user.mobile_number|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">County</span><span class="font-medium text-gray-700">{{ assessment.user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Hospital</span><span class="font-medium text-gray-700 text-right leading-tight">{{ assessment.hospital.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Appt</span><span class="font-medium text-gray-700">{{ assessment.assessment_date|date:"d M Y" }}</span></div>
+      </div>
+    </div>
+
+    <!-- Section navigator -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex-shrink-0">
+      <p class="text-xs font-semibold text-gray-500 mb-2.5 px-1">Sections</p>
+      <div class="space-y-1">
+        <button type="button" @click="step=1"
+                :class="step==1 ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>1 ? 'bg-teal-600 text-white' : step==1 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>1"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=1"><span>1</span></template>
+          </span>
+          Referral &amp; History
+        </button>
+        <button type="button" @click="step=2"
+                :class="step==2 ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>2 ? 'bg-teal-600 text-white' : step==2 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>2"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=2"><span>2</span></template>
+          </span>
+          Language Assessment
+        </button>
+        <button type="button" @click="step=3"
+                :class="step==3 ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>3 ? 'bg-teal-600 text-white' : step==3 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>3"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=3"><span>3</span></template>
+          </span>
+          Speech Impairments
+        </button>
+        <button type="button" @click="step=4"
+                :class="step==4 ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>4 ? 'bg-teal-600 text-white' : step==4 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>4"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=4"><span>4</span></template>
+          </span>
+          Dysphagia Checklist
+        </button>
+        <button type="button" @click="step=5"
+                :class="step==5 ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50'"
+                class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step==5 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-500'"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">5</span>
+          Conclusion
+        </button>
+      </div>
+    </div>
+
+    <a href="{% url 'medical:view_assessment' assessment.pk %}"
+       class="flex items-center gap-2 text-xs text-gray-400 hover:text-teal-600 font-medium transition-colors px-1">
+      <i class="fas fa-arrow-left"></i> Back to Assessment
+    </a>
+  </div>
+
+  <!-- RIGHT: Form wizard -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-0">
+
+    <!-- Progress bar -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3 mb-4 flex items-center gap-4 flex-shrink-0">
+      <div class="flex items-center gap-2 flex-1">
+        <template x-for="i in [1,2,3,4,5]" :key="i">
+          <div class="flex items-center gap-2 flex-1 last:flex-none">
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <div :class="step >= i ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-400'"
+                   class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors">
+                <template x-if="step > i"><i class="fas fa-check" style="font-size:9px"></i></template>
+                <template x-if="step <= i"><span x-text="i"></span></template>
+              </div>
+              <span :class="step >= i ? 'text-teal-700 font-semibold' : 'text-gray-400'"
+                    class="text-xs transition-colors hidden sm:block"
+                    x-text="['Referral','Language','Speech','Dysphagia','Conclusion'][i-1]"></span>
+            </div>
+            <template x-if="i < 5">
+              <div class="flex-1 h-0.5 mx-1" :class="step > i ? 'bg-teal-500' : 'bg-gray-200'"></div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <span class="text-xs text-gray-400 flex-shrink-0" x-text="'Step ' + step + ' of 5'"></span>
+    </div>
+
+    <!-- Form -->
+    <form method="post" enctype="multipart/form-data" class="flex-1 flex flex-col min-h-0">
+      {% csrf_token %}
+
+      <!-- ══ STEP 1: Referral & History ══ -->
+      <div x-show="step==1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 overflow-hidden">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i class="fas fa-notes-medical"></i> Referral &amp; History of Condition
+          </h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto space-y-5">
+
+          <!-- Referral row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Referred By</label>
+              <input type="text" name="referred_by" value="{{ form.referred_by.value|default:'' }}"
+                     placeholder="Name / facility"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Reason for Referral</label>
+              <textarea name="reason_for_referral" rows="2" placeholder="Brief reason…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.reason_for_referral.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Medical diagnosis -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Medical Diagnosis (if available)</label>
+            <textarea name="medical_diagnosis" rows="2" placeholder="ICD code / clinical diagnosis…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.medical_diagnosis.value|default:'' }}</textarea>
+          </div>
+
+          <!-- History of condition -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">History of Condition
+              <span class="text-gray-400 font-normal">(Birth history for developmental / Medical history for acquired)</span>
+            </label>
+            <textarea name="history_of_condition" rows="4" placeholder="Describe history…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.history_of_condition.value|default:'' }}</textarea>
+          </div>
+
+          <!-- Domains -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-2">Domains to be Assessed</label>
+            <div class="flex flex-wrap gap-4">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="domain_language" {% if form.domain_language.value %}checked{% endif %}
+                       class="rounded text-teal-600 focus:ring-teal-500"> Language
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="domain_speech" {% if form.domain_speech.value %}checked{% endif %}
+                       class="rounded text-teal-600 focus:ring-teal-500"> Speech
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="domain_dysphagia" {% if form.domain_dysphagia.value %}checked{% endif %}
+                       class="rounded text-teal-600 focus:ring-teal-500"> Dysphagia
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="domain_communication" {% if form.domain_communication.value %}checked{% endif %}
+                       class="rounded text-teal-600 focus:ring-teal-500"> Communication
+              </label>
+            </div>
+          </div>
+
+          <!-- Developmental disorders -->
+          <div class="border border-gray-100 rounded-xl p-4 space-y-3">
+            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Developmental Disorders Only</p>
+            <div class="flex flex-wrap gap-6">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Delay in Motor Milestones</label>
+                <div class="flex gap-3">
+                  <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+                    <input type="radio" name="delay_motor_milestones" value="True" {% if form.delay_motor_milestones.value == True or form.delay_motor_milestones.value == 'True' %}checked{% endif %}> Yes
+                  </label>
+                  <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+                    <input type="radio" name="delay_motor_milestones" value="False" {% if form.delay_motor_milestones.value == False or form.delay_motor_milestones.value == 'False' %}checked{% endif %}> No
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Sensory Impairment — Visual</label>
+                <div class="flex gap-3">
+                  <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="sensory_visual_impairment" value="True" {% if form.sensory_visual_impairment.value == True or form.sensory_visual_impairment.value == 'True' %}checked{% endif %}> Yes</label>
+                  <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="sensory_visual_impairment" value="False" {% if form.sensory_visual_impairment.value == False or form.sensory_visual_impairment.value == 'False' %}checked{% endif %}> No</label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Sensory Impairment — Auditory</label>
+                <div class="flex gap-3">
+                  <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="sensory_auditory_impairment" value="True" {% if form.sensory_auditory_impairment.value == True or form.sensory_auditory_impairment.value == 'True' %}checked{% endif %}> Yes</label>
+                  <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="sensory_auditory_impairment" value="False" {% if form.sensory_auditory_impairment.value == False or form.sensory_auditory_impairment.value == 'False' %}checked{% endif %}> No</label>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Other</label>
+              <textarea name="other_developmental" rows="2" placeholder="Any other developmental notes…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.other_developmental.value|default:'' }}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Speech &amp; Language Milestones Achieved Thus Far</label>
+              <textarea name="speech_language_milestones" rows="2" placeholder="e.g. babbling at 6 months, first words at 18 months…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.speech_language_milestones.value|default:'' }}</textarea>
+            </div>
+            <!-- Pre-linguistic skills -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-2">Pre-Linguistic Skills <span class="font-normal text-gray-400">(age appropriate?)</span></label>
+              <div class="flex flex-wrap gap-6">
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Eye Contact</p>
+                  <div class="flex gap-3">
+                    <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="prelinguistic_eye_contact" value="True" {% if form.prelinguistic_eye_contact.value == True or form.prelinguistic_eye_contact.value == 'True' %}checked{% endif %}> Yes</label>
+                    <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="prelinguistic_eye_contact" value="False" {% if form.prelinguistic_eye_contact.value == False or form.prelinguistic_eye_contact.value == 'False' %}checked{% endif %}> No</label>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Attention Span</p>
+                  <div class="flex gap-3">
+                    <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="prelinguistic_attention_span" value="True" {% if form.prelinguistic_attention_span.value == True or form.prelinguistic_attention_span.value == 'True' %}checked{% endif %}> Yes</label>
+                    <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="prelinguistic_attention_span" value="False" {% if form.prelinguistic_attention_span.value == False or form.prelinguistic_attention_span.value == 'False' %}checked{% endif %}> No</label>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">Imitation Skills</p>
+                  <div class="flex gap-3">
+                    <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="prelinguistic_imitation_skills" value="True" {% if form.prelinguistic_imitation_skills.value == True or form.prelinguistic_imitation_skills.value == 'True' %}checked{% endif %}> Yes</label>
+                    <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="prelinguistic_imitation_skills" value="False" {% if form.prelinguistic_imitation_skills.value == False or form.prelinguistic_imitation_skills.value == 'False' %}checked{% endif %}> No</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: Language Assessment ══ -->
+      <div x-show="step==2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 overflow-hidden">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i class="fas fa-comment-dots"></i> A. Language Impairments
+          </h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto space-y-5">
+
+          <!-- Receptive Language table -->
+          <div>
+            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">(i) Receptive Language</p>
+            <div class="rounded-xl border border-gray-100 overflow-hidden text-sm">
+              <div class="grid grid-cols-2 bg-gray-50 border-b border-gray-100 px-4 py-2">
+                <span class="font-semibold text-gray-600 text-xs">Area</span>
+                <span class="font-semibold text-gray-600 text-xs">Remarks</span>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Attention / Memory</span>
+                <textarea name="receptive_attention_memory" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.receptive_attention_memory.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Listening / Auditory Processing / Phonological Awareness</span>
+                <textarea name="receptive_listening_auditory" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.receptive_listening_auditory.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Syntactic Comprehension <span class="text-gray-400">(no. of information-carrying words)</span></span>
+                <textarea name="receptive_syntactic_comprehension" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.receptive_syntactic_comprehension.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Semantic Comprehension</span>
+                <textarea name="receptive_semantic_comprehension" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.receptive_semantic_comprehension.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Reading Comprehension</span>
+                <textarea name="receptive_reading_comprehension" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.receptive_reading_comprehension.value|default:'' }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expressive Language table -->
+          <div>
+            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">(ii) Expressive Language</p>
+            <div class="rounded-xl border border-gray-100 overflow-hidden text-sm">
+              <div class="grid grid-cols-2 bg-gray-50 border-b border-gray-100 px-4 py-2">
+                <span class="font-semibold text-gray-600 text-xs">Area</span>
+                <span class="font-semibold text-gray-600 text-xs">Remarks</span>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Sound / Word / Sentence Level Production</span>
+                <textarea name="expressive_sound_word_sentence" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.expressive_sound_word_sentence.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Non-verbal Communication</span>
+                <textarea name="expressive_nonverbal_communication" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.expressive_nonverbal_communication.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Pragmatics</span>
+                <textarea name="expressive_pragmatics" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.expressive_pragmatics.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Play / Work</span>
+                <textarea name="expressive_play_work" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.expressive_play_work.value|default:'' }}</textarea>
+              </div>
+              <div class="grid grid-cols-2 px-4 py-2.5 items-start hover:bg-gray-50/50">
+                <span class="text-gray-700 text-xs pt-1.5">Written Output</span>
+                <textarea name="expressive_written_output" rows="2" placeholder="Observations…"
+                          class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.expressive_written_output.value|default:'' }}</textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: Speech Impairments ══ -->
+      <div x-show="step==3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 overflow-hidden">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i class="fas fa-microphone"></i> B. Speech Impairments &amp; Standardised Test Results
+          </h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto space-y-5">
+
+          <!-- Speech Impairments table -->
+          <div class="rounded-xl border border-gray-100 overflow-hidden text-sm">
+            <div class="grid grid-cols-3 bg-gray-50 border-b border-gray-100 px-4 py-2 text-xs font-semibold text-gray-600">
+              <span>Category</span><span>Check For</span><span>Remarks</span>
+            </div>
+            <!-- Fluency -->
+            <div class="grid grid-cols-3 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+              <span class="text-gray-700 text-xs font-medium pt-1.5" rowspan="2">Fluency</span>
+              <span class="text-gray-600 text-xs pt-1.5">Stuttering</span>
+              <textarea name="fluency_stuttering" rows="2" placeholder="Remarks…"
+                        class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.fluency_stuttering.value|default:'' }}</textarea>
+            </div>
+            <div class="grid grid-cols-3 border-b border-gray-100 px-4 py-2.5 items-start hover:bg-gray-50/50">
+              <span class="text-gray-500 text-xs pt-1.5"></span>
+              <span class="text-gray-600 text-xs pt-1.5">Cluttering</span>
+              <textarea name="fluency_cluttering" rows="2" placeholder="Remarks…"
+                        class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.fluency_cluttering.value|default:'' }}</textarea>
+            </div>
+            <!-- Voice -->
+            <div class="grid grid-cols-3 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+              <span class="text-gray-700 text-xs font-medium pt-1.5">Voice</span>
+              <span class="text-gray-600 text-xs pt-1.5">Aphonia</span>
+              <textarea name="voice_aphonia" rows="2" placeholder="Remarks…"
+                        class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.voice_aphonia.value|default:'' }}</textarea>
+            </div>
+            <div class="grid grid-cols-3 border-b border-gray-100 px-4 py-2.5 items-start hover:bg-gray-50/50">
+              <span class="text-gray-500 text-xs pt-1.5"></span>
+              <span class="text-gray-600 text-xs pt-1.5">Dysphonia</span>
+              <textarea name="voice_dysphonia" rows="2" placeholder="Remarks…"
+                        class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.voice_dysphonia.value|default:'' }}</textarea>
+            </div>
+            <!-- Articulation -->
+            <div class="grid grid-cols-3 border-b border-gray-50 px-4 py-2.5 items-start hover:bg-gray-50/50">
+              <span class="text-gray-700 text-xs font-medium pt-1.5">Articulation</span>
+              <span class="text-gray-600 text-xs pt-1.5">Speech Sound Disorder</span>
+              <textarea name="articulation_speech_sound_disorder" rows="2" placeholder="Remarks…"
+                        class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.articulation_speech_sound_disorder.value|default:'' }}</textarea>
+            </div>
+            <div class="grid grid-cols-3 px-4 py-2.5 items-start hover:bg-gray-50/50">
+              <span class="text-gray-500 text-xs pt-1.5"></span>
+              <span class="text-gray-600 text-xs pt-1.5">Motor Speech Disorder</span>
+              <textarea name="articulation_motor_speech_disorder" rows="2" placeholder="Remarks…"
+                        class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/20 resize-none">{{ form.articulation_motor_speech_disorder.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Standardised test results -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Standardised Test Results &amp; Interpretation</label>
+            <textarea name="standardised_test_results" rows="5" placeholder="Include test name, score, and interpretation…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.standardised_test_results.value|default:'' }}</textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 4: Dysphagia Checklist ══ -->
+      <div x-show="step==4" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 overflow-hidden">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i class="fas fa-utensils"></i> C. Dysphagia Checklist (ASLTK 2021)
+          </h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto space-y-5">
+
+          <!-- Helper macro -->
+          {% with cb_class="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 flex-shrink-0" %}
+
+          <!-- Red flag symptoms -->
+          <div>
+            <p class="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Possible Dysphagia / Red Flag Symptoms</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_recurrent_chest_infections" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_recurrent_chest_infections.value %}checked{% endif %}>
+                History of recurrent chest infections with or without hospitalisation
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_current_chest_infection" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_current_chest_infection.value %}checked{% endif %}>
+                Current chest infection related to difficulties swallowing
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_dehydration_malnutrition" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_dehydration_malnutrition.value %}checked{% endif %}>
+                Dehydration and malnutrition related to difficulties eating &amp; drinking
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_weight_loss" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_weight_loss.value %}checked{% endif %}>
+                Unintentional weight loss (short or long term)
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_long_eating_time" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_long_eating_time.value %}checked{% endif %}>
+                Taking a long time to eat/drink a small amount or unable to manage a normal amount
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_food_avoidance" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_food_avoidance.value %}checked{% endif %}>
+                Avoidance of particular foods or drinks
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_social_avoidance" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_social_avoidance.value %}checked{% endif %}>
+                Avoidance of eating/drinking in social situations
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_distress_eating" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_distress_eating.value %}checked{% endif %}>
+                Distress before/during/after eating and/or drinking
+              </label>
+            </div>
+          </div>
+
+          <!-- Pre-oral stage -->
+          <div>
+            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2">Pre-oral Stage Difficulties</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_difficulty_self_feeding" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_difficulty_self_feeding.value %}checked{% endif %}>
+                Difficulty with self-feeding (age appropriate)
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_difficulty_mouth_cleaning" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_difficulty_mouth_cleaning.value %}checked{% endif %}>
+                Difficulty with cleaning own mouth/teeth (age appropriate)
+              </label>
+            </div>
+          </div>
+
+          <!-- Oral stage -->
+          <div>
+            <p class="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-2">Oral Stage Difficulties</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_difficulty_closing_lips" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_difficulty_closing_lips.value %}checked{% endif %}>
+                Difficulty closing lips when eating and drinking
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_difficulty_taking_food_off_spoon" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_difficulty_taking_food_off_spoon.value %}checked{% endif %}>
+                Difficulty taking food off a spoon or fork
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_oral_escape" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_oral_escape.value %}checked{% endif %}>
+                Losing food or drink from the mouth (oral escape)
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_restricted_oral_movements" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_restricted_oral_movements.value %}checked{% endif %}>
+                Restricted oral movements due to neurological/neuromuscular problem
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_food_residue" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_food_residue.value %}checked{% endif %}>
+                Food residue in mouth after swallowing
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_difficulty_managing_saliva" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_difficulty_managing_saliva.value %}checked{% endif %}>
+                Difficulty managing saliva / drooling
+              </label>
+            </div>
+          </div>
+
+          <!-- Pharyngeal stage -->
+          <div>
+            <p class="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-2">Pharyngeal Stage Difficulties</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_eye_symptoms" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_eye_symptoms.value %}checked{% endif %}>
+                Blinking, eye bulging, squeezing eyes, tearing, red eyes, or grimacing associated with swallowing
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_coughing_throat_clearing" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_coughing_throat_clearing.value %}checked{% endif %}>
+                Coughing / throat clearing during or soon after swallowing
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_colour_breath_changes" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_colour_breath_changes.value %}checked{% endif %}>
+                Changing colour (flushed or blue/grey) or breath pattern changes just after swallowing
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_nasal_oral_regurgitation" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_nasal_oral_regurgitation.value %}checked{% endif %}>
+                Nasal/oral regurgitation of food/drinks during/just after swallowing
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_wet_gurgly_voice" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_wet_gurgly_voice.value %}checked{% endif %}>
+                'Wet' or gurgly voice after swallowing
+              </label>
+            </div>
+          </div>
+
+          <!-- Esophageal stage -->
+          <div>
+            <p class="text-xs font-semibold text-rose-600 uppercase tracking-wide mb-2">Esophageal Stage Difficulties</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_reflux" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_reflux.value %}checked{% endif %}>
+                Reflux (heartburn, chest pain, acid) during or after (up to 30 minutes) swallow
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_coughing_after_eating" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_coughing_after_eating.value %}checked{% endif %}>
+                Coughing after eating/drinking or regurgitating food
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_coughing_lying_down" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_coughing_lying_down.value %}checked{% endif %}>
+                Coughing when lying down
+              </label>
+              <label class="flex items-start gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="dysphagia_breathing_difficulties" class="{{ cb_class }}" style="margin-top:2px" {% if form.dysphagia_breathing_difficulties.value %}checked{% endif %}>
+                Breathing difficulties or choking episodes, sometimes on saliva or with no oral intake
+              </label>
+            </div>
+          </div>
+          {% endwith %}
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 5: Conclusion & Recommendations ══ -->
+      <div x-show="step==5" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 overflow-hidden">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i class="fas fa-clipboard-check"></i> Conclusion &amp; Recommendations
+          </h3>
+        </div>
+        <div class="flex-1 p-5 overflow-y-auto space-y-5">
+
+          <!-- SLT Diagnosis -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">SLT Diagnosis <span class="text-gray-400 font-normal">(include severity; complete attached scale for impairment, activity, participation, well-being)</span></label>
+            <textarea name="slt_diagnosis" rows="3" placeholder="e.g. Moderate receptive-expressive language disorder…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.slt_diagnosis.value|default:'' }}</textarea>
+          </div>
+
+          <!-- Severity -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-2">Severity</label>
+            <div class="flex gap-4 flex-wrap">
+              {% for val, label in form.severity.field.choices %}{% if val %}
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="severity" value="{{ val }}" {% if form.severity.value == val %}checked{% endif %}
+                       class="text-teal-600 focus:ring-teal-500"> {{ label }}
+              </label>
+              {% endif %}{% endfor %}
+            </div>
+          </div>
+
+          <!-- Impact -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Impact on fulfilling PWD's Roles &amp; Responsibilities</label>
+              <textarea name="impact_on_roles" rows="3" placeholder="Describe impact…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.impact_on_roles.value|default:'' }}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Impact on Career</label>
+              <textarea name="impact_on_career" rows="3" placeholder="Describe career impact…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.impact_on_career.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Recommendations checkboxes -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-2">Recommendations</label>
+            <div class="space-y-2 mb-3">
+              <label class="flex items-center gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="recommend_further_management" class="w-4 h-4 rounded text-teal-600 focus:ring-teal-500" {% if form.recommend_further_management.value %}checked{% endif %}>
+                Further management of speech, language, communication, swallowing disorder
+              </label>
+              <label class="flex items-center gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="recommend_referral_professionals" class="w-4 h-4 rounded text-teal-600 focus:ring-teal-500" {% if form.recommend_referral_professionals.value %}checked{% endif %}>
+                Referral to other professionals
+              </label>
+              <label class="flex items-center gap-2.5 text-sm cursor-pointer p-2 rounded-lg hover:bg-gray-50">
+                <input type="checkbox" name="recommend_communication_aids" class="w-4 h-4 rounded text-teal-600 focus:ring-teal-500" {% if form.recommend_communication_aids.value %}checked{% endif %}>
+                Communication aids
+              </label>
+            </div>
+            <textarea name="recommendations_notes" rows="3" placeholder="Expand on recommendations here…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.recommendations_notes.value|default:'' }}</textarea>
+          </div>
+
+          <!-- Cause & dates -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="col-span-3">
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Cause of Disability</label>
+              <textarea name="cause_of_disability" rows="2" placeholder="Describe cause…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.cause_of_disability.value|default:'' }}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Date of Injury / Onset of Illness</label>
+              <input type="date" name="injury_onset" value="{{ form.injury_onset.value|date:'Y-m-d'|default:'' }}"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Condition Type</label>
+              <select name="condition_type" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                <option value="">— Select —</option>
+                {% for val, label in form.condition_type.field.choices %}{% if val %}
+                <option value="{{ val }}" {% if form.condition_type.value == val %}selected{% endif %}>{{ label }}</option>
+                {% endif %}{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Date of Last Intervention</label>
+              <input type="date" name="last_intervention" value="{{ form.last_intervention.value|date:'Y-m-d'|default:'' }}"
+                     class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+            </div>
+          </div>
+
+          <!-- Assistive products & other services -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Recommended Assistive Product(s)</label>
+              <textarea name="recommended_assistive_products" rows="3" placeholder="e.g. AAC device, communication board…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.recommended_assistive_products.value|default:'' }}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Other Required Services</label>
+              <textarea name="other_required_services" rows="3" placeholder="e.g. Speech therapy, SLT follow-up…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.other_required_services.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Document upload -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">
+              Upload Supporting Documents
+              <span class="text-gray-400 font-normal ml-1">(PDF, JPG, PNG — optional)</span>
+            </label>
+            <div class="border-2 border-dashed border-gray-200 hover:border-teal-400 rounded-xl px-5 py-4 flex items-center gap-4 transition-colors">
+              <i class="fas fa-cloud-upload-alt text-gray-300 text-2xl flex-shrink-0"></i>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-gray-500 mb-1">Reports, referral letters, standardised test results</p>
+                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png"
+                       class="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between mt-4 flex-shrink-0">
+        <button type="button" @click="step--" x-show="step > 1"
+                class="inline-flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm">
+          <i class="fas fa-arrow-left text-xs"></i> Back
+        </button>
+        <div x-show="step == 1"></div>
+
+        <div class="flex items-center gap-3">
+          <a href="{% url 'medical:view_assessment' assessment.pk %}"
+             class="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</a>
+          <button type="button" @click="step++" x-show="step < 5"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+            Next <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+          <button type="submit" x-show="step == 5"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-2.5 rounded-xl transition-colors shadow-sm text-sm">
+            <i class="fas fa-paper-plane text-xs"></i> Submit Assessment
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

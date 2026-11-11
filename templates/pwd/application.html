@@ -1,0 +1,146 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Book Assessment{% endblock %}
+{% block page_title %}Book Assessment{% endblock %}
+{% block page_subtitle %}Schedule your disability assessment at a nearby hospital{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">My Portal</p>
+<a href="{% url 'pwd:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'pwd:application' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Book Assessment</span></a>
+<a href="{% url 'pwd:hospitals' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Find Hospitals</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'pwd:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'pwd:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  {% if existing_pending %}
+  <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
+    <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5 flex-shrink-0"></i>
+    <div>
+      <p class="font-semibold text-amber-800 text-sm">Active Application Exists</p>
+      <p class="text-amber-700 text-sm mt-0.5">You already have a pending assessment (#{{ existing_pending.id }}). You cannot submit a new one until it is resolved.</p>
+      <a href="{% url 'pwd:view_application' existing_pending.pk %}" class="inline-flex items-center gap-1.5 mt-2 text-sm font-semibold text-amber-700 hover:text-amber-900 transition-colors">
+        View Application <i class="fas fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-gradient-to-r from-teal-700 to-teal-500 px-6 py-5">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">
+          <i class="fas fa-clipboard-list text-white text-lg"></i>
+        </div>
+        <div>
+          <p class="font-bold text-white">Assessment Application Form</p>
+          <p class="text-teal-200 text-xs mt-0.5">Fill in the details to book your disability assessment</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <form method="post" {% if existing_pending %}style="opacity:.5;pointer-events:none"{% endif %}>
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+          <p class="font-semibold mb-1"><i class="fas fa-exclamation-circle mr-1"></i>Please fix the errors below:</p>
+          {% for field in form %}{% for error in field.errors %}<p class="ml-4">• {{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="space-y-5">
+          <!-- Disability Type -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Type of Disability <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {% for value, label in form.disability_type.field.choices %}
+              <label class="relative cursor-pointer">
+                <input type="radio" name="disability_type" value="{{ value }}" class="peer sr-only"
+                       {% if form.disability_type.value == value %}checked{% endif %}>
+                <div class="flex flex-col items-center gap-2 p-3 border-2 border-gray-200 rounded-xl peer-checked:border-teal-500 peer-checked:bg-teal-50 hover:border-teal-300 transition-all">
+                  <i class="fas {% if value == 'physical' %}fa-wheelchair{% elif value == 'hearing' %}fa-deaf{% elif value == 'visual' %}fa-eye-slash{% elif value == 'mental' %}fa-brain{% elif value == 'maxillofacial' %}fa-tooth{% else %}fa-heartbeat{% endif %} text-teal-600 text-lg"></i>
+                  <span class="text-xs font-medium text-gray-700 text-center">{{ label }}</span>
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- County & Hospital -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">County <span class="text-red-500">*</span></label>
+            <select id="countySelect" name="county_id"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition">
+              <option value="">-- Select County --</option>
+              {% for county in counties %}
+              <option value="{{ county.id }}" {% if user.county_id == county.id %}selected{% endif %}>{{ county.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Assessment Hospital <span class="text-red-500">*</span></label>
+            <select id="hospitalSelect" name="hospital"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white transition">
+              <option value="">-- Select County First --</option>
+            </select>
+          </div>
+
+          <!-- Assessment Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Preferred Assessment Date <span class="text-red-500">*</span></label>
+            <input type="date" name="assessment_date" value="{{ form.assessment_date.value|default:'' }}" required
+                   min="{{ today }}"
+                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+          </div>
+
+          <!-- Notes -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Additional Notes <span class="text-gray-400 font-normal">(optional)</span></label>
+            <textarea name="notes" rows="3" placeholder="Any additional context or information for the medical officer..."
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition resize-none">{{ form.notes.value|default:'' }}</textarea>
+          </div>
+        </div>
+
+        <!-- Info box -->
+        <div class="mt-5 bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-start gap-3">
+          <i class="fas fa-info-circle text-teal-500 mt-0.5 flex-shrink-0"></i>
+          <p class="text-sm text-teal-700">After submitting, a Medical Officer at the chosen hospital will be assigned to your case. You can track your application status on your dashboard.</p>
+        </div>
+
+        <button type="submit"
+                class="mt-6 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+          <i class="fas fa-paper-plane"></i> Submit Application
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('countySelect').addEventListener('change', function(){
+  var countyId = this.value;
+  var select = document.getElementById('hospitalSelect');
+  select.innerHTML = '<option value="">Loading...</option>';
+  if(!countyId){ select.innerHTML = '<option value="">-- Select County First --</option>'; return; }
+  fetch('/api/hospitals/' + countyId + '/')
+    .then(r => r.json())
+    .then(data => {
+      select.innerHTML = '<option value="">-- Select Hospital --</option>';
+      data.forEach(h => {
+        select.innerHTML += '<option value="' + h.id + '">' + h.name + '</option>';
+      });
+    });
+});
+// Pre-load hospitals if county already selected
+(function(){
+  var s = document.getElementById('countySelect');
+  if(s.value) s.dispatchEvent(new Event('change'));
+})();
+</script>
+{% endblock %}

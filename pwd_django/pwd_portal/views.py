@@ -1,10 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, transaction
+from django.conf import settings
+from django.core.cache import cache
 
 from core.decorators import pwd_required
-from core.models import Assessment, Hospital, County
-from .forms import ApplicationForm, ProfileForm, ChangePasswordForm
+from core.models import Assessment, Hospital, County, Certificate
+from core.certificates import build_certificate_context, get_active_certificate
+from .forms import ApplicationForm, ProfileForm
+from accounts.services import password_change_response
 
 
 @pwd_required
@@ -46,11 +52,25 @@ def application(request):
     if request.method == 'POST':
         form = ApplicationForm(request.POST, user=user)
         if form.is_valid():
-            assessment = form.save(commit=False)
-            assessment.user = user
-            assessment.save()
-            messages.success(request, 'Assessment appointment booked successfully!')
-            return redirect('pwd:dashboard')
+            try:
+                with transaction.atomic():
+                    assessment = form.save(commit=False)
+                    assessment.user = user
+                    assessment.save()
+            except IntegrityError:
+                if Assessment.objects.filter(
+                    user=user,
+                    status__in=['pending', 'checked', 'approved_by_health_officer'],
+                ).exists():
+                    form.add_error(
+                        None,
+                        'You already have an active assessment. Review it before booking another.',
+                    )
+                else:
+                    raise
+            else:
+                messages.success(request, 'Assessment appointment booked successfully!')
+                return redirect('pwd:dashboard')
     else:
         form = ApplicationForm(user=user)
 
@@ -64,9 +84,67 @@ def application(request):
 
 
 @pwd_required
+def assessment_detail(request, pk):
+    assessment = get_object_or_404(Assessment, pk=pk, user=request.user)
+    ctx = {'assessment': assessment}
+
+    detail_map = {
+        'hearing': 'hearing_detail',
+        'physical': 'physical_detail',
+        'visual': 'visual_detail',
+        'mental': 'mental_detail',
+        'maxillofacial': 'maxillofacial_detail',
+        'chronic': 'chronic_detail',
+    }
+    related = detail_map.get(assessment.disability_type)
+    if related:
+        ctx['detail'] = getattr(assessment, related, None)
+
+    if assessment.disability_type == 'visual':
+        try:
+            d = assessment.visual_detail
+            ctx['ophthalmic_rows'] = [
+                ('Present Eyeball',  d.present_eyeball_right,  d.present_eyeball_left),
+                ('Squint',           d.squint_right,           d.squint_left),
+                ('Nystagmus',        d.nystagmus_right,        d.nystagmus_left),
+                ('Tearing',          d.tearing_right,          d.tearing_left),
+                ('Lids',             d.lids_right,             d.lids_left),
+                ('Conjunctiva',      d.conjunctiva_right,      d.conjunctiva_left),
+                ('Cornea',           d.cornea_right,           d.cornea_left),
+                ('Anterior Chamber', d.anterior_chamber_right, d.anterior_chamber_left),
+                ('Iris',             d.iris_right,             d.iris_left),
+                ('Pupil',            d.pupil_right,            d.pupil_left),
+                ('Lens',             d.lens_right,             d.lens_left),
+                ('Fundus',           d.fundus_right,           d.fundus_left),
+            ]
+        except ObjectDoesNotExist:
+            ctx['ophthalmic_rows'] = []
+
+    return render(request, 'pwd/assessment_detail.html', ctx)
+
+
+@pwd_required
 def view_application(request, pk):
     assessment = get_object_or_404(Assessment, pk=pk, user=request.user)
-    return render(request, 'pwd/view_application.html', {'assessment': assessment})
+    detail_attr_map = {
+        'hearing': 'hearing_detail',
+        'physical': 'physical_detail',
+        'visual': 'visual_detail',
+        'mental': 'mental_detail',
+        'maxillofacial': 'maxillofacial_detail',
+        'chronic': 'chronic_detail',
+    }
+    related_attr = detail_attr_map.get(assessment.disability_type)
+    has_detail = False
+    if related_attr:
+        try:
+            has_detail = getattr(assessment, related_attr, None) is not None
+        except ObjectDoesNotExist:
+            has_detail = False
+    return render(request, 'pwd/view_application.html', {
+        'assessment': assessment,
+        'has_detail': has_detail,
+    })
 
 
 @pwd_required
@@ -115,20 +193,7 @@ def edit_profile(request):
 
 @pwd_required
 def change_password(request):
-    user = request.user
-    if request.method == 'POST':
-        form = ChangePasswordForm(request.POST)
-        if form.is_valid():
-            if not user.check_password(form.cleaned_data['current_password']):
-                messages.error(request, 'Current password is incorrect.')
-            else:
-                user.set_password(form.cleaned_data['new_password'])
-                user.save()
-                messages.success(request, 'Password changed. Please log in again.')
-                return redirect('accounts:login')
-    else:
-        form = ChangePasswordForm()
-    return render(request, 'pwd/change_password.html', {'form': form})
+    return password_change_response(request, 'pwd/change_password.html')
 
 
 @pwd_required
@@ -136,4 +201,36 @@ def certificate_print(request, pk):
     assessment = get_object_or_404(
         Assessment, pk=pk, user=request.user, status='approved_by_county_officer'
     )
-    return render(request, 'pwd/certificate_print.html', {'assessment': assessment, 'qr_code': None})
+    certificate = get_active_certificate(assessment)
+    if not certificate:
+        messages.error(request, 'This certificate is unavailable. Please contact the county office.')
+        return redirect('pwd:view_application', pk=assessment.pk)
+    return render(
+        request, 'pwd/certificate_print.html',
+        build_certificate_context(request, assessment, certificate),
+    )
+
+
+def verify_certificate(request, token):
+    """Verify an opaque token with bounded requests and minimal public disclosure."""
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    client_ip = forwarded_for.split(',')[0].strip() if forwarded_for else request.META.get('REMOTE_ADDR', '')
+    key = f'certificate-verify:{client_ip}'
+    attempts = cache.get(key, 0)
+    if attempts >= settings.CERTIFICATE_VERIFY_MAX_ATTEMPTS:
+        return render(request, 'public/verify_certificate.html', {
+            'valid': False, 'error': 'Too many verification attempts. Please try again shortly.',
+            'cert_id': '',
+        }, status=429)
+    cache.set(key, attempts + 1, settings.CERTIFICATE_VERIFY_WINDOW_SECONDS)
+
+    certificate = Certificate.objects.select_related(
+        'assessment__hospital__county'
+    ).filter(verification_token=token).first()
+    valid = bool(certificate and certificate.is_active)
+    return render(request, 'public/verify_certificate.html', {
+        'certificate': certificate,
+        'cert_id': certificate.certificate_number if certificate else '',
+        'valid': valid,
+        'error': None if valid else 'This certificate is invalid, revoked, or has been replaced.',
+    })

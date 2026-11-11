@@ -1,0 +1,90 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Add Hospital{% endblock %}
+{% block page_title %}Add Hospital{% endblock %}
+{% block page_subtitle %}Register a new assessment center in {{ county.name }} County{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Overview</p>
+<a href="{% url 'supervisor:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'supervisor:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-clipboard-check w-5 text-center text-sm"></i><span>Pending Approval</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'supervisor:hospital_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'supervisor:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user-md w-5 text-center text-sm"></i><span>Officers</span></a>
+<a href="{% url 'supervisor:geography' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Geography</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'supervisor:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'supervisor:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-800">New Assessment Center</h3>
+      <a href="{% url 'supervisor:hospital_list' %}" class="text-sm text-gray-500 hover:text-teal-600 flex items-center gap-1.5 transition-colors">
+        <i class="fas fa-arrow-left text-xs"></i> Back
+      </a>
+    </div>
+    <div class="p-6">
+      <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+          <p class="font-semibold mb-1"><i class="fas fa-exclamation-circle mr-1"></i>Please fix the errors below:</p>
+          {% for field in form %}{% for error in field.errors %}<p class="ml-4">{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Hospital / Facility Name <span class="text-red-500">*</span></label>
+            <input type="text" name="name" value="{{ form.name.value|default:'' }}" required placeholder="e.g. Kenyatta National Hospital"
+                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Sub-County <span class="text-red-500">*</span></label>
+            <select name="subcounty"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition bg-white">
+              <option value="">-- Select Sub-County --</option>
+              {% for sc in subcounties %}
+              <option value="{{ sc.name }}" {% if form.subcounty.value == sc.name %}selected{% endif %}>{{ sc.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Physical Address</label>
+            <textarea name="address" rows="2" placeholder="Street, area, town..."
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition resize-none">{{ form.address.value|default:'' }}</textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+              <input type="text" name="phone" value="{{ form.phone.value|default:'' }}" placeholder="07XX XXX XXX"
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="hospital@example.com"
+                     class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <button type="submit"
+                  class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+            <i class="fas fa-hospital"></i> Register Hospital
+          </button>
+          <a href="{% url 'supervisor:hospital_list' %}"
+             class="px-6 py-3 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium rounded-xl transition-colors text-sm flex items-center gap-2">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

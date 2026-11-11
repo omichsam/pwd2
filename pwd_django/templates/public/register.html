@@ -4,156 +4,271 @@
 {% block body %}
 <div class="min-h-screen flex">
 
-  <!-- ── Left hero panel (fixed) ── -->
-  <div class="hidden lg:flex lg:w-5/12 xl:w-2/5 bg-gradient-to-br from-teal-950 via-teal-800 to-teal-600 flex-col justify-between p-10 fixed top-0 left-0 h-full">
+  <!-- ── Left hero panel ── -->
+  <div class="hidden lg:flex lg:w-5/12 xl:w-2/5 bg-gradient-to-br from-teal-950 via-teal-800 to-teal-600 flex-col justify-between p-10 fixed top-0 left-0 h-full" aria-hidden="true">
     <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image:radial-gradient(circle at 30% 40%,white 1px,transparent 1px);background-size:36px 36px;"></div>
-    <div class="absolute bottom-0 right-0 w-64 h-64 bg-teal-400/20 rounded-full translate-y-1/3 translate-x-1/3 blur-3xl"></div>
-    <a href="{% url 'landing' %}" class="flex items-center gap-2.5 relative z-10">
-      <div class="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center">
-        <i class="fas fa-wheelchair text-white"></i>
+    <a href="{% url 'landing' %}" class="flex items-center gap-2.5 relative z-10" aria-label="PWD Access home">
+      <div class="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center">
+        <i class="fas fa-wheelchair text-white text-lg" aria-hidden="true"></i>
       </div>
-      <span class="font-bold text-lg text-white">PWD Access</span>
+      <span class="font-bold text-xl text-white">PWD Access</span>
     </a>
     <div class="relative z-10">
-      <h2 class="text-3xl font-bold text-white mb-2 leading-tight">PWD Registration<br>Portal</h2>
-      <p class="text-teal-200 text-sm leading-relaxed mb-6">Access disability services and support programs designed for you.</p>
+      <h2 class="text-4xl font-bold text-white mb-3 leading-tight">PWD Registration<br>Portal</h2>
+      <p class="text-teal-100 text-base leading-relaxed mb-7">Access disability services and support programs designed for you.</p>
       <div class="space-y-3">
-        <div class="flex items-center gap-3 bg-white/10 border border-white/15 rounded-xl p-3.5">
-          <div class="w-8 h-8 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-id-card-alt text-teal-200 text-sm"></i>
+        <div class="flex items-center gap-4 bg-white/10 border border-white/20 rounded-xl p-4">
+          <div class="w-10 h-10 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-id-card-alt text-teal-200" aria-hidden="true"></i>
           </div>
-          <div><p class="font-semibold text-white text-sm">Official Certificate</p><p class="text-teal-300 text-xs">Government-recognised disability cert</p></div>
+          <div>
+            <p class="font-bold text-white">Official Certificate</p>
+            <p class="text-teal-200 text-sm">Government-recognised disability cert</p>
+          </div>
         </div>
-        <div class="flex items-center gap-3 bg-white/10 border border-white/15 rounded-xl p-3.5">
-          <div class="w-8 h-8 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-chart-line text-teal-200 text-sm"></i>
+        <div class="flex items-center gap-4 bg-white/10 border border-white/20 rounded-xl p-4">
+          <div class="w-10 h-10 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-chart-line text-teal-200" aria-hidden="true"></i>
           </div>
-          <div><p class="font-semibold text-white text-sm">Track Your Application</p><p class="text-teal-300 text-xs">Real-time status updates</p></div>
+          <div>
+            <p class="font-bold text-white">Track Your Application</p>
+            <p class="text-teal-200 text-sm">Real-time status updates</p>
+          </div>
         </div>
-        <div class="flex items-center gap-3 bg-white/10 border border-white/15 rounded-xl p-3.5">
-          <div class="w-8 h-8 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-hand-holding-heart text-teal-200 text-sm"></i>
+        <div class="flex items-center gap-4 bg-white/10 border border-white/20 rounded-xl p-4">
+          <div class="w-10 h-10 bg-teal-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-hand-holding-heart text-teal-200" aria-hidden="true"></i>
           </div>
-          <div><p class="font-semibold text-white text-sm">Access Support Services</p><p class="text-teal-300 text-xs">Disability benefits and programs</p></div>
+          <div>
+            <p class="font-bold text-white">Access Support Services</p>
+            <p class="text-teal-200 text-sm">Disability benefits and programs</p>
+          </div>
         </div>
       </div>
     </div>
-    <p class="relative z-10 text-teal-400 text-xs">Already registered? <a href="{% url 'accounts:login' %}" class="text-white font-semibold hover:underline">Sign In</a></p>
+    <p class="relative z-10 text-teal-300 text-sm">Already registered?
+      <a href="{% url 'accounts:login' %}" class="text-white font-bold hover:underline">Sign In</a>
+    </p>
   </div>
 
   <!-- ── Right form panel ── -->
-  <div class="flex-1 lg:ml-[41.666%] xl:ml-[40%] bg-white flex items-start justify-center min-h-screen p-6 pt-10"
-       x-data="{
-         step: 1,
-         steps: ['Personal Info', 'Background', 'Security'],
-         next() { this.step = Math.min(this.step + 1, 3) },
-         prev() { this.step = Math.max(this.step - 1, 1) }
-       }">
+  <main id="main-content" tabindex="-1" class="flex-1 lg:ml-[41.666%] xl:ml-[40%] bg-white flex items-start justify-center min-h-screen p-6 pt-10"
+        x-data="{
+          step: {% if form.password.errors or form.confirm_password.errors %}3{% elif form.county.errors or form.subcounty.errors or form.occupation.errors or form.marital_status.errors or form.education_level.errors or form.next_of_kin_name.errors or form.next_of_kin_mobile.errors or form.next_of_kin_relationship.errors %}2{% else %}1{% endif %},
+          steps: ['Personal Info', 'Background', 'Security'],
+          dob: '',
+          get age() {
+            if (!this.dob) return null;
+            const today = new Date();
+            const birth = new Date(this.dob);
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+            return age;
+          },
+          get isAdult() { return this.age !== null && this.age >= 18; },
+          next() { this.step = Math.min(this.step + 1, 3) },
+          prev() { this.step = Math.max(this.step - 1, 1) }
+        }">
     <div class="w-full max-w-md">
 
+      <!-- Skip link -->
+      <a href="#registration-form" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-semibold z-50">
+        Skip to registration form
+      </a>
+
       <!-- Mobile logo -->
-      <div class="lg:hidden flex items-center gap-2.5 mb-5">
-        <div class="w-8 h-8 bg-teal-600 rounded-xl flex items-center justify-center">
-          <i class="fas fa-wheelchair text-white text-sm"></i>
+      <div class="lg:hidden flex items-center gap-2.5 mb-6">
+        <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center">
+          <i class="fas fa-wheelchair text-white" aria-hidden="true"></i>
         </div>
-        <span class="font-bold text-gray-900">PWD Access</span>
+        <span class="font-bold text-xl text-gray-900">PWD Access</span>
       </div>
 
-      <!-- Page title -->
+      <!-- Page heading -->
       <div class="mb-5">
-        <h1 class="text-2xl font-bold text-gray-900">PWD Citizen Registration</h1>
-        <p class="text-gray-500 text-xs mt-0.5">Create your account to access disability certification services</p>
+        <h1 class="text-3xl font-bold text-gray-900">PWD Citizen Registration</h1>
+        <p class="text-gray-600 text-sm mt-1">Create your account to access disability certification services</p>
       </div>
 
       <!-- Step progress -->
-      <div class="mb-5">
+      <div class="mb-6" role="progressbar" :aria-valuenow="step" aria-valuemin="1" aria-valuemax="3" :aria-label="'Step ' + step + ' of 3: ' + steps[step-1]">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold text-teal-600" x-text="'Step ' + step + ' of 3 — ' + steps[step-1]"></span>
-          <span class="text-xs text-gray-400" x-text="Math.round((step/3)*100) + '% complete'"></span>
+          <span class="text-sm font-bold text-teal-700" x-text="'Step ' + step + ' of 3 — ' + steps[step-1]"></span>
+          <span class="text-sm text-gray-500 font-medium" x-text="Math.round((step/3)*100) + '% complete'"></span>
         </div>
-        <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div class="h-full bg-teal-500 rounded-full transition-all duration-300" :style="'width:' + Math.round((step/3)*100) + '%'"></div>
+        <div class="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+          <div class="h-full bg-teal-600 rounded-full transition-all duration-300" :style="'width:' + Math.round((step/3)*100) + '%'"></div>
         </div>
-        <div class="flex justify-between mt-1.5">
-          <template x-for="(name, i) in steps">
-            <span class="text-xs transition-colors" :class="step > i ? 'text-teal-600 font-semibold' : step === i+1 ? 'text-gray-700 font-medium' : 'text-gray-300'" x-text="name"></span>
+        <div class="flex justify-between mt-2">
+          <template x-for="(name, i) in steps" :key="i">
+            <span class="text-xs font-semibold transition-colors"
+                  :class="step > i ? 'text-teal-700' : step === i+1 ? 'text-gray-800' : 'text-gray-400'"
+                  x-text="name"></span>
           </template>
         </div>
       </div>
 
       {% if form.errors %}
-      <div class="mb-4 bg-red-50 border border-red-200 rounded-xl p-3">
-        <p class="text-xs font-semibold text-red-700 mb-1"><i class="fas fa-exclamation-circle mr-1"></i>Please fix the errors below:</p>
-        {% for field in form %}{% for error in field.errors %}<p class="text-xs text-red-600 ml-3">• {{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
-        {% for error in form.non_field_errors %}<p class="text-xs text-red-600 ml-3">• {{ error }}</p>{% endfor %}
+      <div id="registration-errors" tabindex="-1" class="mb-5 bg-red-50 border-2 border-red-400 rounded-xl p-4" role="alert" aria-live="assertive">
+        <p class="text-sm font-bold text-red-700 mb-2 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle" aria-hidden="true"></i> Please fix the errors below:
+        </p>
+        {% for field in form %}{% for error in field.errors %}
+          <p class="text-sm text-red-700 ml-4">• <a href="#{{ field.id_for_label }}" class="underline">{{ field.label }}: {{ error }}</a></p>
+        {% endfor %}{% endfor %}
+        {% for error in form.non_field_errors %}
+          <p class="text-sm text-red-700 ml-4">• {{ error }}</p>
+        {% endfor %}
       </div>
       {% endif %}
 
-      <form method="post">
+      <form method="post" id="registration-form" data-prevent-double-submit>
         {% csrf_token %}
 
+        <!-- Input style helper: defined once and reused via Tailwind classes -->
+
         <!-- ── Step 1: Personal Information ── -->
-        <div x-show="step===1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-0 translate-x-0">
-          <div class="grid grid-cols-2 gap-3 mb-3">
+        <div x-show="step===1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
+             role="group" aria-labelledby="step1-label">
+          <p id="step1-label" class="sr-only">Step 1: Personal Information</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">First Name <span class="text-red-400">*</span></label>
-              <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" required placeholder="John"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+              <label for="first_name" class="block text-sm font-bold text-gray-800 mb-1.5">
+                First Name <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="text" name="first_name" id="first_name" value="{{ form.first_name.value|default:'' }}" required
+                     placeholder="John" autocomplete="given-name" aria-required="true"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Last Name <span class="text-red-400">*</span></label>
-              <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" required placeholder="Doe"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Email <span class="text-red-400">*</span></label>
-              <input type="email" name="email" value="{{ form.email.value|default:'' }}" required placeholder="john@example.com"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Mobile <span class="text-red-400">*</span></label>
-              <input type="tel" name="mobile_number" value="{{ form.mobile_number.value|default:'' }}" required placeholder="07XX XXX XXX"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+              <label for="last_name" class="block text-sm font-bold text-gray-800 mb-1.5">
+                Last Name <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="text" name="last_name" id="last_name" value="{{ form.last_name.value|default:'' }}" required
+                     placeholder="Doe" autocomplete="family-name" aria-required="true"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-3 mb-3">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Date of Birth <span class="text-red-400">*</span></label>
-              <input type="date" name="date_of_birth" value="{{ form.date_of_birth.value|default:'' }}" required
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+              <label for="email" class="block text-sm font-bold text-gray-800 mb-1.5">
+                Email <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="email" name="email" id="email" value="{{ form.email.value|default:'' }}" required
+                     placeholder="john@example.com" autocomplete="email" aria-required="true"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Gender <span class="text-red-400">*</span></label>
-              <select name="gender" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white transition">
-                <option value="">Select</option>
+              <label for="mobile_number" class="block text-sm font-bold text-gray-800 mb-1.5">
+                Mobile <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="tel" name="mobile_number" id="mobile_number" value="{{ form.mobile_number.value|default:'' }}" required
+                     placeholder="07XX XXX XXX" autocomplete="tel" aria-required="true"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div>
+              <label for="date_of_birth" class="block text-sm font-bold text-gray-800 mb-1.5">
+                Date of Birth <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="date" name="date_of_birth" id="date_of_birth" value="{{ form.date_of_birth.value|default:'' }}" required
+                     autocomplete="bday" aria-required="true"
+                     x-model="dob"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900">
+            </div>
+            <div>
+              <label for="gender" class="block text-sm font-bold text-gray-800 mb-1.5">
+                Gender <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <select name="gender" id="gender" required aria-required="true"
+                      class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 bg-white text-gray-900 transition">
+                <option value="">Select gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
             </div>
           </div>
-          <div class="mb-5">
-            <label class="block text-xs font-medium text-gray-600 mb-1">National ID Number <span class="text-red-400">*</span></label>
-            <input type="text" name="id_number" value="{{ form.id_number.value|default:'' }}" required placeholder="e.g. 12345678"
-                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+
+          <!-- Age-based ID field: shows after DOB is entered -->
+          <div class="mb-5" x-show="age !== null">
+
+            <!-- Age badge -->
+            <div x-show="age !== null"
+                 class="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-sm font-medium"
+                 :class="isAdult ? 'bg-teal-50 text-teal-800 border border-teal-200' : 'bg-amber-50 text-amber-800 border border-amber-200'">
+              <i :class="isAdult ? 'fas fa-id-card text-teal-600' : 'fas fa-baby text-amber-600'" aria-hidden="true"></i>
+              <span x-text="isAdult ? 'Age ' + age + ' — National ID required' : 'Age ' + age + ' — Birth certificate required'"></span>
+            </div>
+
+            <!-- 18+ : National ID -->
+            <div x-show="isAdult">
+              <label for="id_number" class="block text-sm font-bold text-gray-800 mb-1.5">
+                National ID Number <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="text" name="id_number" id="id_number"
+                     value="{{ form.id_number.value|default:'' }}"
+                     :required="isAdult"
+                     placeholder="e.g. 12345678"
+                     autocomplete="off"
+                     :aria-required="isAdult"
+                     aria-describedby="id_number-hint"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
+              <p id="id_number-hint" class="text-xs text-gray-500 mt-1.5">This will be your login username</p>
+            </div>
+
+            <!-- Under 18 : Birth Certificate -->
+            <div x-show="!isAdult">
+              <label for="birth_cert_number" class="block text-sm font-bold text-gray-800 mb-1.5">
+                Birth Certificate Number <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <input type="text" name="id_number" id="birth_cert_number"
+                     value="{{ form.id_number.value|default:'' }}"
+                     :required="!isAdult"
+                     placeholder="e.g. BC/2010/123456"
+                     autocomplete="off"
+                     :aria-required="!isAdult"
+                     aria-describedby="birth-cert-hint"
+                     class="w-full px-4 py-3.5 border-2 border-amber-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-amber-200 focus:border-amber-500 transition bg-white text-gray-900 placeholder-gray-400">
+              <p id="birth-cert-hint" class="text-xs text-gray-500 mt-1.5">This will be your login username</p>
+            </div>
+
           </div>
+
+          <!-- Placeholder shown before DOB is entered -->
+          <div class="mb-5" x-show="age === null">
+            <label class="block text-sm font-bold text-gray-400 mb-1.5">ID / Certificate Number <span class="text-red-300" aria-hidden="true">*</span></label>
+            <div class="w-full px-4 py-3.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 bg-gray-50">
+              Enter your date of birth above to continue
+            </div>
+          </div>
+
           <button type="button" @click="next()"
-                  class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-            Continue <i class="fas fa-arrow-right text-xs"></i>
+                  class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2 shadow-sm">
+            Continue <i class="fas fa-arrow-right" aria-hidden="true"></i>
           </button>
-          <p class="text-center text-xs text-gray-500 mt-3">
-            Already registered? <a href="{% url 'accounts:login' %}" class="text-teal-600 font-semibold">Sign in</a>
+          <p class="text-center text-sm text-gray-600 font-medium mt-4">
+            Already registered? <a href="{% url 'accounts:login' %}" class="text-teal-700 font-bold underline underline-offset-2">Sign in</a>
           </p>
         </div>
 
         <!-- ── Step 2: Background & Location ── -->
-        <div x-show="step===2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-0 translate-x-0">
-          <div class="grid grid-cols-2 gap-3 mb-3">
+        <div x-show="step===2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
+             role="group" aria-labelledby="step2-label">
+          <p id="step2-label" class="sr-only">Step 2: Background and Location</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">County <span class="text-red-400">*</span></label>
-              <select name="county" id="county-select" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white transition">
+              <label for="county-select" class="block text-sm font-bold text-gray-800 mb-1.5">
+                County <span class="text-red-600" aria-hidden="true">*</span>
+              </label>
+              <select name="county" id="county-select" required aria-required="true"
+                      class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 bg-white text-gray-900 transition">
                 <option value="">Select county</option>
                 {% for c in counties %}
                 <option value="{{ c.id }}">{{ c.name }}</option>
@@ -161,21 +276,24 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Sub-County</label>
-              <select name="subcounty" id="subcounty-select" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white transition">
+              <label for="subcounty-select" class="block text-sm font-bold text-gray-800 mb-1.5">Sub-County</label>
+              <select name="subcounty" id="subcounty-select"
+                      class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 bg-white text-gray-900 transition">
                 <option value="">Select county first</option>
               </select>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-3 mb-3">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Occupation</label>
-              <input type="text" name="occupation" value="{{ form.occupation.value|default:'' }}" placeholder="e.g. Farmer"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+              <label for="occupation" class="block text-sm font-bold text-gray-800 mb-1.5">Occupation</label>
+              <input type="text" name="occupation" id="occupation" value="{{ form.occupation.value|default:'' }}" placeholder="e.g. Farmer"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Marital Status</label>
-              <select name="marital_status" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white transition">
+              <label for="marital_status" class="block text-sm font-bold text-gray-800 mb-1.5">Marital Status</label>
+              <select name="marital_status" id="marital_status"
+                      class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 bg-white text-gray-900 transition">
                 <option value="">Select</option>
                 <option value="single">Single</option>
                 <option value="married">Married</option>
@@ -184,9 +302,11 @@
               </select>
             </div>
           </div>
+
           <div class="mb-4">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Education Level</label>
-            <select name="education_level" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white transition">
+            <label for="education_level" class="block text-sm font-bold text-gray-800 mb-1.5">Education Level</label>
+            <select name="education_level" id="education_level"
+                    class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 bg-white text-gray-900 transition">
               <option value="">Select</option>
               <option value="none">None</option>
               <option value="primary">Primary</option>
@@ -196,80 +316,116 @@
               <option value="postgraduate">Postgraduate</option>
             </select>
           </div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 border-t border-gray-100 pt-3">Next of Kin</p>
-          <div class="grid grid-cols-2 gap-3 mb-3">
+
+          <p class="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3 border-t-2 border-gray-100 pt-4">Next of Kin</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Full Name</label>
-              <input type="text" name="next_of_kin_name" value="{{ form.next_of_kin_name.value|default:'' }}" placeholder="Jane Doe"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+              <label for="next_of_kin_name" class="block text-sm font-bold text-gray-800 mb-1.5">Full Name</label>
+              <input type="text" name="next_of_kin_name" id="next_of_kin_name" value="{{ form.next_of_kin_name.value|default:'' }}" placeholder="Jane Doe"
+                     autocomplete="off"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Relationship</label>
-              <input type="text" name="next_of_kin_relationship" value="{{ form.next_of_kin_relationship.value|default:'' }}" placeholder="Spouse"
-                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+              <label for="next_of_kin_relationship" class="block text-sm font-bold text-gray-800 mb-1.5">Relationship</label>
+              <input type="text" name="next_of_kin_relationship" id="next_of_kin_relationship" value="{{ form.next_of_kin_relationship.value|default:'' }}" placeholder="Spouse"
+                     class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
             </div>
           </div>
           <div class="mb-5">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Next of Kin Mobile</label>
-            <input type="tel" name="next_of_kin_mobile" value="{{ form.next_of_kin_mobile.value|default:'' }}" placeholder="07XX XXX XXX"
-                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+            <label for="next_of_kin_mobile" class="block text-sm font-bold text-gray-800 mb-1.5">Next of Kin Mobile</label>
+            <input type="tel" name="next_of_kin_mobile" id="next_of_kin_mobile" value="{{ form.next_of_kin_mobile.value|default:'' }}" placeholder="07XX XXX XXX"
+                   autocomplete="off"
+                   class="w-full px-4 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
           </div>
-          <div class="flex gap-2">
+
+          <div class="flex gap-3">
             <button type="button" @click="prev()"
-                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-              <i class="fas fa-arrow-left text-xs"></i> Back
+                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2 border-2 border-gray-200">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
             </button>
             <button type="button" @click="next()"
-                    class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-              Continue <i class="fas fa-arrow-right text-xs"></i>
+                    class="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2 shadow-sm">
+              Continue <i class="fas fa-arrow-right" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
         <!-- ── Step 3: Account Security ── -->
-        <div x-show="step===3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-0 translate-x-0">
-          <div class="mb-3" x-data="{ show: false }">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Password <span class="text-red-400">*</span></label>
+        <div x-show="step===3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
+             role="group" aria-labelledby="step3-label">
+          <p id="step3-label" class="sr-only">Step 3: Account Security</p>
+
+          <div class="mb-4" x-data="{ show: false }">
+            <label for="password" class="block text-sm font-bold text-gray-800 mb-1.5">
+              Password <span class="text-red-600" aria-hidden="true">*</span>
+            </label>
             <div class="relative">
-              <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-              <input :type="show ? 'text' : 'password'" name="password" required minlength="6" placeholder="Min. 6 characters"
-                     class="w-full pl-8 pr-9 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-              <button type="button" @click="show=!show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'" class="text-xs"></i>
+              <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true"></i>
+              <input :type="show ? 'text' : 'password'" name="password" id="password" required minlength="8"
+                     placeholder="Use a strong password"
+                     autocomplete="new-password" aria-required="true"
+                     aria-describedby="password-hint"
+                     class="w-full pl-10 pr-12 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
+              <button type="button" @click="show=!show" :aria-label="show ? 'Hide password' : 'Show password'"
+                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 p-1">
+                <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p id="password-hint" class="text-xs text-gray-500 mt-1.5">Use at least 8 characters. Avoid common, numeric-only, or identity-based passwords.</p>
+          </div>
+
+          <div class="mb-6" x-data="{ show: false }">
+            <label for="confirm_password" class="block text-sm font-bold text-gray-800 mb-1.5">
+              Confirm Password <span class="text-red-600" aria-hidden="true">*</span>
+            </label>
+            <div class="relative">
+              <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true"></i>
+              <input :type="show ? 'text' : 'password'" name="confirm_password" id="confirm_password" required
+                     placeholder="Repeat your password"
+                     autocomplete="new-password" aria-required="true"
+                     class="w-full pl-10 pr-12 py-3.5 border-2 border-gray-300 rounded-xl text-base font-medium focus:outline-none focus:ring-4 focus:ring-teal-300 focus:border-teal-600 transition bg-white text-gray-900 placeholder-gray-400">
+              <button type="button" @click="show=!show" :aria-label="show ? 'Hide password' : 'Show password'"
+                      class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 p-1">
+                <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'" aria-hidden="true"></i>
               </button>
             </div>
           </div>
-          <div class="mb-5" x-data="{ show: false }">
-            <label class="block text-xs font-medium text-gray-600 mb-1">Confirm Password <span class="text-red-400">*</span></label>
-            <div class="relative">
-              <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-              <input :type="show ? 'text' : 'password'" name="confirm_password" required placeholder="Repeat password"
-                     class="w-full pl-8 pr-9 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
-              <button type="button" @click="show=!show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <i :class="show ? 'fas fa-eye-slash' : 'fas fa-eye'" class="text-xs"></i>
-              </button>
-            </div>
+
+          <!-- Agreement notice -->
+          <div class="mb-5 bg-teal-50 border-2 border-teal-200 rounded-xl p-4 flex items-start gap-3" role="note">
+            <i class="fas fa-shield-alt text-teal-600 mt-0.5 flex-shrink-0" aria-hidden="true"></i>
+            <p class="text-teal-800 text-sm font-medium">
+              By creating an account you confirm that the information provided is accurate and truthful.
+              Giving false information is punishable by the laws of Kenya.
+            </p>
           </div>
-          <div class="flex gap-2">
+
+          <div class="flex gap-3">
             <button type="button" @click="prev()"
-                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-              <i class="fas fa-arrow-left text-xs"></i> Back
+                    class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2 border-2 border-gray-200">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
             </button>
-            <button type="submit"
-                    class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-              <i class="fas fa-user-plus text-xs"></i> Create Account
+            <button type="submit" data-submit-label="Creating account…"
+                    class="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-xl transition-colors text-base flex items-center justify-center gap-2 shadow-sm">
+              <i class="fas fa-user-plus" aria-hidden="true"></i> Create Account
             </button>
           </div>
-          <p class="text-center text-xs text-gray-500 mt-3">
-            Official? <a href="{% url 'accounts:official_register' %}" class="text-teal-600 font-semibold">Register here</a>
-            &nbsp;·&nbsp;
-            <a href="{% url 'accounts:login' %}" class="text-teal-600 font-semibold">Sign in</a>
-          </p>
+
+          <div class="text-center mt-4 space-y-1.5">
+            <p class="text-sm text-gray-600 font-medium">
+              Official staff?
+              <a href="{% url 'accounts:official_register' %}" class="text-teal-700 font-bold underline underline-offset-2">Register here</a>
+            </p>
+            <p class="text-sm text-gray-600 font-medium">
+              Already registered?
+              <a href="{% url 'accounts:login' %}" class="text-teal-700 font-bold underline underline-offset-2">Sign in</a>
+            </p>
+          </div>
         </div>
 
       </form>
     </div>
-  </div>
+  </main>
 </div>
 {% endblock %}
 
@@ -278,7 +434,7 @@
 document.getElementById('county-select').addEventListener('change', function(){
   var countyId = this.value;
   var sub = document.getElementById('subcounty-select');
-  sub.innerHTML = '<option value="">Loading...</option>';
+  sub.innerHTML = '<option value="">Loading…</option>';
   if(!countyId){ sub.innerHTML = '<option value="">Select county first</option>'; return; }
   fetch('/api/subcounties/' + countyId + '/')
     .then(r => r.json())
@@ -289,5 +445,6 @@ document.getElementById('county-select').addEventListener('change', function(){
       });
     });
 });
+document.getElementById('registration-errors')?.focus();
 </script>
 {% endblock %}

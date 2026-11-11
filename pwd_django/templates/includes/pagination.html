@@ -1,0 +1,10 @@
+{% load querystring %}
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4 flex items-center justify-between gap-3" aria-label="{{ label|default:'Results' }} pagination">
+  <p class="text-xs text-gray-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} results</p>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}<a class="px-3 py-2 border rounded-lg text-sm" href="{% page_url request page_param page_obj.previous_page_number %}">Previous</a>{% endif %}
+    {% if page_obj.has_next %}<a class="px-3 py-2 border rounded-lg text-sm" href="{% page_url request page_param page_obj.next_page_number %}">Next</a>{% endif %}
+  </div>
+</nav>
+{% endif %}

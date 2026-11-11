@@ -1,0 +1,538 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Physical Assessment — #{{ assessment.id }}{% endblock %}
+{% block page_title %}Physical Disability Assessment{% endblock %}
+{% block page_subtitle %}Assessment #{{ assessment.id }} — {{ assessment.user.get_full_name }}{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Assessments</p>
+<a href="{% url 'medical:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-th-large w-5 text-center text-sm"></i><span>Dashboard</span></a>
+<a href="{% url 'medical:assessment_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-clipboard-list w-5 text-center text-sm"></i><span>Pending Assessments</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'medical:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media (min-width: 1024px) {
+    main > div { padding: 0 !important; }
+    main { overflow: hidden !important; }
+    footer { display: none !important; }
+  }
+  @media (max-width: 1023px) {
+    /* Relax the fixed-height two-pane shell so the form flows and scrolls on phones/tablets */
+    main { overflow: visible !important; }
+    main > div { height: auto !important; overflow: visible !important; }
+    main [style*="100vh"] { height: auto !important; min-height: 0 !important; }
+    main .overflow-hidden { overflow: visible !important; }
+    main .overflow-y-auto { overflow-y: visible !important; }
+  }
+  .imp-select { width:100%; padding:6px 10px; border:1px solid #e5e7eb; border-radius:10px; font-size:12px; background:rgba(240,253,250,0.3); }
+  .imp-select:focus { outline:none; box-shadow:0 0 0 2px #14b8a6; }
+  .imp-textarea { width:100%; padding:6px 10px; border:1px solid #e5e7eb; border-radius:10px; font-size:12px; background:rgba(240,253,250,0.3); resize:none; }
+  .imp-textarea:focus { outline:none; box-shadow:0 0 0 2px #14b8a6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-5 overflow-hidden" style="height:calc(100vh - 6.5rem)" x-data="{ step: 1 }">
+
+  <!-- LEFT: Patient card + step nav -->
+  <div class="w-full lg:w-56 flex-shrink-0 flex flex-col gap-3 lg:overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex-shrink-0">
+      <div class="bg-gradient-to-br from-teal-700 to-teal-500 px-4 py-4 text-center">
+        <div class="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2 text-base">
+          {{ assessment.user.first_name|first|upper }}{{ assessment.user.last_name|first|upper }}
+        </div>
+        <p class="font-bold text-white text-sm leading-tight">{{ assessment.user.get_full_name }}</p>
+        <p class="text-teal-200 text-xs mt-0.5">ID: {{ assessment.user.id_number|default:"—" }}</p>
+      </div>
+      <div class="p-3 space-y-1.5 text-xs">
+        <div class="flex justify-between"><span class="text-gray-400">Gender</span><span class="font-medium text-gray-700">{{ assessment.user.get_gender_display|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">DOB</span><span class="font-medium text-gray-700">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Phone</span><span class="font-medium text-gray-700">{{ assessment.user.mobile_number|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">County</span><span class="font-medium text-gray-700">{{ assessment.user.county.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Hospital</span><span class="font-medium text-gray-700 text-right leading-tight">{{ assessment.hospital.name|default:"—" }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Appt</span><span class="font-medium text-gray-700">{{ assessment.assessment_date|date:"d M Y" }}</span></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex-shrink-0">
+      <p class="text-xs font-semibold text-gray-500 mb-2.5 px-1">Sections</p>
+      <div class="space-y-1">
+        <button type="button" @click="step=1" :class="step==1?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>1?'bg-teal-600 text-white':step==1?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>1"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=1"><span>1</span></template>
+          </span>Summary Findings
+        </button>
+        <button type="button" @click="step=2" :class="step==2?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>2?'bg-teal-600 text-white':step==2?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>2"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=2"><span>2</span></template>
+          </span>Structural Impairments
+        </button>
+        <button type="button" @click="step=3" :class="step==3?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step>3?'bg-teal-600 text-white':step==3?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <template x-if="step>3"><i class="fas fa-check" style="font-size:9px"></i></template>
+            <template x-if="step<=3"><span>3</span></template>
+          </span>Functional &amp; Participation
+        </button>
+        <button type="button" @click="step=4" :class="step==4?'bg-teal-50 text-teal-700 font-semibold':'text-gray-500 hover:bg-gray-50'" class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors text-left">
+          <span :class="step==4?'bg-teal-600 text-white':'bg-gray-200 text-gray-500'" class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+          Recommendations
+        </button>
+      </div>
+    </div>
+
+    <a href="{% url 'medical:view_assessment' assessment.pk %}" class="flex items-center gap-2 text-xs text-gray-400 hover:text-teal-600 font-medium transition-colors px-1">
+      <i class="fas fa-arrow-left"></i> Back to Assessment
+    </a>
+  </div>
+
+  <!-- RIGHT: Wizard -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-0">
+
+    <!-- Progress bar -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3 mb-4 flex items-center gap-4 flex-shrink-0">
+      <div class="flex items-center gap-2 flex-1">
+        <template x-for="i in [1,2,3,4]" :key="i">
+          <div class="flex items-center gap-2 flex-1 last:flex-none">
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <div :class="step >= i ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-400'"
+                   class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors">
+                <template x-if="step > i"><i class="fas fa-check" style="font-size:9px"></i></template>
+                <template x-if="step <= i"><span x-text="i"></span></template>
+              </div>
+              <span :class="step >= i ? 'text-teal-700 font-semibold' : 'text-gray-400'"
+                    class="text-xs transition-colors hidden lg:block"
+                    x-text="['Summary Findings','Structural Impairments','Functional & Participation','Recommendations'][i-1]"></span>
+            </div>
+            <template x-if="i < 4">
+              <div class="flex-1 h-0.5 mx-1" :class="step > i ? 'bg-teal-500' : 'bg-gray-200'"></div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <span class="text-xs text-gray-400 flex-shrink-0" x-text="'Step ' + step + ' of 4'"></span>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="flex-1 flex flex-col min-h-0">
+      {% csrf_token %}
+
+      <!-- ══ STEP 1: Summary Findings ══ -->
+      <div x-show="step==1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-file-medical-alt"></i> 1. Summary Findings</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+          <div>
+            <h4 class="text-sm font-semibold text-gray-700 mb-4 pb-1 border-b border-gray-100">Medical History</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Injury / Onset</label>
+                <input type="date" name="injury_onset" value="{{ form.injury_onset.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Last Intervention</label>
+                <input type="date" name="last_intervention" value="{{ form.last_intervention.value|default:'' }}"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Cause of Disability</label>
+                <textarea name="cause_of_disability" rows="3" placeholder="Describe the cause…"
+                          class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.cause_of_disability.value|default:'' }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-semibold text-gray-700 mb-4 pb-1 border-b border-gray-100">Additional Details</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Affected Limbs / Body Parts</label>
+                <input type="text" name="affected_limbs" value="{{ form.affected_limbs.value|default:'' }}"
+                       placeholder="e.g. Left leg, both arms"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Degree of Disability</label>
+                <input type="text" name="degree_of_disability" value="{{ form.degree_of_disability.value|default:'' }}"
+                       placeholder="e.g. Moderate, Severe"
+                       class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Functional Limitation</label>
+                <textarea name="functional_limitation" rows="3" placeholder="Describe how the disability limits day-to-day functions…"
+                          class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.functional_limitation.value|default:'' }}</textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: Structural Impairments ══ -->
+      <div x-show="step==2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-bone"></i> 2. Structural Impairments</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          <!-- Region checkboxes -->
+          <div>
+            <p class="text-xs font-semibold text-gray-600 mb-3">Tick Region(s) Being Assessed</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700">
+                <input type="checkbox" name="region_s710" {% if form.region_s710.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s710 Head &amp; Neck Region
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700">
+                <input type="checkbox" name="region_s720" {% if form.region_s720.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s720 Shoulder Region
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700">
+                <input type="checkbox" name="region_s730" {% if form.region_s730.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s730 Upper Extremity (arm, hand)
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700">
+                <input type="checkbox" name="region_s740" {% if form.region_s740.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s740 Pelvis
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700">
+                <input type="checkbox" name="region_s750" {% if form.region_s750.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s750 Lower Extremity (leg, foot)
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700">
+                <input type="checkbox" name="region_s760" {% if form.region_s760.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s760 Trunk
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-teal-50/40 text-xs text-gray-700 col-span-1">
+                <input type="checkbox" name="region_s8" {% if form.region_s8.value %}checked{% endif %} class="rounded border-gray-300 text-teal-600 focus:ring-teal-500"> s8 Skin and Related Structures
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Region(s) Affected <span class="text-gray-400 font-normal">(describe)</span></label>
+            <textarea name="regions_affected" rows="2" placeholder="Describe the affected regions…"
+                      class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.regions_affected.value|default:'' }}</textarea>
+          </div>
+
+          <!-- Structural Assessment Table -->
+          <div class="border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="bg-gray-50 px-4 py-2.5 border-b border-gray-200">
+              <p class="text-xs font-semibold text-gray-700">Physical / Structural Assessment Summary</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50/50 px-4 py-2 border-b border-gray-200">
+              <p class="text-xs font-semibold text-gray-500">Assessment Area — Impairment Level</p>
+              <p class="text-xs font-semibold text-gray-500">Finding / Remarks</p>
+            </div>
+            {% with impairment_opts="0:0 — No Impairment,1:1 — Mild (< 25%),2:2 — Moderate (25–49%),3:3 — Severe (50–95%),4:4 — Complete (96–100%)" %}
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Muscle Power of Affected Muscle Groups</p>
+                <select name="muscle_power_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.muscle_power_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.muscle_power_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.muscle_power_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.muscle_power_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.muscle_power_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="muscle_power_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.muscle_power_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Range of Motion of Joints Affected</p>
+                <select name="range_of_motion_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.range_of_motion_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.range_of_motion_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.range_of_motion_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.range_of_motion_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.range_of_motion_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="range_of_motion_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.range_of_motion_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Degree of Structural Angulation / Deviation</p>
+                <select name="angulation_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.angulation_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.angulation_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.angulation_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.angulation_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.angulation_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="angulation_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.angulation_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Level of Limb Amputation</p>
+                <select name="limb_amputation_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.limb_amputation_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.limb_amputation_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.limb_amputation_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.limb_amputation_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.limb_amputation_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="limb_amputation_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.limb_amputation_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Bilateral Lower Limb Length</p>
+                <select name="limb_length_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.limb_length_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.limb_length_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.limb_length_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.limb_length_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.limb_length_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="limb_length_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.limb_length_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Balance and Coordination</p>
+                <select name="balance_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.balance_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.balance_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.balance_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.balance_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.balance_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="balance_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.balance_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Other Physical Impairments (Specify)</p>
+                <select name="other_impairment_level" class="imp-select">
+                  <option value="">— Select Impairment Level —</option>
+                  <option value="0" {% if form.other_impairment_level.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+                  <option value="1" {% if form.other_impairment_level.value == "1" %}selected{% endif %}>1 — Mild (&lt; 25%)</option>
+                  <option value="2" {% if form.other_impairment_level.value == "2" %}selected{% endif %}>2 — Moderate (25–49%)</option>
+                  <option value="3" {% if form.other_impairment_level.value == "3" %}selected{% endif %}>3 — Severe (50–95%)</option>
+                  <option value="4" {% if form.other_impairment_level.value == "4" %}selected{% endif %}>4 — Complete (96–100%)</option>
+                </select>
+              </div>
+              <div><textarea name="other_impairment_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.other_impairment_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            {% endwith %}
+          </div>
+
+          <!-- Score for Impairments -->
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">Score for Impairments</p>
+            <select name="score_for_impairments" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+              <option value="">— Select —</option>
+              <option value="0" {% if form.score_for_impairments.value == "0" %}selected{% endif %}>0 — No Impairment</option>
+              <option value="1" {% if form.score_for_impairments.value == "1" %}selected{% endif %}>1 — Mild</option>
+              <option value="2" {% if form.score_for_impairments.value == "2" %}selected{% endif %}>2 — Moderate</option>
+              <option value="3" {% if form.score_for_impairments.value == "3" %}selected{% endif %}>3 — Severe</option>
+              <option value="4" {% if form.score_for_impairments.value == "4" %}selected{% endif %}>4 — Complete / Profound</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: Functional & Participation ══ -->
+      <div x-show="step==3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-running"></i> 3. Functional &amp; Participation</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          <div class="border border-gray-200 rounded-2xl overflow-hidden">
+            <div class="bg-gray-50 px-4 py-2.5 border-b border-gray-200">
+              <p class="text-xs font-semibold text-gray-700">Function and Participation Restriction Assessment</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50/50 px-4 py-2 border-b border-gray-200">
+              <p class="text-xs font-semibold text-gray-500">Functional Area — Difficulty Level</p>
+              <p class="text-xs font-semibold text-gray-500">Finding / Remarks</p>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Mobility</p>
+                <select name="mobility_level" class="imp-select">
+                  <option value="">— Select Difficulty Level —</option>
+                  <option value="0" {% if form.mobility_level.value == "0" %}selected{% endif %}>0 — No Difficulty</option>
+                  <option value="1" {% if form.mobility_level.value == "1" %}selected{% endif %}>1 — Mild Difficulty</option>
+                  <option value="2" {% if form.mobility_level.value == "2" %}selected{% endif %}>2 — Moderate Difficulty</option>
+                  <option value="3" {% if form.mobility_level.value == "3" %}selected{% endif %}>3 — Severe Difficulty</option>
+                  <option value="4" {% if form.mobility_level.value == "4" %}selected{% endif %}>4 — Complete Difficulty</option>
+                </select>
+              </div>
+              <div><textarea name="mobility_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.mobility_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Domestic Life</p>
+                <select name="domestic_life_level" class="imp-select">
+                  <option value="">— Select Difficulty Level —</option>
+                  <option value="0" {% if form.domestic_life_level.value == "0" %}selected{% endif %}>0 — No Difficulty</option>
+                  <option value="1" {% if form.domestic_life_level.value == "1" %}selected{% endif %}>1 — Mild Difficulty</option>
+                  <option value="2" {% if form.domestic_life_level.value == "2" %}selected{% endif %}>2 — Moderate Difficulty</option>
+                  <option value="3" {% if form.domestic_life_level.value == "3" %}selected{% endif %}>3 — Severe Difficulty</option>
+                  <option value="4" {% if form.domestic_life_level.value == "4" %}selected{% endif %}>4 — Complete Difficulty</option>
+                </select>
+              </div>
+              <div><textarea name="domestic_life_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.domestic_life_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Community Social Civic</p>
+                <select name="community_level" class="imp-select">
+                  <option value="">— Select Difficulty Level —</option>
+                  <option value="0" {% if form.community_level.value == "0" %}selected{% endif %}>0 — No Difficulty</option>
+                  <option value="1" {% if form.community_level.value == "1" %}selected{% endif %}>1 — Mild Difficulty</option>
+                  <option value="2" {% if form.community_level.value == "2" %}selected{% endif %}>2 — Moderate Difficulty</option>
+                  <option value="3" {% if form.community_level.value == "3" %}selected{% endif %}>3 — Severe Difficulty</option>
+                  <option value="4" {% if form.community_level.value == "4" %}selected{% endif %}>4 — Complete Difficulty</option>
+                </select>
+              </div>
+              <div><textarea name="community_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.community_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Self-care</p>
+                <select name="selfcare_level" class="imp-select">
+                  <option value="">— Select Difficulty Level —</option>
+                  <option value="0" {% if form.selfcare_level.value == "0" %}selected{% endif %}>0 — No Difficulty</option>
+                  <option value="1" {% if form.selfcare_level.value == "1" %}selected{% endif %}>1 — Mild Difficulty</option>
+                  <option value="2" {% if form.selfcare_level.value == "2" %}selected{% endif %}>2 — Moderate Difficulty</option>
+                  <option value="3" {% if form.selfcare_level.value == "3" %}selected{% endif %}>3 — Severe Difficulty</option>
+                  <option value="4" {% if form.selfcare_level.value == "4" %}selected{% endif %}>4 — Complete Difficulty</option>
+                </select>
+              </div>
+              <div><textarea name="selfcare_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.selfcare_findings.value|default:'' }}</textarea></div>
+            </div>
+
+            <div class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><p class="text-xs font-semibold text-gray-600 mb-1.5">Major Life Areas</p>
+                <select name="major_life_level" class="imp-select">
+                  <option value="">— Select Difficulty Level —</option>
+                  <option value="0" {% if form.major_life_level.value == "0" %}selected{% endif %}>0 — No Difficulty</option>
+                  <option value="1" {% if form.major_life_level.value == "1" %}selected{% endif %}>1 — Mild Difficulty</option>
+                  <option value="2" {% if form.major_life_level.value == "2" %}selected{% endif %}>2 — Moderate Difficulty</option>
+                  <option value="3" {% if form.major_life_level.value == "3" %}selected{% endif %}>3 — Severe Difficulty</option>
+                  <option value="4" {% if form.major_life_level.value == "4" %}selected{% endif %}>4 — Complete Difficulty</option>
+                </select>
+              </div>
+              <div><textarea name="major_life_findings" rows="2" placeholder="Enter findings or remarks" class="imp-textarea">{{ form.major_life_findings.value|default:'' }}</textarea></div>
+            </div>
+
+          </div>
+
+          <!-- Score + Rating -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+              <p class="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">Score for Function and Participation Restriction</p>
+              <select name="score_for_participation" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                <option value="">— Select —</option>
+                <option value="0" {% if form.score_for_participation.value == "0" %}selected{% endif %}>0 — No Restriction</option>
+                <option value="1" {% if form.score_for_participation.value == "1" %}selected{% endif %}>1 — Mild</option>
+                <option value="2" {% if form.score_for_participation.value == "2" %}selected{% endif %}>2 — Moderate</option>
+                <option value="3" {% if form.score_for_participation.value == "3" %}selected{% endif %}>3 — Severe</option>
+                <option value="4" {% if form.score_for_participation.value == "4" %}selected{% endif %}>4 — Complete</option>
+              </select>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+              <p class="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">Disability Rating</p>
+              <select name="disability_rating" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                <option value="">— Select —</option>
+                <option value="mild" {% if form.disability_rating.value == "mild" %}selected{% endif %}>Mild (&lt; 25%)</option>
+                <option value="moderate" {% if form.disability_rating.value == "moderate" %}selected{% endif %}>Moderate (25–49%)</option>
+                <option value="severe" {% if form.disability_rating.value == "severe" %}selected{% endif %}>Severe (50–74%)</option>
+                <option value="profound" {% if form.disability_rating.value == "profound" %}selected{% endif %}>Profound (75–100%)</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ STEP 4: Recommendations & Conclusion ══ -->
+      <div x-show="step==4" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+           class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0">
+        <div class="bg-teal-700 px-6 py-3 rounded-t-2xl flex-shrink-0">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2"><i class="fas fa-clipboard-check"></i> 4. Recommendations &amp; Conclusion</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Recommended Assistive Products</label>
+              <textarea name="assistive_devices" rows="6" placeholder="e.g. Wheelchair, prosthetic limb, walking aids…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.assistive_devices.value|default:'' }}</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Other Required Services</label>
+              <textarea name="other_required_services" rows="6" placeholder="e.g. Physiotherapy, occupational therapy…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.other_required_services.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Conclusion</label>
+              <select name="conclusion" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30">
+                <option value="">— Select —</option>
+                {% for val, label in form.conclusion.field.choices %}{% if val %}<option value="{{ val }}" {% if form.conclusion.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">General Recommendations</label>
+              <textarea name="recommendations" rows="2" placeholder="Any other recommendations…"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50/30 resize-none">{{ form.recommendations.value|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Document Upload -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Upload Supporting Document <span class="text-gray-400 font-normal">(PDF, JPG, PNG — optional)</span></label>
+            <div class="border-2 border-dashed border-gray-200 hover:border-teal-400 rounded-xl px-5 py-4 flex items-center gap-4 transition-colors">
+              <i class="fas fa-cloud-upload-alt text-gray-300 text-2xl flex-shrink-0"></i>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-gray-500 mb-1">X-rays, physiotherapy reports, referral letters</p>
+                <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png"
+                       class="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between mt-4 flex-shrink-0">
+        <button type="button" @click="step--" x-show="step > 1"
+                class="inline-flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-5 py-2.5 rounded-xl transition-colors text-sm">
+          <i class="fas fa-arrow-left text-xs"></i> Back
+        </button>
+        <div x-show="step == 1"></div>
+        <div class="flex items-center gap-3">
+          <a href="{% url 'medical:view_assessment' assessment.pk %}" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</a>
+          <button type="button" @click="step++" x-show="step < 4"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
+            Next <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+          <button type="submit" x-show="step == 4"
+                  class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-2.5 rounded-xl transition-colors shadow-sm text-sm">
+            <i class="fas fa-paper-plane text-xs"></i> Submit Assessment
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

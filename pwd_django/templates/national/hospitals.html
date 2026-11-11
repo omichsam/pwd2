@@ -1,0 +1,90 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}Hospitals Nationwide{% endblock %}
+{% block page_title %}Hospitals{% endblock %}
+{% block page_subtitle %}All assessment centres across Kenya{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Analytics</p>
+<a href="{% url 'national_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-globe w-5 text-center text-sm"></i><span>National Overview</span></a>
+<a href="{% url 'national_admin:county_breakdown' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Counties</span></a>
+<a href="{% url 'national_admin:hospital_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'national_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-users w-5 text-center text-sm"></i><span>Officials</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'national_admin:county_officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user-shield w-5 text-center text-sm"></i><span>County Officers</span></a>
+<a href="{% url 'national_admin:add_county' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Add County</span></a>
+<a href="{% url 'national_admin:chatbot_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-robot w-5 text-center text-sm"></i><span>Chatbot Settings</span></a>
+<a href="{% url 'national_admin:doc_checker_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-file-shield w-5 text-center text-sm"></i><span>Document Checker</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'national_admin:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'national_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<!-- County filter -->
+<form method="get" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5 flex flex-wrap gap-3 items-end">
+  <div>
+    <label class="block text-xs font-semibold text-gray-600 mb-1">Filter by County</label>
+    <select name="county" class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+      <option value="">All Counties</option>
+      {% for c in counties %}
+      <option value="{{ c.id }}" {% if selected_county == c.id %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-xl text-sm transition-colors">
+    <i class="fas fa-filter mr-1"></i> Filter
+  </button>
+  {% if selected_county %}
+  <a href="{% url 'national_admin:hospital_list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium px-4 py-2 rounded-xl text-sm transition-colors">Clear</a>
+  {% endif %}
+</form>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+    <h3 class="font-semibold text-gray-800">Assessment Centres</h3>
+    <span class="bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1 rounded-full">{{ hospitals.count }} hospital{{ hospitals.count|pluralize }}</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table id="hospTable" class="w-full min-w-[700px] text-sm whitespace-nowrap">
+      <thead class="bg-teal-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Hospital</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">County</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Sub-county</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Officers</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Total</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Certified</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for h in hospitals %}
+        <tr class="hover:bg-teal-50/20 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-hospital text-teal-500 text-xs"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-800">{{ h.name }}</p>
+                <p class="text-xs text-gray-400">{{ h.address|default:"" }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-gray-600 text-sm">{{ h.county.name }}</td>
+          <td class="px-6 py-4 text-gray-500 text-xs">{{ h.subcounty|default:"—" }}</td>
+          <td class="px-6 py-4 text-gray-600">{{ h.officer_count }}</td>
+          <td class="px-6 py-4 font-semibold text-gray-800">{{ h.total }}</td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">{{ h.certified }}</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">No hospitals found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "includes/pagination.html" with page_obj=hospitals page_param="page" label="Hospitals" %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script>$(document).ready(function(){ $('#hospTable').DataTable({ order: [[4,'desc']], paging: false, info: false, destroy: true }); });</script>{% endblock %}

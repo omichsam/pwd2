@@ -54,14 +54,751 @@
     .sidebar-link:hover { background-color: rgba(255,255,255,0.1); }
     .sidebar-link.active { background-color: #0d9488; }
   </style>
+  <!-- Accessibility CSS -->
+  <style>
+    /* ── Accessibility modes applied to <html> ── */
+
+    /* Font size scale */
+    html.a11y-md  { font-size: 112%; }
+    html.a11y-lg  { font-size: 125%; }
+    html.a11y-xl  { font-size: 140%; }
+
+    /* High contrast mode */
+    html.a11y-hc body          { background: #0a0a0a !important; color: #ffffff !important; }
+    html.a11y-hc *             { border-color: #ffffff !important; }
+    html.a11y-hc a             { color: #ffff00 !important; }
+    html.a11y-hc button:not(.a11y-toolbar-btn),
+    html.a11y-hc [type=submit] { background: #ffff00 !important; color: #000000 !important; border: 2px solid #ffffff !important; }
+    html.a11y-hc input,
+    html.a11y-hc select,
+    html.a11y-hc textarea      { background: #1a1a1a !important; color: #ffffff !important;
+                                  border: 2px solid #ffff00 !important; }
+    html.a11y-hc label         { color: #ffffff !important; font-weight: 700 !important; }
+    html.a11y-hc .bg-white,
+    html.a11y-hc [class*="bg-gray"],
+    html.a11y-hc [class*="bg-teal"] { background: #111111 !important; }
+    html.a11y-hc [class*="text-gray"],
+    html.a11y-hc [class*="text-teal"] { color: #ffffff !important; }
+    html.a11y-hc .sidebar-link { color: #ffffff !important; }
+    html.a11y-hc .sidebar-link.active { background: #ffff00 !important; color: #000000 !important; }
+    html.a11y-hc .border { border-color: #ffffff !important; }
+    html.a11y-hc .rounded-2xl,
+    html.a11y-hc .rounded-xl   { border: 1px solid #444 !important; }
+    html.a11y-hc h1, html.a11y-hc h2, html.a11y-hc h3,
+    html.a11y-hc p, html.a11y-hc span, html.a11y-hc div { color: inherit; }
+
+    /* Enhanced focus rings for keyboard users */
+    :focus-visible { outline: 3px solid #f59e0b !important; outline-offset: 3px !important; }
+
+    .skip-link {
+      position: fixed; left: 1rem; top: -5rem; z-index: 10000;
+      background: #ffffff; color: #115e59; border: 3px solid #0f766e;
+      padding: 0.75rem 1rem; border-radius: 0.5rem; font-weight: 700;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Accessibility toolbar */
+    #a11y-toolbar { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 9999; }
+    .a11y-toolbar-btn { font-family: 'Poppins', sans-serif; cursor: pointer; }
+
+    [x-cloak] { display: none !important; }
+
+    /* ── Chatbot ── */
+    #pwd-chatbot { position: fixed; bottom: 1.25rem; left: 1.25rem; z-index: 9998; }
+    .chat-panel { width: 360px; height: min(560px, calc(100vh - 6rem)); }
+    .chat-greeting { position: absolute; bottom: 4.25rem; left: 0; width: 215px; }
+    .chat-bubble a { text-decoration: underline; }
+    .chat-bubble strong { font-weight: 600; }
+    @media (max-width: 480px) {
+      #pwd-chatbot { bottom: 0.75rem; left: 0.75rem; right: 0.75rem; }
+      .chat-panel { width: calc(100vw - 1.5rem); height: min(78vh, calc(100vh - 5rem)); }
+      .chat-greeting { width: calc(100vw - 3rem); }
+    }
+    @keyframes chatToastOut { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
+    .chat-toast { animation: chatToastOut 2s forwards; }
+    .chat-sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-gray-50 font-sans antialiased">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ── Accessibility Toolbar ── -->
+  <div id="a11y-toolbar"
+       x-data="a11yToolbar()"
+       x-init="init()"
+       role="region"
+       aria-label="Accessibility tools">
+
+    <!-- Collapsed toggle button -->
+    <div x-show="!open" @click="open=true"
+         class="a11y-toolbar-btn w-12 h-12 bg-teal-700 hover:bg-teal-800 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+         title="Accessibility options" aria-haspopup="true" :aria-expanded="open" role="button" tabindex="0"
+         @keydown.enter="open=true" @keydown.space.prevent="open=true">
+      <i class="fas fa-universal-access text-lg"></i>
+    </div>
+
+    <!-- Expanded panel -->
+    <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95 origin-bottom-right" x-transition:enter-end="opacity-100 scale-100"
+         class="bg-white border border-gray-200 rounded-2xl shadow-2xl p-4 w-64" style="margin-bottom:0.25rem">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-universal-access text-teal-600"></i>
+          <span class="font-bold text-gray-800 text-sm">Accessibility</span>
+        </div>
+        <button @click="open=false" class="a11y-toolbar-btn w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600" aria-label="Close accessibility panel">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Text Size -->
+      <div class="mb-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Text Size</p>
+        <div class="flex gap-1.5">
+          <button @click="setSize('normal')" :class="size==='normal' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                  class="a11y-toolbar-btn flex-1 py-1.5 rounded-lg font-semibold transition-colors text-xs" aria-label="Normal text size">A</button>
+          <button @click="setSize('md')" :class="size==='md' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                  class="a11y-toolbar-btn flex-1 py-1.5 rounded-lg font-semibold transition-colors text-sm" aria-label="Medium text size">A</button>
+          <button @click="setSize('lg')" :class="size==='lg' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                  class="a11y-toolbar-btn flex-1 py-1.5 rounded-lg font-semibold transition-colors text-base" aria-label="Large text size">A</button>
+          <button @click="setSize('xl')" :class="size==='xl' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                  class="a11y-toolbar-btn flex-1 py-1.5 rounded-lg font-semibold transition-colors text-lg" aria-label="Extra large text size">A</button>
+        </div>
+      </div>
+
+      <!-- High Contrast -->
+      <div class="mb-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Display Mode</p>
+        <button @click="toggleContrast()"
+                :class="contrast ? 'bg-gray-900 text-yellow-300 border-yellow-400' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'"
+                class="a11y-toolbar-btn w-full py-2 rounded-xl border-2 font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
+                :aria-pressed="contrast" aria-label="Toggle high contrast mode">
+          <i :class="contrast ? 'fas fa-sun text-yellow-300' : 'fas fa-adjust text-gray-500'"></i>
+          <span x-text="contrast ? 'High Contrast ON' : 'High Contrast OFF'"></span>
+        </button>
+      </div>
+
+      <!-- Reset -->
+      <button @click="reset()"
+              class="a11y-toolbar-btn w-full py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 text-xs font-medium transition-colors border border-gray-200">
+        Reset to Default
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function a11yToolbar() {
+      return {
+        open: false,
+        size: 'normal',
+        contrast: false,
+        sizes: ['normal', 'md', 'lg', 'xl'],
+        init() {
+          this.size     = localStorage.getItem('a11y-size')     || 'normal';
+          this.contrast = localStorage.getItem('a11y-contrast') === 'true';
+          this.applySize(this.size);
+          this.applyContrast(this.contrast);
+        },
+        setSize(s) {
+          this.size = s;
+          localStorage.setItem('a11y-size', s);
+          this.applySize(s);
+        },
+        applySize(s) {
+          const html = document.documentElement;
+          html.classList.remove('a11y-md', 'a11y-lg', 'a11y-xl');
+          if (s !== 'normal') html.classList.add('a11y-' + s);
+        },
+        toggleContrast() {
+          this.contrast = !this.contrast;
+          localStorage.setItem('a11y-contrast', this.contrast);
+          this.applyContrast(this.contrast);
+        },
+        applyContrast(on) {
+          document.documentElement.classList.toggle('a11y-hc', on);
+        },
+        reset() {
+          this.size = 'normal'; this.contrast = false;
+          localStorage.removeItem('a11y-size'); localStorage.removeItem('a11y-contrast');
+          this.applySize('normal'); this.applyContrast(false);
+        }
+      }
+    }
+  </script>
+
   {% block body %}{% endblock %}
+
+  <!-- ── PWD Chatbot ── -->
+  <div id="pwd-chatbot" x-data="pwdChatbot()" x-init="init()"
+       @keydown.escape.window="if (open) closeChat()"
+       role="complementary" aria-label="PWD Access Help Chatbot">
+
+    <!-- Proactive greeting bubble (shown after 8s if chat has never been opened) -->
+    <div x-show="showGreeting && !open" x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="chat-greeting">
+      <div class="bg-white rounded-2xl rounded-bl-sm shadow-lg border border-gray-200 px-4 py-3 relative">
+        <button @click="dismissGreeting()" aria-label="Dismiss greeting"
+                class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xs leading-none">
+          <i class="fas fa-times"></i>
+        </button>
+        <button @click="openChat()" class="text-left w-full">
+          <p class="text-sm font-semibold text-gray-800 pr-4">Need help? I'm here! 👋</p>
+          <p class="text-xs text-gray-500 mt-0.5">Ask about booking, fees or your certificate</p>
+        </button>
+      </div>
+      <!-- Arrow pointing down to the button -->
+      <div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid white;margin-left:20px;filter:drop-shadow(0 2px 1px rgba(0,0,0,.08))"></div>
+    </div>
+
+    <!-- Toggle button -->
+    <button x-show="!open" id="pwd-chat-toggle" type="button"
+            @click="openChat()"
+            :aria-expanded="open" aria-haspopup="dialog"
+            :aria-label="'Open help chat' + (unreadCount > 0 ? ', ' + unreadCount + ' unread' : '')"
+            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
+            class="w-14 h-14 bg-teal-700 hover:bg-teal-800 text-white rounded-full shadow-xl flex items-center justify-center cursor-pointer transition-colors relative group">
+      <i class="fas {% block chatbot_icon %}fa-comments{% endblock %} text-xl" aria-hidden="true"></i>
+
+      <!-- Pulse dot — disappears after first open -->
+      <span x-show="!hasOpened"
+            class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse pointer-events-none"></span>
+
+      <!-- Unread count badge -->
+      <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount"
+            class="absolute -top-1 -right-1 min-w-[1.25rem] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1 leading-none pointer-events-none"
+            aria-live="polite" :aria-label="unreadCount + ' unread messages'">
+      </span>
+
+      <!-- Hover tooltip -->
+      <span class="hidden sm:inline-block absolute left-16 bottom-1 bg-gray-900 text-white text-xs rounded-lg px-2.5 py-1.5 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none select-none" aria-hidden="true">
+        Chat with PWD Assistant
+      </span>
+    </button>
+
+    <!-- Chat window -->
+    <div x-show="open" x-cloak
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-90 origin-bottom-left" x-transition:enter-end="opacity-100 scale-100"
+         class="chat-panel bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col"
+         role="dialog" aria-label="PWD Access Help Chat">
+
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-teal-700 to-teal-600 px-4 py-3 rounded-t-2xl flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+            <i class="fas fa-robot text-white text-sm" aria-hidden="true"></i>
+          </div>
+          <div>
+            <p class="font-bold text-white text-sm">PWD Assistant</p>
+            <p class="text-xs flex items-center gap-1" :class="isOnline ? 'text-teal-200' : 'text-red-300'">
+              <span class="w-1.5 h-1.5 rounded-full inline-block" :class="isOnline ? 'bg-emerald-400' : 'bg-red-400'"></span>
+              <span x-text="isOnline ? 'Online' : 'Offline'"></span>
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button @click="clearHistory()" title="Clear chat history"
+                  class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 text-white/60 hover:text-white transition-colors"
+                  aria-label="Clear chat history">
+            <i class="fas fa-trash-alt text-xs" aria-hidden="true"></i>
+          </button>
+          <button @click="closeChat()" aria-label="Close chat"
+                  class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 text-white/80 hover:text-white transition-colors">
+            <i class="fas fa-times text-sm" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages area (relative so scroll-btn can be absolutely positioned) -->
+      <div class="flex-1 overflow-hidden relative">
+        <div class="h-full overflow-y-auto p-3 space-y-3" id="chatbot-messages"
+             @scroll="checkScroll()" aria-live="polite" aria-label="Chat messages">
+
+          <template x-for="(msg, i) in messages" :key="msg.id">
+            <div x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+              <!-- Message row -->
+              <div :class="msg.from === 'bot' ? 'flex items-start gap-2' : 'flex justify-end'">
+                <!-- Bot avatar -->
+                <div x-show="msg.from === 'bot'"
+                     class="w-7 h-7 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <i class="fas fa-robot text-teal-600 text-xs" aria-hidden="true"></i>
+                </div>
+                <!-- Bubble with group hover -->
+                <div class="group relative max-w-[85%]">
+                  <div class="chat-bubble"
+                       :class="msg.from === 'bot'
+                         ? 'bg-gray-100 text-gray-800 rounded-2xl rounded-tl-sm px-3 py-2.5 text-sm leading-relaxed break-words'
+                         : 'bg-teal-600 text-white rounded-2xl rounded-tr-sm px-3 py-2.5 text-sm break-words'"
+                       x-html="render(msg.text)">
+                  </div>
+                  <!-- Copy button (appears on hover/focus for bot messages) -->
+                  <button x-show="msg.from === 'bot'" type="button"
+                          @click="copyMessage(msg.text)"
+                          aria-label="Copy this answer"
+                          class="absolute -top-7 right-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity bg-gray-700 text-white rounded-lg px-2 py-1 text-xs hover:bg-gray-800">
+                    <i class="fas fa-copy mr-1" aria-hidden="true"></i> Copy
+                  </button>
+                </div>
+              </div>
+
+              <!-- Timestamp + thumbs (bot only, skip the opening message) -->
+              <div x-show="msg.from === 'bot'" class="flex items-center gap-1 ml-9 mt-0.5">
+                <span class="text-xs text-gray-500" x-text="timeAgo(msg.ts)"></span>
+                <template x-if="i > 0 && !msg.error">
+                  <div class="flex items-center gap-1 ml-auto">
+                    <span x-show="msg.rated" class="text-xs text-gray-500"
+                          x-text="msg.rated === 'up' ? 'Thanks!' : 'Noted — sorry about that'"></span>
+                    <button type="button" @click="rate(i,'up')" aria-label="This answer was helpful"
+                            :aria-pressed="msg.rated === 'up'"
+                            :class="msg.rated === 'up' ? 'opacity-100 scale-125' : 'opacity-40 hover:opacity-90'"
+                            class="text-sm transition-all leading-none px-0.5 cursor-pointer">👍</button>
+                    <button type="button" @click="rate(i,'down')" aria-label="This answer was not helpful"
+                            :aria-pressed="msg.rated === 'down'"
+                            :class="msg.rated === 'down' ? 'opacity-100 scale-125' : 'opacity-40 hover:opacity-90'"
+                            class="text-sm transition-all leading-none px-0.5 cursor-pointer">👎</button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <!-- Typing indicator -->
+          <div x-show="typing" x-cloak aria-hidden="true"
+               x-transition:enter="transition ease-out duration-150" class="flex items-start gap-2">
+            <div class="w-7 h-7 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-robot text-teal-600 text-xs"></i>
+            </div>
+            <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl rounded-tl-sm px-4 py-2.5 flex gap-1.5 items-center shadow-sm">
+              <span class="w-2.5 h-2.5 bg-gray-500 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+              <span class="w-2.5 h-2.5 bg-gray-500 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+              <span class="w-2.5 h-2.5 bg-gray-500 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scroll-to-bottom arrow -->
+        <button x-show="showScrollBtn" @click="scrollDown()" aria-label="Scroll to latest message"
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 scale-75"
+                x-transition:enter-end="opacity-100 scale-100"
+                class="absolute bottom-2 right-2 w-7 h-7 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-md flex items-center justify-center transition-colors">
+          <i class="fas fa-chevron-down text-xs" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- Quick replies -->
+      <div x-show="quickReplies.length || canRetry" x-cloak
+           class="flex-shrink-0 px-3 pt-2 pb-1 border-t border-gray-100 max-h-28 overflow-y-auto">
+        <div class="flex flex-wrap gap-2" role="list" aria-label="Suggested replies">
+          <template x-if="canRetry">
+            <button type="button" @click="retry()" role="listitem" :disabled="typing"
+                    class="text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-full px-3 py-2 transition-all disabled:opacity-50">
+              <i class="fas fa-rotate-right mr-1" aria-hidden="true"></i>Try again
+            </button>
+          </template>
+          <template x-for="(reply, i) in quickReplies" :key="reply.label + i">
+            <button type="button" @click="choose(reply)" role="listitem" :disabled="typing"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-90"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    class="text-xs font-medium bg-gradient-to-r from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 text-teal-800 border border-teal-200 rounded-full px-3 py-2 transition-all disabled:opacity-50 hover:shadow-sm"
+                    x-text="reply.label">
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Text input -->
+      <div class="flex-shrink-0 px-3 py-3 border-t border-gray-100 bg-white rounded-b-2xl">
+        <form @submit.prevent="sendMessage()" class="flex gap-2 items-center">
+          <input type="text" x-model="inputText" x-ref="input" :disabled="typing"
+                 maxlength="500" autocomplete="off"
+                 @input="noteActivity()"
+                 @keydown.up.prevent="recallLast()"
+                 placeholder="Ask about booking, fees, status…"
+                 aria-label="Type your question"
+                 class="flex-1 min-w-0 border border-gray-300 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-gray-50 hover:bg-white disabled:opacity-50 transition-colors">
+          <button type="submit" :disabled="typing || !inputText.trim()" aria-label="Send message"
+                  class="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white transition-all disabled:opacity-40 flex-shrink-0 shadow-sm hover:shadow-md">
+            <i class="fas fa-paper-plane text-sm" aria-hidden="true"></i>
+          </button>
+        </form>
+        <p class="text-center text-xs text-gray-500 mt-1.5">
+          Automated assistant · not medical advice ·
+          <button type="button" @click="choose({label: 'Talk to a person', intent: 'human'})"
+                  class="underline hover:text-teal-700">talk to a person</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function pwdChatbot() {
+    // Rendering the token also makes Django set the cookie on pages without a form (e.g. landing).
+    const CSRF     = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '{{ csrf_token }}';
+    const LS_KEY   = 'pwd_chat_v3';
+    const LS_SEEN  = 'pwd_chat_opened';
+    const LS_PANEL = 'pwd_chat_panel_open';
+    const MAX_KEPT = 40;
+
+    return {
+      open:          false,
+      typing:        false,
+      messages:      [],
+      quickReplies:  [],
+      inputText:     '',
+      unreadCount:   0,
+      hasOpened:     false,
+      showGreeting:  false,
+      showScrollBtn: false,
+      canRetry:      false,
+      isOnline:      navigator.onLine,
+      now:           Date.now(),
+      _lastPayload:  null,
+      _lastTyped:    '',
+      _nudged:       false,
+      _seq:          0,
+      _idleTimer:    null,
+      _greetTimer:   null,
+      _clockTimer:   null,
+
+      init() {
+        this.hasOpened = !!localStorage.getItem(LS_SEEN);
+
+        // restore history (the panel stays open across page navigation)
+        let restored = false;
+        try {
+          const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+          if (saved && Array.isArray(saved.messages) && saved.messages.length) {
+            this.messages     = saved.messages.map(m => ({ ...m, id: this.nextId() }));
+            this.quickReplies = Array.isArray(saved.quickReplies) ? saved.quickReplies : [];
+            restored = true;
+          }
+        } catch (e) { /* corrupt history — start fresh */ }
+
+        if (sessionStorage.getItem(LS_PANEL) === '1') {
+          this.open = true;
+          this.$nextTick(() => this.scrollDown());
+        }
+        if (!restored) this.ask({ message: '', intent: '' });
+
+        window.addEventListener('online',  () => { this.isOnline = true;  });
+        window.addEventListener('offline', () => { this.isOnline = false; });
+
+        // keeps "2 min ago" honest without re-rendering constantly
+        this._clockTimer = setInterval(() => { this.now = Date.now(); }, 30000);
+
+        // proactive nudge, only ever shown to a first-time visitor
+        if (!this.hasOpened) {
+          this._greetTimer = setTimeout(() => {
+            if (!this.open) this.showGreeting = true;
+          }, 8000);
+        }
+      },
+
+      nextId() { return ++this._seq; },
+
+      openChat() {
+        this.open         = true;
+        this.hasOpened    = true;
+        this.showGreeting = false;
+        this.unreadCount  = 0;
+        localStorage.setItem(LS_SEEN, '1');
+        sessionStorage.setItem(LS_PANEL, '1');
+        clearTimeout(this._greetTimer);
+        this.noteActivity();
+        this.$nextTick(() => {
+          this.scrollDown();
+          if (window.matchMedia('(min-width: 481px)').matches) this.$refs.input?.focus();
+        });
+      },
+
+      closeChat() {
+        this.open = false;
+        sessionStorage.removeItem(LS_PANEL);
+        clearTimeout(this._idleTimer);
+        this.$nextTick(() => document.getElementById('pwd-chat-toggle')?.focus());
+      },
+
+      dismissGreeting() {
+        this.showGreeting = false;
+        this.hasOpened    = true;
+        localStorage.setItem(LS_SEEN, '1');
+        clearTimeout(this._greetTimer);
+      },
+
+      // One gentle nudge per page after 45 s of silence — never repeated.
+      noteActivity() {
+        clearTimeout(this._idleTimer);
+        if (this._nudged) return;
+        this._idleTimer = setTimeout(() => {
+          if (!this.open || this.typing || this._nudged) return;
+          this._nudged = true;
+          this._pushBot('Still there? Ask me anything, or pick a topic below. 🙂');
+          if (!this.quickReplies.length) {
+            this.quickReplies = [
+              { label: '📅 Book Assessment', intent: 'book'    },
+              { label: '📋 My Status',       intent: 'status'  },
+              { label: '⏱️ How long?',       intent: 'timeline'},
+              { label: '🙋 Talk to a person', intent: 'human'  },
+            ];
+          }
+          this.saveHistory();
+          this.$nextTick(() => this.scrollDown());
+        }, 45000);
+      },
+
+      async ask(payload) {
+        this.canRetry     = false;
+        this._lastPayload = payload;
+
+        if (!this.isOnline) {
+          this._pushBot("📶 You appear to be offline. Check your connection and try again — I'll be here.", true);
+          this.canRetry = true;
+          this.finishTurn();
+          return;
+        }
+
+        this.typing       = true;
+        this.quickReplies = [];
+        this.$nextTick(() => this.scrollDown());
+
+        const started = Date.now();
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 45000);  // DocAssist + fallback can be slow
+          const res = await fetch('/chatbot/', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body:    JSON.stringify({ ...payload, history: this._recentHistory() }),
+            signal:  controller.signal,
+          });
+          clearTimeout(timeout);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+
+          // Keep the typing indicator visible just long enough to read as natural.
+          const elapsed = Date.now() - started;
+          if (elapsed < 350) await new Promise(r => setTimeout(r, 350 - elapsed));
+
+          this.typing = false;
+          this._pushBot(data.text || '', false, data.intent || '');
+          this.quickReplies = Array.isArray(data.quick_replies) ? data.quick_replies : [];
+        } catch (e) {
+          this.typing = false;
+          this._pushBot(
+            e.name === 'AbortError'
+              ? "⌛ That took too long. Please try again."
+              : "⚠️ I couldn't reach the server. Please try again in a moment.",
+            true
+          );
+          this.canRetry = true;
+        }
+        this.finishTurn();
+      },
+
+      retry() {
+        if (this.typing || !this._lastPayload) return;
+        this.isOnline = navigator.onLine;
+        this.ask(this._lastPayload);
+      },
+
+      finishTurn() {
+        if (!this.open) this.unreadCount++;
+        this.saveHistory();
+        this.noteActivity();
+        this.$nextTick(() => this.scrollDown());
+      },
+
+      _pushBot(text, isError, intent) {
+        this.messages.push({
+          id: this.nextId(), from: 'bot', text,
+          ts: Date.now(), rated: null,
+          error: !!isError, intent: intent || '',
+          replyTo: this._lastPayload?.message || '',
+        });
+      },
+
+      // Last few turns before the current question, so the server can answer
+      // follow-ups ("how long does that take?"). The server drops personal answers.
+      _recentHistory() {
+        return this.messages.slice(0, -1).slice(-6)
+          .filter(m => !m.error)
+          .map(m => ({ from: m.from, text: String(m.text || '').slice(0, 1000), intent: m.intent || '' }));
+      },
+
+      _pushUser(text) {
+        this.messages.push({ id: this.nextId(), from: 'user', text, ts: Date.now() });
+      },
+
+      choose(reply) {
+        if (this.typing) return;
+        this._pushUser(reply.label);
+        this.quickReplies = [];
+        this.noteActivity();
+        if (reply.url) {
+          // Keep the panel open so the answer is still there after the page loads.
+          sessionStorage.setItem(LS_PANEL, '1');
+          this.saveHistory();
+          window.location.href = reply.url;
+          return;
+        }
+        this.$nextTick(() => this.scrollDown());
+        this.ask({ message: reply.label, intent: reply.intent || '' });
+      },
+
+      sendMessage() {
+        const text = this.inputText.trim().slice(0, 500);
+        if (!text || this.typing) return;
+        this.inputText  = '';
+        this._lastTyped = text;
+        this._pushUser(text);
+        this.quickReplies = [];
+        this.noteActivity();
+        this.$nextTick(() => this.scrollDown());
+        this.ask({ message: text, intent: '' });
+      },
+
+      recallLast() {
+        if (!this.inputText && this._lastTyped) this.inputText = this._lastTyped;
+      },
+
+      // Escape everything, then re-introduce a tiny, known-safe subset of markup.
+      render(text) {
+        let html = String(text ?? '')
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        html = html
+          .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+          .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s.,!?)]|$)/g, '$1<strong>$2</strong>')
+          .replace(/\b([\w.+-]+@[\w-]+\.[\w.-]+)\b/g,
+                   '<a href="mailto:$1" class="text-teal-700">$1</a>')
+          .replace(/\n/g, '<br>');
+        return html;
+      },
+
+      copyMessage(text) {
+        const done = () => {
+          const toast = document.createElement('div');
+          toast.className = 'chat-toast';
+          toast.setAttribute('role', 'status');
+          toast.textContent = '✓ Copied to clipboard';
+          toast.style.cssText = 'position:fixed;top:1.5rem;right:1.5rem;background:#0f766e;color:white;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;z-index:10000;';
+          document.body.appendChild(toast);
+          setTimeout(() => toast.remove(), 2000);
+        };
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => {});
+        }
+      },
+
+      clearHistory() {
+        const reset = () => {
+          this.messages     = [];
+          this.quickReplies = [];
+          this.canRetry     = false;
+          this._nudged      = false;
+          localStorage.removeItem(LS_KEY);
+          this.ask({ message: '', intent: '' });
+        };
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Clear this conversation?',
+            text: 'The messages will be removed from this device.',
+            showCancelButton: true,
+            confirmButtonText: 'Clear',
+            confirmButtonColor: '#0f766e',
+          }).then(r => { if (r.isConfirmed) reset(); });
+        } else if (confirm('Clear this conversation?')) {
+          reset();
+        }
+      },
+
+      rate(i, val) {
+        const msg = this.messages[i];
+        if (!msg || msg.rated === val) return;
+        this.messages[i] = { ...msg, rated: val };
+        this.saveHistory();
+        fetch('/chatbot/feedback/', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+          body:    JSON.stringify({ rating: val, intent: msg.intent || '', question: msg.replyTo || '' }),
+        }).catch(() => {});
+      },
+
+      timeAgo(ts) {
+        if (!ts) return '';
+        const s = Math.floor((this.now - ts) / 1000);
+        if (s < 60) return 'just now';
+        const m = Math.floor(s / 60);
+        if (m < 60) return m + ' min ago';
+        const h = Math.floor(m / 60);
+        if (h < 24) return h + 'h ago';
+        return new Date(ts).toLocaleDateString();
+      },
+
+      checkScroll() {
+        const el = document.getElementById('chatbot-messages');
+        if (el) this.showScrollBtn = (el.scrollHeight - el.scrollTop - el.clientHeight) > 60;
+      },
+
+      scrollDown() {
+        const el = document.getElementById('chatbot-messages');
+        if (el) { el.scrollTop = el.scrollHeight; this.showScrollBtn = false; }
+      },
+
+      saveHistory() {
+        try {
+          localStorage.setItem(LS_KEY, JSON.stringify({
+            messages:     this.messages.slice(-MAX_KEPT),
+            quickReplies: this.quickReplies,
+          }));
+        } catch (e) { /* storage full or blocked — history is a nicety */ }
+      },
+    };
+  }
+  </script>
+
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('form[data-prevent-double-submit]').forEach(function (form) {
+        form.addEventListener('submit', function () {
+          if (!form.checkValidity() || form.dataset.submitting === 'true') return;
+          form.dataset.submitting = 'true';
+          form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function (button) {
+            button.disabled = true;
+            button.setAttribute('aria-disabled', 'true');
+            if (button.dataset.submitLabel) button.textContent = button.dataset.submitLabel;
+          });
+        });
+      });
+    });
+  </script>
   {% if messages %}
   <script>
     document.addEventListener('DOMContentLoaded', function() {

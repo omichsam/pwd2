@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<p class="greeting">Hello, {{ user.first_name }}!</p>
+<p>Your assessment has been approved by the health officer and is now in the final stage — awaiting county-level certification.</p>
+<div class="info-box">
+  <p><strong>Application Update</strong><br>
+  Assessment #: <strong>{{ assessment.pk }}</strong><br>
+  Disability Type: <strong>{{ assessment.get_disability_type_display }}</strong><br>
+  Hospital: <strong>{{ assessment.hospital.name }}</strong><br>
+  Status: <span class="badge badge-success">Health Officer Approved</span></p>
+</div>
+<p>You are one step away from receiving your official PWD certificate. The county officer will review and certify your application shortly.</p>
+<a href="http://localhost:8000/pwd/application/{{ assessment.pk }}/" class="btn">View My Application</a>
+{% endblock %}

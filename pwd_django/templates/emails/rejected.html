@@ -1,0 +1,19 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<p class="greeting">Hello, {{ user.first_name }},</p>
+<p>We regret to inform you that your disability assessment could not be approved at this stage.</p>
+<div class="info-box">
+  <p><strong>Application Details</strong><br>
+  Assessment #: <strong>{{ assessment.pk }}</strong><br>
+  Disability Type: <strong>{{ assessment.get_disability_type_display }}</strong><br>
+  Hospital: <strong>{{ assessment.hospital.name }}</strong><br>
+  Status: <span class="badge badge-error">Not Approved</span>
+  {% if assessment.rejection_reason %}
+  <br><br>Reason: <em>{{ assessment.rejection_reason }}</em>
+  {% endif %}</p>
+</div>
+<p>Please review the feedback and visit your registered hospital to discuss next steps. You may be eligible to reapply after addressing the concerns raised.</p>
+<a href="http://localhost:8000/pwd/application/{{ assessment.pk }}/" class="btn">View My Application</a>
+<div class="divider"></div>
+<p style="font-size:13px;color:#9ca3af;">If you believe this decision is incorrect, please contact your hospital directly.</p>
+{% endblock %}

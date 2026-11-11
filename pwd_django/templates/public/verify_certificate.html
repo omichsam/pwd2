@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+{% block title %}Verify Certificate — PWD Access{% endblock %}
+{% block body %}
+<div class="min-h-screen bg-gray-50">
+  <nav class="bg-teal-800 text-white px-6 py-3 flex items-center justify-between shadow-md">
+    <span class="font-bold">PWD Access — Certificate Verification</span>
+    <a href="{% url 'landing' %}" class="text-teal-200 hover:text-white text-sm">Home</a>
+  </nav>
+  <main class="max-w-xl mx-auto px-4 py-12">
+    <div class="rounded-2xl overflow-hidden border {% if valid %}bg-emerald-50 border-emerald-200{% else %}bg-red-50 border-red-200{% endif %}">
+      <div class="px-6 py-5 text-white {% if valid %}bg-emerald-600{% else %}bg-red-600{% endif %}">
+        <h1 class="font-bold text-xl">{% if valid %}Certificate is Genuine{% else %}Certificate Not Verified{% endif %}</h1>
+        <p class="text-sm opacity-90 mt-1">{% if valid %}This certificate is active in the issuing system.{% else %}{{ error }}{% endif %}</p>
+      </div>
+      <div class="p-6 text-sm space-y-4">
+        {% if valid and certificate %}
+          <div><p class="text-xs text-gray-500 uppercase">Certificate number</p><p class="font-mono font-semibold">{{ certificate.certificate_number }}</p></div>
+          <div><p class="text-xs text-gray-500 uppercase">Issuing county</p><p class="font-semibold">{{ certificate.assessment.hospital.county.name }}</p></div>
+          <div><p class="text-xs text-gray-500 uppercase">Issued</p><p class="font-semibold">{{ certificate.issued_at|date:"d F Y" }}</p></div>
+          <p class="text-gray-600 border-t border-emerald-200 pt-4">Holder identity and medical information are intentionally omitted. Compare the certificate number and printed details on the original document.</p>
+        {% else %}
+          {% if cert_id %}<p>Certificate checked: <code class="font-mono">{{ cert_id }}</code></p>{% endif %}
+          <p class="text-gray-600">Contact the issuing county disability office if you need clarification.</p>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

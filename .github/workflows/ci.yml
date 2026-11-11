@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: pwd_test
+          MYSQL_USER: pwd_user
+          MYSQL_PASSWORD: testpassword
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -prootpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      SECRET_KEY: ci-test-secret-key-not-for-production
+      DEBUG: "True"
+      DB_ENGINE: django.db.backends.mysql
+      DB_NAME: pwd_test
+      DB_USER: pwd_user
+      DB_PASSWORD: testpassword
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pwd_django/requirements-dev.txt
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y default-libmysqlclient-dev pkg-config mysql-client openssl
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r pwd_django/requirements-dev.txt
+
+      - name: Run correctness lint
+        working-directory: pwd_django
+        run: ruff check .
+
+      - name: Check Django configuration
+        working-directory: pwd_django
+        run: python manage.py check
+
+      - name: Check model migration state
+        working-directory: pwd_django
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run migrations
+        working-directory: pwd_django
+        run: python manage.py migrate --noinput
+
+      - name: Run tests
+        working-directory: pwd_django
+        run: python manage.py test --verbosity=2
+
+      - name: Check for missing migrations
+        working-directory: pwd_django
+        run: python manage.py migrate --check
+
+      - name: Audit workflow data
+        working-directory: pwd_django
+        run: python manage.py audit_workflow_data --fail-on-error
+
+      - name: Exercise encrypted backup and restore
+        working-directory: pwd_django
+        env:
+          BACKUP_DIR: /tmp/pwd-backups
+          BACKUP_ENCRYPTION_PASSWORD: ci-only-backup-password
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_NAME: pwd_test
+          DB_USER: root
+          DB_PASSWORD: rootpassword
+          MEDIA_DIR: /tmp/pwd-media-source
+        run: |
+          mkdir -p "$MEDIA_DIR" /tmp/pwd-media-restore
+          printf 'restore-drill\n' > "$MEDIA_DIR/probe.txt"
+          sh scripts/backup.sh
+          mysql -h "$DB_HOST" -u root -p"$DB_PASSWORD" -e "CREATE DATABASE pwd_restore"
+          export BACKUP_SET="$(find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+          export RESTORE_CONFIRM="$(basename "$BACKUP_SET")"
+          export DB_NAME=pwd_restore
+          export MEDIA_DIR=/tmp/pwd-media-restore
+          sh scripts/restore.sh
+          mysql -h "$DB_HOST" -u root -p"$DB_PASSWORD" pwd_restore -e "SELECT COUNT(*) FROM django_migrations"
+          test "$(cat /tmp/pwd-media-restore/probe.txt)" = "restore-drill"
+
+      - name: Audit Python dependencies
+        working-directory: pwd_django
+        run: pip-audit -r requirements.txt
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository history for secrets
+        uses: gitleaks/gitleaks-action@v2

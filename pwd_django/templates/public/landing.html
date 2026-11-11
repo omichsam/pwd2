@@ -3,22 +3,74 @@
 
 {% block body %}
 <!-- Navbar -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 shadow-sm">
-  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-    <div class="flex items-center gap-3">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 shadow-sm" x-data="{ mobileMenuOpen: false }">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+    <!-- Logo -->
+    <a href="{% url 'landing' %}" class="flex items-center gap-3 flex-shrink-0">
       <div class="w-9 h-9 bg-teal-600 rounded-xl flex items-center justify-center">
         <i class="fas fa-wheelchair text-white"></i>
       </div>
-      <span class="font-bold text-lg text-gray-900">PWD <span class="text-teal-600">Access</span></span>
-    </div>
+      <span class="font-bold text-lg text-gray-900 hidden sm:inline">PWD <span class="text-teal-600">Access</span></span>
+    </a>
+
+    <!-- Desktop Menu -->
     <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
       <a href="#features" class="hover:text-teal-600 transition-colors">Features</a>
       <a href="#process" class="hover:text-teal-600 transition-colors">How It Works</a>
-      <a href="#about" class="hover:text-teal-600 transition-colors">About</a>
+      <a href="#features" class="hover:text-teal-600 transition-colors">About</a>
     </div>
-    <div class="flex items-center gap-3">
+
+    <!-- Desktop Auth Buttons -->
+    <div class="hidden md:flex items-center gap-3">
       <a href="{% url 'accounts:login' %}" class="text-sm font-medium text-teal-700 hover:text-teal-800 px-4 py-2 rounded-lg hover:bg-teal-50 transition-colors">Sign In</a>
       <a href="{% url 'accounts:register' %}" class="text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl transition-colors shadow-sm">Register</a>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button @click="mobileMenuOpen = !mobileMenuOpen" 
+            class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Toggle menu"
+            :aria-expanded="mobileMenuOpen">
+      <i :class="mobileMenuOpen ? 'fas fa-times' : 'fas fa-bars'" class="text-gray-700 text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div x-show="mobileMenuOpen" 
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-2"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100 translate-y-0"
+       x-transition:leave-end="opacity-0 -translate-y-2"
+       class="md:hidden bg-white border-t border-gray-100 shadow-lg">
+    <div class="px-4 py-4 space-y-3">
+      <!-- Mobile Navigation Links -->
+      <a href="#features" @click="mobileMenuOpen = false" 
+         class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition-colors font-medium">
+        <i class="fas fa-star text-teal-600 mr-2 w-4"></i> Features
+      </a>
+      <a href="#process" @click="mobileMenuOpen = false" 
+         class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition-colors font-medium">
+        <i class="fas fa-list text-teal-600 mr-2 w-4"></i> How It Works
+      </a>
+      <a href="#features" @click="mobileMenuOpen = false" 
+         class="block px-4 py-3 rounded-lg text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition-colors font-medium">
+        <i class="fas fa-info-circle text-teal-600 mr-2 w-4"></i> About
+      </a>
+      
+      <!-- Divider -->
+      <div class="border-t border-gray-100 my-2"></div>
+      
+      <!-- Mobile Auth Buttons -->
+      <a href="{% url 'accounts:login' %}" @click="mobileMenuOpen = false"
+         class="block px-4 py-3 rounded-lg text-center text-teal-700 hover:bg-teal-50 font-medium transition-colors">
+        <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+      </a>
+      <a href="{% url 'accounts:register' %}" @click="mobileMenuOpen = false"
+         class="block px-4 py-3 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-center transition-colors">
+        <i class="fas fa-user-plus mr-2"></i> Register
+      </a>
     </div>
   </div>
 </nav>
@@ -34,40 +86,40 @@
     <div class="grid lg:grid-cols-2 gap-16 items-center">
       <!-- Left -->
       <div>
-        <div class="inline-flex items-center gap-2 bg-teal-700/50 border border-teal-500/50 text-teal-100 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+        <div class="inline-flex items-center gap-2 bg-teal-700/50 border border-teal-500/50 text-teal-100 rounded-full px-4 py-1.5 text-sm font-medium mb-6 transform hover:scale-105 transition-transform">
           <i class="fas fa-certificate text-teal-300 text-xs"></i>
-          Kenya Disability Certification System
+          Official Government Certification Platform
         </div>
         <h1 class="text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-          Your Medical<br>
-          <span class="text-teal-300">Assessment</span><br>
-          Journey
+          Get Your Disability<br>
+          <span class="text-teal-300">Certificate</span><br>
+          Today
         </h1>
         <p class="text-lg text-teal-100 mb-10 leading-relaxed max-w-lg">
-          Access disability assessment and certification services across Kenya. Fast, secure, and designed for you.
+          The fastest, most secure way to obtain official disability certification across Kenya. One platform, 47 counties, thousands of success stories.
         </p>
         <div class="flex flex-wrap gap-4">
           <a href="{% url 'accounts:register' %}"
-             class="inline-flex items-center gap-2 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-lg">
-            <i class="fas fa-play text-sm"></i> Get Started
+             class="inline-flex items-center gap-2 bg-white text-teal-700 hover:bg-teal-50 font-semibold px-8 py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+            <i class="fas fa-arrow-right text-sm"></i> Get Started Free
           </a>
           <a href="#process"
              class="inline-flex items-center gap-2 border-2 border-white/40 text-white hover:bg-white/10 font-medium px-8 py-3.5 rounded-xl transition-colors">
-            <i class="fas fa-info-circle text-sm"></i> Learn More
+            <i class="fas fa-play text-sm"></i> See How It Works
           </a>
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-white/20">
-          <div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-12 pt-12 border-t border-white/20">
+          <div class="transform hover:scale-105 transition-transform">
             <p class="text-3xl font-bold text-white">{{ hospital_count }}+</p>
             <p class="text-sm text-teal-300 mt-1">Assessment Centers</p>
           </div>
-          <div>
-            <p class="text-3xl font-bold text-white">6</p>
+          <div class="transform hover:scale-105 transition-transform">
+            <p class="text-3xl font-bold text-white">7</p>
             <p class="text-sm text-teal-300 mt-1">Disability Categories</p>
           </div>
-          <div>
+          <div class="transform hover:scale-105 transition-transform">
             <p class="text-3xl font-bold text-white">47</p>
             <p class="text-sm text-teal-300 mt-1">Counties Covered</p>
           </div>
@@ -75,9 +127,9 @@
       </div>
 
       <!-- Right — feature cards -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {% for icon, label, desc in hero_cards %}
-        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/15 transition-all">
+        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/15 hover:border-white/30 transition-all transform hover:scale-105 hover:-translate-y-1">
           <div class="w-10 h-10 bg-teal-400/30 rounded-xl flex items-center justify-center mb-3">
             <i class="{{ icon }} text-teal-200"></i>
           </div>
@@ -85,33 +137,33 @@
           <p class="text-teal-200 text-xs mt-1">{{ desc }}</p>
         </div>
         {% empty %}
-        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5">
+        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/15 transition-all transform hover:scale-105 hover:-translate-y-1">
           <div class="w-10 h-10 bg-teal-400/30 rounded-xl flex items-center justify-center mb-3">
-            <i class="fas fa-bolt text-teal-200"></i>
+            <i class="fas fa-rocket text-teal-200"></i>
           </div>
           <p class="font-semibold text-white text-sm">Fast Processing</p>
-          <p class="text-teal-200 text-xs mt-1">Quick assessments across all disability types</p>
+          <p class="text-teal-200 text-xs mt-1">3-4 weeks average certification time</p>
         </div>
-        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5">
+        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/15 transition-all transform hover:scale-105 hover:-translate-y-1">
           <div class="w-10 h-10 bg-teal-400/30 rounded-xl flex items-center justify-center mb-3">
-            <i class="fas fa-shield-alt text-teal-200"></i>
+            <i class="fas fa-lock text-teal-200"></i>
           </div>
-          <p class="font-semibold text-white text-sm">Secure & Private</p>
-          <p class="text-teal-200 text-xs mt-1">Your medical data is protected</p>
+          <p class="font-semibold text-white text-sm">Bank-Level Security</p>
+          <p class="text-teal-200 text-xs mt-1">Your medical data is encrypted</p>
         </div>
-        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5">
+        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/15 transition-all transform hover:scale-105 hover:-translate-y-1">
           <div class="w-10 h-10 bg-teal-400/30 rounded-xl flex items-center justify-center mb-3">
             <i class="fas fa-mobile-alt text-teal-200"></i>
           </div>
           <p class="font-semibold text-white text-sm">Mobile Friendly</p>
-          <p class="text-teal-200 text-xs mt-1">Access from any device, anywhere</p>
+          <p class="text-teal-200 text-xs mt-1">Access anytime, anywhere on any device</p>
         </div>
-        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5">
+        <div class="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-5 hover:bg-white/15 transition-all transform hover:scale-105 hover:-translate-y-1">
           <div class="w-10 h-10 bg-teal-400/30 rounded-xl flex items-center justify-center mb-3">
-            <i class="fas fa-clock text-teal-200"></i>
+            <i class="fas fa-qrcode text-teal-200"></i>
           </div>
-          <p class="font-semibold text-white text-sm">24/7 Access</p>
-          <p class="text-teal-200 text-xs mt-1">Track your application status anytime</p>
+          <p class="font-semibold text-white text-sm">Instant Verification</p>
+          <p class="text-teal-200 text-xs mt-1">QR code proves your certificate instantly</p>
         </div>
         {% endfor %}
       </div>
@@ -255,9 +307,9 @@
     <div class="text-center mb-16">
       <span class="inline-block bg-teal-100 text-teal-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">Coverage</span>
       <h2 class="text-4xl font-bold text-gray-900 mb-4">Disability Categories</h2>
-      <p class="text-lg text-gray-500">Assessments available for six major disability types</p>
+      <p class="text-lg text-gray-500">Assessments available for seven major disability types</p>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {% for cat in categories %}
       <div class="bg-white rounded-2xl p-5 text-center hover:shadow-md hover:border-teal-200 border border-gray-100 transition-all group">
         <div class="w-14 h-14 bg-teal-50 group-hover:bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors">
@@ -290,7 +342,148 @@
         <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-heartbeat text-teal-600 text-xl"></i></div>
         <p class="font-semibold text-gray-800 text-sm">Chronic</p>
       </div>
+      <div class="bg-white rounded-2xl p-5 text-center hover:shadow-md border border-gray-100 transition-all group">
+        <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-comment-medical text-teal-600 text-xl"></i></div>
+        <p class="font-semibold text-gray-800 text-sm">Speech, Language &amp; Communication</p>
+      </div>
       {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <span class="inline-block bg-teal-100 text-teal-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">Success Stories</span>
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">Hear From Our Users</h2>
+      <p class="text-lg text-gray-500 max-w-2xl mx-auto">Real stories from people who have successfully obtained their disability certificates through our platform.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-gray-50 border border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-shadow">
+        <div class="flex items-center gap-1 mb-4">
+          {% for i in "12345" %}<i class="fas fa-star text-amber-400 text-sm"></i>{% endfor %}
+        </div>
+        <p class="text-gray-700 mb-6 leading-relaxed">"The process was straightforward and the staff at the hospital were very professional. I got my certificate within two weeks!"</p>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-teal-200 rounded-full flex items-center justify-center text-teal-700 font-bold">JM</div>
+          <div>
+            <p class="font-semibold text-gray-900">Jane Mwangi</p>
+            <p class="text-sm text-gray-500">Nairobi</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 border border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-shadow">
+        <div class="flex items-center gap-1 mb-4">
+          {% for i in "12345" %}<i class="fas fa-star text-amber-400 text-sm"></i>{% endfor %}
+        </div>
+        <p class="text-gray-700 mb-6 leading-relaxed">"I was worried about the medical assessment, but the professionals made it comfortable and easy to go through. Highly recommended!"</p>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center text-emerald-700 font-bold">PK</div>
+          <div>
+            <p class="font-semibold text-gray-900">Peter Kipchoge</p>
+            <p class="text-sm text-gray-500">Kisumu</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 border border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-shadow">
+        <div class="flex items-center gap-1 mb-4">
+          {% for i in "12345" %}<i class="fas fa-star text-amber-400 text-sm"></i>{% endfor %}
+        </div>
+        <p class="text-gray-700 mb-6 leading-relaxed">"The digital certificate is so convenient to use. I can verify it anytime with just the QR code. Amazing innovation!"</p>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-rose-200 rounded-full flex items-center justify-center text-rose-700 font-bold">AO</div>
+          <div>
+            <p class="font-semibold text-gray-900">Alice Ochieng</p>
+            <p class="text-sm text-gray-500">Mombasa</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-24 bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <span class="inline-block bg-teal-100 text-teal-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">FAQs</span>
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+      <p class="text-lg text-gray-500">Get answers to common questions about the disability certification process.</p>
+    </div>
+    <div class="space-y-4" x-data="{ open: null }">
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <button @click="open === 0 ? open = null : open = 0" class="w-full p-6 text-left font-semibold text-gray-900 hover:bg-teal-50 transition-colors flex items-center justify-between">
+          <span>Who is eligible for disability certification?</span>
+          <i class="fas fa-chevron-down text-teal-600" :class="open === 0 ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open === 0" class="px-6 pb-6 text-gray-600 leading-relaxed">
+          Any Kenyan citizen with a documented disability can apply for certification. Medical professionals at our partner hospitals will assess your condition during the appointment.
+        </div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <button @click="open === 1 ? open = null : open = 1" class="w-full p-6 text-left font-semibold text-gray-900 hover:bg-teal-50 transition-colors flex items-center justify-between">
+          <span>How long does the entire process take?</span>
+          <i class="fas fa-chevron-down text-teal-600" :class="open === 1 ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open === 1" class="px-6 pb-6 text-gray-600 leading-relaxed">
+          Typically 3-4 weeks from registration to final certification. This includes hospital appointment, medical review, health officer approval, and county certification. Some cases may take longer depending on the complexity of the assessment.
+        </div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <button @click="open === 2 ? open = null : open = 2" class="w-full p-6 text-left font-semibold text-gray-900 hover:bg-teal-50 transition-colors flex items-center justify-between">
+          <span>Is there any cost involved?</span>
+          <i class="fas fa-chevron-down text-teal-600" :class="open === 2 ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open === 2" class="px-6 pb-6 text-gray-600 leading-relaxed">
+          The certification process is free for all PWD citizens. You only pay if you require additional medical tests or services beyond the standard assessment.
+        </div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <button @click="open === 3 ? open = null : open = 3" class="w-full p-6 text-left font-semibold text-gray-900 hover:bg-teal-50 transition-colors flex items-center justify-between">
+          <span>How do I verify a certificate?</span>
+          <i class="fas fa-chevron-down text-teal-600" :class="open === 3 ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open === 3" class="px-6 pb-6 text-gray-600 leading-relaxed">
+          Each certificate comes with a unique QR code. Scan the code or visit our verification portal to instantly confirm if a certificate is genuine and active.
+        </div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <button @click="open === 4 ? open = null : open = 4" class="w-full p-6 text-left font-semibold text-gray-900 hover:bg-teal-50 transition-colors flex items-center justify-between">
+          <span>What if I'm rejected? Can I reapply?</span>
+          <i class="fas fa-chevron-down text-teal-600" :class="open === 4 ? 'rotate-180' : ''"></i>
+        </button>
+        <div x-show="open === 4" class="px-6 pb-6 text-gray-600 leading-relaxed">
+          Yes, you can contact the county disability office to understand the reason for rejection and discuss reapplication options. Additional medical evidence may strengthen your case.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust & Security Section -->
+<section class="py-16 bg-white border-t border-gray-100">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h3 class="text-2xl font-bold text-gray-900">Trusted by Government & Healthcare Professionals</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="flex flex-col items-center p-6 rounded-xl bg-gray-50 border border-gray-100">
+        <i class="fas fa-shield-alt text-teal-600 text-3xl mb-3"></i>
+        <p class="font-semibold text-gray-900 text-sm text-center">End-to-End<br>Encryption</p>
+      </div>
+      <div class="flex flex-col items-center p-6 rounded-xl bg-gray-50 border border-gray-100">
+        <i class="fas fa-lock text-teal-600 text-3xl mb-3"></i>
+        <p class="font-semibold text-gray-900 text-sm text-center">Data Privacy<br>Compliant</p>
+      </div>
+      <div class="flex flex-col items-center p-6 rounded-xl bg-gray-50 border border-gray-100">
+        <i class="fas fa-check-circle text-teal-600 text-3xl mb-3"></i>
+        <p class="font-semibold text-gray-900 text-sm text-center">ISO/IEC<br>27001</p>
+      </div>
+      <div class="flex flex-col items-center p-6 rounded-xl bg-gray-50 border border-gray-100">
+        <i class="fas fa-certificate text-teal-600 text-3xl mb-3"></i>
+        <p class="font-semibold text-gray-900 text-sm text-center">Government<br>Approved</p>
+      </div>
     </div>
   </div>
 </section>
@@ -300,18 +493,18 @@
   <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 25% 25%, white 1px, transparent 1px); background-size: 32px 32px;"></div>
   <div class="max-w-3xl mx-auto px-6 text-center relative z-10">
     <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-      <i class="fas fa-wheelchair text-white text-2xl"></i>
+      <i class="fas fa-rocket text-white text-2xl"></i>
     </div>
-    <h2 class="text-4xl font-bold text-white mb-4">Ready to Begin Your Journey?</h2>
-    <p class="text-teal-100 text-lg mb-10">Join thousands of Kenyans who have accessed disability services through our platform. Registration is free and takes only minutes.</p>
+    <h2 class="text-4xl font-bold text-white mb-4">Start Your Certification Journey Today</h2>
+    <p class="text-teal-100 text-lg mb-10">Join thousands of Kenyans across all 47 counties who have successfully obtained their disability certificates. Fast, secure, and completely free.</p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <a href="{% url 'accounts:register' %}"
-         class="inline-flex items-center justify-center gap-2 bg-white text-teal-700 hover:bg-teal-50 font-bold px-8 py-4 rounded-xl transition-colors shadow-lg text-base">
-        <i class="fas fa-user-plus"></i> Register as PWD Citizen
+         class="inline-flex items-center justify-center gap-2 bg-white text-teal-700 hover:bg-teal-50 font-bold px-8 py-4 rounded-xl transition-colors shadow-lg text-base transform hover:scale-105">
+        <i class="fas fa-user-plus"></i> Register Now
       </a>
-      <a href="{% url 'accounts:login' %}"
+      <a href="#process"
          class="inline-flex items-center justify-center gap-2 border-2 border-white/50 text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-xl transition-colors text-base">
-        <i class="fas fa-sign-in-alt"></i> Sign In
+        <i class="fas fa-book-open"></i> Learn More
       </a>
     </div>
   </div>

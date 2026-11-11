@@ -1,0 +1,142 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}County Officers{% endblock %}
+{% block page_title %}County Officers{% endblock %}
+{% block page_subtitle %}Create and manage county supervisor accounts{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Analytics</p>
+<a href="{% url 'national_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-globe w-5 text-center text-sm"></i><span>National Overview</span></a>
+<a href="{% url 'national_admin:county_breakdown' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Counties</span></a>
+<a href="{% url 'national_admin:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'national_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-users w-5 text-center text-sm"></i><span>Officials</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'national_admin:county_officer_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user-shield w-5 text-center text-sm"></i><span>County Officers</span></a>
+<a href="{% url 'national_admin:add_county' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Add County</span></a>
+<a href="{% url 'national_admin:chatbot_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-robot w-5 text-center text-sm"></i><span>Chatbot Settings</span></a>
+<a href="{% url 'national_admin:doc_checker_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-file-shield w-5 text-center text-sm"></i><span>Document Checker</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'national_admin:profile' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'national_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+{% for message in messages %}
+<div class="mb-4 px-4 py-3 rounded-xl text-sm
+  {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+  {% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+  {{ message }}
+</div>
+{% endfor %}
+
+<!-- Filter + Create -->
+<div class="flex flex-wrap gap-3 items-end mb-5">
+  <form method="get" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-wrap gap-3 items-end flex-1">
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Filter by County</label>
+      <select name="county" onchange="this.form.submit()" class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+        <option value="">All Counties</option>
+        {% for c in counties %}<option value="{{ c.id }}" {% if selected_county == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+    </div>
+    {% if selected_county %}
+    <a href="{% url 'national_admin:county_officer_list' %}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-sm transition-colors">Clear</a>
+    {% endif %}
+  </form>
+  <a href="{% url 'national_admin:create_county_officer' %}"
+     class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm flex-shrink-0">
+    <i class="fas fa-user-plus"></i> Add County Officer
+  </a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+  <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+    <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+      <i class="fas fa-user-shield text-teal-500"></i> County Officers
+    </h3>
+    <span class="bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">{{ officers.count }} officer{{ officers.count|pluralize }}</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table id="officerTable" class="w-full min-w-[700px] text-sm whitespace-nowrap">
+      <thead class="bg-teal-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Officer</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">County</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">License ID</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Email</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Mobile</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for o in officers %}
+        <tr class="hover:bg-teal-50/20 transition-colors">
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                {{ o.first_name|first|upper }}{{ o.last_name|first|upper }}
+              </div>
+              <div>
+                <p class="font-semibold text-gray-800">{{ o.get_full_name }}</p>
+                <p class="text-xs text-gray-400">County Supervisor</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-1.5">
+              <i class="fas fa-map-marker-alt text-teal-400 text-xs"></i>
+              <span class="text-gray-700 font-medium">{{ o.county.name|default:"—" }}</span>
+            </div>
+          </td>
+          <td class="px-6 py-3 font-mono text-xs text-gray-500">{{ o.license_id }}</td>
+          <td class="px-6 py-3 text-gray-500 text-xs">{{ o.email|default:"—" }}</td>
+          <td class="px-6 py-3 text-gray-500 text-xs">{{ o.mobile_number|default:"—" }}</td>
+          <td class="px-6 py-3">
+            {% if o.is_approved %}
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Active
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              <span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span> Inactive
+            </span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-2">
+              <a href="{% url 'national_admin:edit_county_officer' o.pk %}"
+                 class="inline-flex items-center gap-1 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 font-medium rounded-lg text-xs transition-colors">
+                <i class="fas fa-edit text-xs"></i> Edit
+              </a>
+              <form method="post" action="{% url 'national_admin:toggle_officer' o.pk %}" class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 font-medium rounded-lg text-xs transition-colors
+                          {% if o.is_approved %}bg-red-50 hover:bg-red-100 text-red-700{% else %}bg-emerald-50 hover:bg-emerald-100 text-emerald-700{% endif %}"
+                        onclick="return confirm('{% if o.is_approved %}Deactivate{% else %}Activate{% endif %} {{ o.get_full_name }}?')">
+                  {% if o.is_approved %}<i class="fas fa-ban text-xs"></i> Deactivate
+                  {% else %}<i class="fas fa-check text-xs"></i> Activate{% endif %}
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% include "includes/pagination.html" with page_obj=officers page_param="page" label="County officers" %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function(){
+  $('#officerTable').DataTable({
+    paging: false, info: false,
+    order: [[1,'asc']],
+    language: { emptyTable: 'No county officers found.', zeroRecords: 'No matching officers.' }
+  });
+});
+</script>
+{% endblock %}

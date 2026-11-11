@@ -1,160 +1,574 @@
 {% extends "base/base.html" %}
-{% block title %}PWD Certificate — {{ assessment.user.get_full_name }}{% endblock %}
+{% load static %}
+{% block title %}{{ form_code }} Certificate — {{ assessment.user.get_full_name }}{% endblock %}
 
 {% block extra_head %}
 <style>
+  @page { size: A4; margin: 1.5cm 2cm; }
   @media print {
     .no-print { display: none !important; }
-    body { background: white !important; }
-    .certificate { box-shadow: none !important; }
+    body { background: white !important; margin: 0; }
+    .cert-page { box-shadow: none !important; border: none !important; }
   }
-  @page { size: A4; margin: 1cm; }
+  body { font-family: 'Times New Roman', Times, serif; font-size: 11pt; }
+  .cert-page { background: white; max-width: 210mm; margin: 0 auto; }
+
+  /* Section headers */
+  .sec-head { font-weight: bold; font-size: 10.5pt; margin: 10px 0 4px; }
+
+  /* Form table */
+  .ft { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  .ft td { border: 1px solid #555; padding: 5px 8px; vertical-align: top; font-size: 10pt; }
+  .ft td.lbl { font-weight: bold; white-space: nowrap; background: #f9f9f9; width: 22%; }
+  .ft td.lbl2 { font-weight: bold; white-space: nowrap; background: #f9f9f9; }
+  .ft th { border: 1px solid #555; padding: 5px 8px; font-weight: bold; background: #f0f0f0; font-size: 10pt; text-align: left; }
+
+  /* Watermark diagonal */
+  .watermark {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-size: 80pt; color: rgba(13,148,136,0.05);
+    font-weight: bold; pointer-events: none; white-space: nowrap; z-index: 0;
+  }
+
+  /* Header */
+  .cert-header { text-align: center; border-bottom: 3px double #333; padding-bottom: 10px; margin-bottom: 8px; }
+  .cert-header .title { font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin: 4px 0 2px; }
+  .cert-header .subtitle { font-size: 11pt; font-weight: bold; text-transform: uppercase; }
+
+  /* Cert ID bar */
+  .cert-id-bar { display: flex; justify-content: space-between; align-items: flex-start; border: 1px solid #aaa; padding: 6px 10px; margin-bottom: 8px; background: #fafafa; }
+  .cert-id-bar .id-block .cid { font-weight: bold; font-size: 10.5pt; }
+  .cert-id-bar .id-block .sub { font-size: 9pt; color: #555; margin-top: 2px; }
+  .qr-box { width: 72px; height: 72px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 7pt; color: #999; text-align: center; flex-shrink: 0; }
+
+  /* Signature line */
+  .sig-line { border-bottom: 1px solid #333; height: 28px; width: 100%; margin-bottom: 4px; }
+
+  /* Footer */
+  .cert-footer { border-top: 1px solid #aaa; margin-top: 14px; padding-top: 6px; text-align: right; font-size: 8.5pt; color: #777; }
 </style>
 {% endblock %}
 
 {% block body %}
-<!-- Print controls -->
-<div class="no-print bg-gray-100 p-4 flex items-center justify-between">
-  <a href="{% url 'pwd:view_application' assessment.pk %}" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+<!-- Screen toolbar -->
+<div class="no-print bg-gray-100 border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+  <a href="{% if can_manage_certificate %}{% url 'supervisor:view_assessment' assessment.pk %}{% else %}{% url 'pwd:view_application' assessment.pk %}{% endif %}" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
     <i class="fas fa-arrow-left"></i> Back to Application
   </a>
-  <button onclick="window.print()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
-    <i class="fas fa-print"></i> Print Certificate
-  </button>
-</div>
-
-<!-- Certificate -->
-<div class="min-h-screen bg-gray-50 flex items-center justify-center p-6 no-print-bg">
-  <div class="certificate bg-white w-full max-w-2xl shadow-xl rounded-2xl overflow-hidden" style="border: 3px solid #0d9488;">
-
-    <!-- Header Band -->
-    <div class="bg-gradient-to-r from-teal-800 to-teal-600 p-6 text-white text-center relative overflow-hidden">
-      <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 20px 20px;"></div>
-      <div class="relative z-10">
-        <div class="flex items-center justify-center gap-3 mb-2">
-          <i class="fas fa-wheelchair text-3xl text-teal-200"></i>
-        </div>
-        <h1 class="text-xl font-bold tracking-wide uppercase">Republic of Kenya</h1>
-        <h2 class="text-base font-semibold text-teal-200 mt-0.5">Ministry of Health</h2>
-        <p class="text-teal-300 text-xs mt-1">Persons with Disabilities (PWD) Certification</p>
-      </div>
-    </div>
-
-    <!-- Certificate Body -->
-    <div class="p-8">
-      <!-- Title -->
-      <div class="text-center mb-6">
-        <div class="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 px-5 py-2 rounded-full mb-3">
-          <i class="fas fa-certificate text-teal-600 text-sm"></i>
-          <span class="text-teal-700 font-semibold text-sm uppercase tracking-wider">Certificate of Disability</span>
-        </div>
-        <p class="text-gray-500 text-xs">This is to certify that the following individual has been assessed and registered</p>
-      </div>
-
-      <!-- Divider -->
-      <div class="flex items-center gap-3 mb-6">
-        <div class="flex-1 h-px bg-teal-200"></div>
-        <i class="fas fa-star text-teal-400 text-xs"></i>
-        <div class="flex-1 h-px bg-teal-200"></div>
-      </div>
-
-      <!-- Beneficiary Info -->
-      <div class="bg-teal-50 rounded-xl p-5 mb-6 border border-teal-100">
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p class="text-xs text-gray-400 mb-0.5">Full Name</p>
-            <p class="font-bold text-gray-900 text-base">{{ assessment.user.get_full_name }}</p>
-          </div>
-          <div>
-            <p class="text-xs text-gray-400 mb-0.5">National ID</p>
-            <p class="font-semibold text-gray-800">{{ assessment.user.id_number }}</p>
-          </div>
-          <div>
-            <p class="text-xs text-gray-400 mb-0.5">Date of Birth</p>
-            <p class="font-medium text-gray-800">{{ assessment.user.date_of_birth|date:"d M Y"|default:"—" }}</p>
-          </div>
-          <div>
-            <p class="text-xs text-gray-400 mb-0.5">Gender</p>
-            <p class="font-medium text-gray-800">{{ assessment.user.gender|capfirst|default:"—" }}</p>
-          </div>
-          <div>
-            <p class="text-xs text-gray-400 mb-0.5">County</p>
-            <p class="font-medium text-gray-800">{{ assessment.user.county.name|default:"—" }}</p>
-          </div>
-          <div>
-            <p class="text-xs text-gray-400 mb-0.5">Sub-County</p>
-            <p class="font-medium text-gray-800">{{ assessment.user.subcounty|default:"—" }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Disability Details -->
-      <div class="grid grid-cols-3 gap-4 mb-6 text-center">
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-          <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mx-auto mb-2">
-            <i class="fas fa-wheelchair text-teal-600"></i>
-          </div>
-          <p class="text-xs text-gray-400">Disability Type</p>
-          <p class="text-sm font-bold text-gray-800 mt-0.5">{{ assessment.get_disability_type_display }}</p>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-          <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mx-auto mb-2">
-            <i class="fas fa-hospital text-teal-600"></i>
-          </div>
-          <p class="text-xs text-gray-400">Assessed At</p>
-          <p class="text-sm font-bold text-gray-800 mt-0.5">{{ assessment.hospital.name }}</p>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-          <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mx-auto mb-2">
-            <i class="fas fa-calendar text-teal-600"></i>
-          </div>
-          <p class="text-xs text-gray-400">Certified On</p>
-          <p class="text-sm font-bold text-gray-800 mt-0.5">{{ assessment.updated_at|date:"d M Y" }}</p>
-        </div>
-      </div>
-
-      <!-- Certificate Number -->
-      <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 flex items-center justify-between">
-        <div>
-          <p class="text-xs text-gray-400">Certificate Number</p>
-          <p class="text-base font-bold text-teal-700 font-mono">PWD-{{ assessment.hospital.county.name|upper|slice:":3" }}-{{ assessment.user.id_number }}-{{ assessment.pk|stringformat:"04d" }}</p>
-        </div>
-        {% if qr_code %}
-        <img src="{{ qr_code }}" alt="QR Code" class="w-16 h-16">
-        {% else %}
-        <div class="w-16 h-16 bg-teal-50 border border-teal-200 rounded-lg flex items-center justify-center">
-          <i class="fas fa-qrcode text-teal-400 text-2xl"></i>
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Signatures -->
-      <div class="grid grid-cols-2 gap-6 mb-6">
-        <div class="text-center">
-          <div class="border-b-2 border-gray-300 mb-2 h-10"></div>
-          <p class="text-xs font-semibold text-gray-700">{{ assessment.medical_officer.get_full_name|default:"Medical Officer" }}</p>
-          <p class="text-xs text-gray-400">Medical Officer</p>
-        </div>
-        <div class="text-center">
-          <div class="border-b-2 border-gray-300 mb-2 h-10"></div>
-          <p class="text-xs font-semibold text-gray-700">{{ assessment.county_officer.get_full_name|default:"County Officer" }}</p>
-          <p class="text-xs text-gray-400">County Officer — {{ assessment.hospital.county.name }} County</p>
-        </div>
-      </div>
-
-      <!-- Status Badge -->
-      <div class="text-center">
-        <span class="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide">
-          <i class="fas fa-check-circle"></i> Fully Certified
-        </span>
-        <p class="text-xs text-gray-400 mt-2">Valid for official use in Kenya. Issued under the Persons with Disabilities Act.</p>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="bg-teal-800 py-3 px-6 text-center">
-      <p class="text-teal-300 text-xs">PWD Access Kenya &nbsp;·&nbsp; {{ assessment.updated_at|date:"Y" }} &nbsp;·&nbsp; Verify at pwdaccess.go.ke</p>
-    </div>
+  <div class="flex items-center gap-3">
+    <span class="text-xs text-gray-500">{{ form_code }} &mdash; {{ form_title }}</span>
+    {% if can_manage_certificate %}
+    <form method="post" action="{% url 'supervisor:certificate_reissue' certificate.pk %}" class="flex items-center gap-1" onsubmit="return confirm('Reissue this certificate? The current QR code will stop working.');">
+      {% csrf_token %}<input name="reason" required placeholder="Reissue reason" class="border rounded px-2 py-1.5 text-xs">
+      <button class="bg-amber-600 text-white px-3 py-2 rounded-lg text-xs">Reissue</button>
+    </form>
+    <form method="post" action="{% url 'supervisor:certificate_revoke' certificate.pk %}" class="flex items-center gap-1" onsubmit="return confirm('Revoke this certificate?');">
+      {% csrf_token %}<input name="reason" required placeholder="Revocation reason" class="border rounded px-2 py-1.5 text-xs">
+      <button class="bg-red-600 text-white px-3 py-2 rounded-lg text-xs">Revoke</button>
+    </form>
+    {% endif %}
+    <button onclick="window.print()" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-5 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+      <i class="fas fa-print"></i> Print / Save PDF
+    </button>
   </div>
 </div>
+
+<div class="bg-gray-200 min-h-screen py-8 px-4 no-print-bg">
+<div class="cert-page shadow-2xl p-8 relative" style="position:relative;">
+
+  <div class="watermark">PWD</div>
+
+  <!-- ── HEADER ── -->
+  <div class="cert-header">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;">
+      <img src="{% static 'img/coat_of_arms.png' %}"
+           alt="Kenya Coat of Arms" style="height:72px;"
+           onerror="this.style.display='none'">
+    </div>
+    <div class="title">Republic of Kenya</div>
+    <div style="font-size:11pt;margin:1px 0;">Ministry of Health</div>
+    <div class="subtitle">Assessment Form for {{ form_title }}s ({{ form_code }})</div>
+  </div>
+
+  <!-- ── CERT ID + QR ── -->
+  <div class="cert-id-bar">
+    <div class="id-block">
+      <div class="cid">Certificate ID: {{ cert_id }}</div>
+      <div class="sub">Approved on {{ assessment.updated_at|date:"d M Y" }}</div>
+      <div class="sub" style="margin-top:3px;">This document is officially generated from the Ministry of Health Disability Assessment System.</div>
+    </div>
+    <div class="qr-box">
+      {% if qr_code %}
+      <img src="{{ qr_code }}" alt="QR" style="width:100%;height:100%;">
+      {% else %}
+      <span>QR CODE</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── SECTION 1: Health Facility ── -->
+  <div class="sec-head">1. Health Facility Details</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Name of Health Facility</td>
+      <td>{{ assessment.hospital.name }}</td>
+      <td class="lbl2" style="width:8%;">Date</td>
+      <td style="width:18%;">{{ assessment.assessment_date|date:"Y-m-d" }}</td>
+    </tr>
+  </table>
+
+  <!-- ── SECTION 2: Applicant Information ── -->
+  <div class="sec-head">2. Applicant Information for the purpose of reporting on Disability Assessment:</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Name</td>
+      <td>{{ assessment.user.get_full_name }}</td>
+      <td class="lbl2">ID No.</td>
+      <td>{{ assessment.user.id_number|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Gender</td>
+      <td>{{ assessment.user.gender|capfirst|default:"—" }}</td>
+      <td class="lbl2">DOB</td>
+      <td>{{ assessment.user.date_of_birth|date:"Y-m-d"|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Phone</td>
+      <td>{{ assessment.user.mobile_number|default:"—" }}</td>
+      <td class="lbl2">County/Subcounty</td>
+      <td>{{ assessment.user.county.name|default:"—" }}/{{ assessment.user.subcounty|default:"—" }}</td>
+    </tr>
+  </table>
+
+  <!-- ── SECTION 3: Next of Kin ── -->
+  <div class="sec-head">3. Next of Kin Details:</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Next of Kin</td>
+      <td>{{ assessment.user.next_of_kin_name|default:"—" }}</td>
+      <td class="lbl2">Relation</td>
+      <td>{{ assessment.user.next_of_kin_relationship|default:"—" }}</td>
+      <td class="lbl2">NOK Phone</td>
+      <td>{{ assessment.user.next_of_kin_mobile|default:"—" }}</td>
+    </tr>
+  </table>
+
+  <!-- ══════════════════════════════════════════
+       DISABILITY-SPECIFIC MIDDLE SECTIONS
+  ══════════════════════════════════════════ -->
+
+  {% if assessment.disability_type == 'hearing' %}{% with d=detail %}
+
+  <div class="sec-head">4. Hearing History</div>
+  <table class="ft">
+    <tr><td class="lbl">History of Hearing Loss</td><td style="height:42px;">{{ d.history_of_hearing_loss|default:"" }}</td></tr>
+    <tr><td class="lbl">Hearing Device Usage</td><td style="height:42px;">{{ d.history_of_hearing_devices|default:"" }}</td></tr>
+  </table>
+
+  <div class="sec-head">5. Hearing Test Results</div>
+  <table class="ft">
+    <tr>
+      <th style="width:40%;"></th>
+      <th>Right Ear</th>
+      <th>Left Ear</th>
+    </tr>
+    <tr>
+      <td class="lbl">Type of Hearing Loss</td>
+      <td>{{ d.get_hearing_loss_type_right_display|default:"—" }}</td>
+      <td>{{ d.get_hearing_loss_type_left_display|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Degree</td>
+      <td>{{ d.get_hearing_grade_right_display|default:"—" }}</td>
+      <td>{{ d.get_hearing_grade_left_display|default:"—" }}</td>
+    </tr>
+  </table>
+
+  <div class="sec-head">6. Disability Calculation</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Right dBHL</td>
+      <td>{{ d.hearing_level_dbhl_right|default:"0.00" }} %</td>
+      <td>{{ d.monaural_percentage_right|default:"0.00" }}%</td>
+    </tr>
+    <tr>
+      <td class="lbl">Left dBHL</td>
+      <td>{{ d.hearing_level_dbhl_left|default:"0.00" }} %</td>
+      <td>{{ d.monaural_percentage_left|default:"0.00" }}%</td>
+    </tr>
+    <tr>
+      <td class="lbl">Overall Binaural %</td>
+      <td colspan="2"><strong>{{ d.binaural_percentage|default:"0.00" }}%</strong></td>
+    </tr>
+  </table>
+
+  <div class="sec-head">7. Conclusion</div>
+  <table class="ft">
+    <tr><td class="lbl">Conclusion</td><td colspan="2">{{ d.get_conclusion_display|default:"—" }}</td><td></td></tr>
+  </table>
+
+  <div class="sec-head">8. Recommendations</div>
+  <table class="ft">
+    <tr><td class="lbl">Assistive Products</td><td style="height:36px;">{{ d.assistive_devices|default:"" }}</td></tr>
+    <tr><td class="lbl">Required Services</td><td style="height:36px;">{{ d.recommendations|default:"" }}</td></tr>
+  </table>
+
+  {% endwith %}{% elif assessment.disability_type == 'physical' %}{% with d=detail %}
+
+  <div class="sec-head">4. Physical Assessment Background</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Date of Injury/Onset</td><td>{{ d.injury_onset|date:"Y-m-d"|default:"—" }}</td>
+      <td class="lbl2">Last Intervention</td><td>{{ d.last_intervention|date:"Y-m-d"|default:"—" }}</td>
+    </tr>
+    <tr><td class="lbl">Cause of Disability</td><td colspan="3" style="height:36px;">{{ d.cause_of_disability|default:"" }}</td></tr>
+  </table>
+
+  <div class="sec-head">5. Structural Impairments</div>
+  <table class="ft">
+    <tr><th style="width:30%;">Area</th><th style="width:30%;">Level</th><th>Findings</th></tr>
+    <tr><td class="lbl">Muscle Power</td><td>{{ d.muscle_power_level|default:"—" }}</td><td>{{ d.muscle_power_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Range of Motion</td><td>{{ d.range_of_motion_level|default:"—" }}</td><td>{{ d.range_of_motion_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Angulation</td><td>{{ d.angulation_level|default:"—" }}</td><td>{{ d.angulation_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Limb Amputation</td><td>{{ d.limb_amputation_level|default:"—" }}</td><td>{{ d.limb_amputation_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Limb Length</td><td>{{ d.limb_length_level|default:"—" }}</td><td>{{ d.limb_length_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Balance</td><td>{{ d.balance_level|default:"—" }}</td><td>{{ d.balance_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Other</td><td>{{ d.other_impairment_level|default:"—" }}</td><td>{{ d.other_impairment_findings|default:"—" }}</td></tr>
+  </table>
+
+  <div class="sec-head">6. Functional &amp; Participation Assessment</div>
+  <table class="ft">
+    <tr><th style="width:30%;">Area</th><th style="width:30%;">Level</th><th>Findings</th></tr>
+    <tr><td class="lbl">Mobility</td><td>{{ d.mobility_level|default:"—" }}</td><td>{{ d.mobility_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Self-care</td><td>{{ d.selfcare_level|default:"—" }}</td><td>{{ d.selfcare_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Domestic Life</td><td>{{ d.domestic_life_level|default:"—" }}</td><td>{{ d.domestic_life_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Major Life Areas</td><td>{{ d.major_life_level|default:"—" }}</td><td>{{ d.major_life_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Community</td><td>{{ d.community_level|default:"—" }}</td><td>{{ d.community_findings|default:"—" }}</td></tr>
+  </table>
+
+  <div class="sec-head">7. Disability Rating &amp; Conclusion</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Disability Rating</td><td>{{ d.get_disability_rating_display|default:"—" }}</td>
+      <td class="lbl2">Conclusion</td><td>{{ d.get_conclusion_display|default:"—" }}</td>
+    </tr>
+  </table>
+
+  <div class="sec-head">8. Recommendations</div>
+  <table class="ft">
+    <tr><td class="lbl">Assistive Products</td><td style="height:36px;">{{ d.assistive_devices|default:"" }}</td></tr>
+    <tr><td class="lbl">Required Services</td><td style="height:36px;">{{ d.other_required_services|default:"" }}</td></tr>
+    <tr><td class="lbl">Clinical Recommendations</td><td style="height:36px;">{{ d.recommendations|default:"" }}</td></tr>
+  </table>
+
+  {% endwith %}{% elif assessment.disability_type == 'visual' %}{% with d=detail %}
+
+  <!-- Visual Disability Assessment heading (matches PDF bold section title) -->
+  <div style="font-size:12pt;font-weight:bold;color:#c0392b;border-bottom:2px solid #c0392b;padding-bottom:3px;margin:10px 0 8px;">Visual Disability Assessment</div>
+
+  <!-- History fields as bold-label + text (PDF format) -->
+  <p style="font-size:10pt;font-weight:bold;margin:6px 0 2px;">Assistive Device</p>
+  <p style="font-size:10pt;margin:0 0 6px;padding:3px 6px;">{{ d.assistive_devices|default:"—" }}</p>
+
+  <p style="font-size:10pt;font-weight:bold;margin:6px 0 2px;">Medical History</p>
+  <p style="font-size:10pt;margin:0 0 6px;padding:3px 6px;">{{ d.medical_history|default:"—" }}</p>
+
+  <p style="font-size:10pt;font-weight:bold;margin:6px 0 2px;">Ocular History</p>
+  <p style="font-size:10pt;margin:0 0 10px;padding:3px 6px;">{{ d.ocular_history|default:"—" }}</p>
+
+  <!-- Distance Visual Acuity — merged header columns -->
+  <div style="font-size:11pt;font-weight:bold;margin:8px 0 4px;">Distance Visual Acuity</div>
+  <table class="ft">
+    <tr>
+      <th style="width:20%;">Test</th>
+      <th colspan="2" style="text-align:center;">With Correction</th>
+      <th colspan="2" style="text-align:center;">Without Correction</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th style="text-align:center;">Right</th>
+      <th style="text-align:center;">Left</th>
+      <th style="text-align:center;">Right</th>
+      <th style="text-align:center;">Left</th>
+    </tr>
+    <tr>
+      <td class="lbl" style="text-align:center;">Distance</td>
+      <td style="text-align:center;">{{ d.visual_acuity_right|default:"—" }}</td>
+      <td style="text-align:center;">{{ d.visual_acuity_left|default:"—" }}</td>
+      <td style="text-align:center;">{{ d.visual_acuity_right_uncorrected|default:"—" }}</td>
+      <td style="text-align:center;">{{ d.visual_acuity_left_uncorrected|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl" style="text-align:center;">Near Vision</td>
+      <td style="text-align:center;">{{ d.near_vision_corrected|default:"—" }}</td>
+      <td></td>
+      <td style="text-align:center;">{{ d.near_vision_uncorrected|default:"—" }}</td>
+      <td></td>
+    </tr>
+  </table>
+
+  <!-- Ophthalmic Examination — two-panel side-by-side (6 columns) -->
+  <div style="font-size:11pt;font-weight:bold;margin:10px 0 4px;">Ophthalmic Examination</div>
+  <table class="ft" style="table-layout:fixed;">
+    <tr>
+      <th colspan="3" style="text-align:center;border-right:2px solid #555;">Examination</th>
+      <th colspan="3" style="text-align:center;">Examination</th>
+    </tr>
+    <tr>
+      <th style="width:17%;">Examination</th>
+      <th style="width:9%;text-align:center;">Right Eye</th>
+      <th style="width:9%;text-align:center;border-right:2px solid #555;">Left Eye</th>
+      <th style="width:17%;">Examination</th>
+      <th style="width:9%;text-align:center;">Right Eye</th>
+      <th style="width:9%;text-align:center;">Left Eye</th>
+    </tr>
+    <tr>
+      <td class="lbl">Present eyeball</td><td style="text-align:center;">{{ d.present_eyeball_right|default:"—" }}</td><td style="text-align:center;border-right:2px solid #555;">{{ d.present_eyeball_left|default:"—" }}</td>
+      <td class="lbl">Cornea</td><td style="text-align:center;">{{ d.cornea_right|default:"—" }}</td><td style="text-align:center;">{{ d.cornea_left|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Squint</td><td style="text-align:center;">{{ d.squint_right|default:"—" }}</td><td style="text-align:center;border-right:2px solid #555;">{{ d.squint_left|default:"—" }}</td>
+      <td class="lbl">Anterior Chamber</td><td style="text-align:center;">{{ d.anterior_chamber_right|default:"—" }}</td><td style="text-align:center;">{{ d.anterior_chamber_left|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Nystagmus</td><td style="text-align:center;">{{ d.nystagmus_right|default:"—" }}</td><td style="text-align:center;border-right:2px solid #555;">{{ d.nystagmus_left|default:"—" }}</td>
+      <td class="lbl">Iris</td><td style="text-align:center;">{{ d.iris_right|default:"—" }}</td><td style="text-align:center;">{{ d.iris_left|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Tearing</td><td style="text-align:center;">{{ d.tearing_right|default:"—" }}</td><td style="text-align:center;border-right:2px solid #555;">{{ d.tearing_left|default:"—" }}</td>
+      <td class="lbl">Pupil</td><td style="text-align:center;">{{ d.pupil_right|default:"—" }}</td><td style="text-align:center;">{{ d.pupil_left|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Lids</td><td style="text-align:center;">{{ d.lids_right|default:"—" }}</td><td style="text-align:center;border-right:2px solid #555;">{{ d.lids_left|default:"—" }}</td>
+      <td class="lbl">Lens</td><td style="text-align:center;">{{ d.lens_right|default:"—" }}</td><td style="text-align:center;">{{ d.lens_left|default:"—" }}</td>
+    </tr>
+    <tr>
+      <td class="lbl">Conjunctiva</td><td style="text-align:center;">{{ d.conjunctiva_right|default:"—" }}</td><td style="text-align:center;border-right:2px solid #555;">{{ d.conjunctiva_left|default:"—" }}</td>
+      <td class="lbl">Fundus</td><td style="text-align:center;">{{ d.fundus_right|default:"—" }}</td><td style="text-align:center;">{{ d.fundus_left|default:"—" }}</td>
+    </tr>
+  </table>
+
+  <!-- Specialized Tests -->
+  <div style="font-size:11pt;font-weight:bold;margin:10px 0 4px;">Specialized Tests</div>
+  <table class="ft">
+    <tr><th style="width:45%;">Test</th><th>Findings / Defect</th></tr>
+    <tr><td class="lbl">Humphreys Visual Field</td><td>{{ d.humphreys_visual_field|default:"—" }}</td></tr>
+    <tr><td class="lbl">Colour Vision</td><td>{{ d.colour_vision|default:"—" }}</td></tr>
+    <tr><td class="lbl">Stereopsis</td><td>{{ d.stereopsis|default:"—" }}</td></tr>
+  </table>
+
+  <!-- Conclusion — impairment category tick list + details panel -->
+  <div style="font-size:11pt;font-weight:bold;color:#c0392b;margin:10px 0 4px;">Conclusion</div>
+  <table class="ft">
+    <tr>
+      <th style="width:30%;">Impairment Category</th>
+      <th style="width:8%;">Tick</th>
+      <th>Conclusion Details</th>
+    </tr>
+    <tr>
+      <td>Normal</td>
+      <td style="text-align:center;">{% if d.get_conclusion_display == 'Normal' or d.conclusion == 'normal' %}&#10003;{% endif %}</td>
+      <td rowspan="5" style="vertical-align:top;padding:8px;">
+        <p style="margin:0 0 4px;"><strong>Cause of Vision Impairment:</strong></p>
+        <p style="margin:0 0 10px;font-size:9.5pt;">{{ d.cause_of_vision_loss|default:"—" }}</p>
+        <p style="margin:0 0 2px;"><strong>Percentage Disability:</strong></p>
+        <p style="margin:0 0 10px;font-size:9.5pt;">{{ d.percentage_disability|default:"—" }}</p>
+        <p style="margin:0 0 2px;"><strong>Possible Intervention:</strong></p>
+        <p style="margin:0 0 10px;font-size:9.5pt;">{{ d.possible_intervention|default:"—" }}</p>
+        <p style="margin:0 0 2px;"><strong>Recommendation:</strong></p>
+        <p style="margin:0 0 10px;font-size:9.5pt;">{{ d.recommendations|default:"—" }}</p>
+        <p style="margin:0 0 4px;"><strong>Conclusion Duration:</strong></p>
+        <p style="font-size:9.5pt;margin:0;">
+          &#9633; Temporary &nbsp;&nbsp;
+          {% if d.conclusion == 'permanent' %}&#9635;{% else %}&#9633;{% endif %} Permanent
+        </p>
+      </td>
+    </tr>
+    <tr><td>Mild Impairment</td><td style="text-align:center;">{% if d.conclusion == 'mild' %}&#10003;{% endif %}</td></tr>
+    <tr><td>Moderate Impairment</td><td style="text-align:center;">{% if d.conclusion == 'moderate' %}&#10003;{% endif %}</td></tr>
+    <tr><td>Severe Impairment</td><td style="text-align:center;">{% if d.conclusion == 'severe' %}&#10003;{% endif %}</td></tr>
+    <tr><td>Blind</td><td style="text-align:center;">{% if d.conclusion == 'blind' %}&#10003;{% endif %}</td></tr>
+  </table>
+
+  {% endwith %}{% elif assessment.disability_type == 'mental' %}{% with d=detail %}
+
+  <div class="sec-head">4. Clinical History</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Disorder Type</td><td>{{ d.get_disorder_type_display|default:"—" }}</td>
+      <td class="lbl2">IQ Score</td><td>{{ d.iq_score|default:"—" }}</td>
+    </tr>
+    <tr><td class="lbl">Current Medication</td><td colspan="3">{{ d.current_medication|default:"—" }}</td></tr>
+    <tr><td class="lbl">Brief Clinical History</td><td colspan="3" style="height:42px;">{{ d.history|default:"" }}</td></tr>
+    <tr><td class="lbl">Mental Status Evaluation</td><td colspan="3" style="height:42px;">{{ d.mental_status_exam|default:"" }}</td></tr>
+  </table>
+
+  <div class="sec-head">5. Functional Assessment Tool (REHAB)</div>
+  <table class="ft">
+    <tr><th style="width:40%;">Area</th><th>Score</th></tr>
+    <tr><td class="lbl">Feeding</td><td>{{ d.feeding_score|default:"—" }}</td></tr>
+    <tr><td class="lbl">Toileting</td><td>{{ d.toileting_score|default:"—" }}</td></tr>
+    <tr><td class="lbl">Grooming</td><td>{{ d.grooming_score|default:"—" }}</td></tr>
+    <tr><td class="lbl">Physical/Daytime Disability</td><td>{{ d.physical_disability_score|default:"—" }}</td></tr>
+    <tr><td class="lbl">Employability/Schooling</td><td>{{ d.employability_score|default:"—" }}</td></tr>
+  </table>
+
+  <div class="sec-head">6. Duration &amp; Conclusion</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Duration of Illness</td><td>{{ d.duration_of_illness|default:"—" }}</td>
+      <td class="lbl2">Major Cause</td><td>{{ d.major_cause_of_disability|default:"—" }}</td>
+    </tr>
+    <tr><td class="lbl">Conclusion</td><td colspan="3">{{ d.get_conclusion_display|default:"—" }}</td></tr>
+  </table>
+
+  <div class="sec-head">7. Recommendations</div>
+  <table class="ft">
+    <tr><td class="lbl">Assistive Products</td><td style="height:36px;">{{ d.assistive_devices|default:"" }}</td></tr>
+    <tr><td class="lbl">Required Services</td><td style="height:36px;">{{ d.other_required_services|default:"" }}</td></tr>
+    <tr><td class="lbl">Clinical Recommendations</td><td style="height:36px;">{{ d.recommendations|default:"" }}</td></tr>
+  </table>
+
+  {% endwith %}{% elif assessment.disability_type == 'maxillofacial' %}{% with d=detail %}
+
+  <div class="sec-head">4. Medical &amp; Dental History</div>
+  <table class="ft">
+    <tr><td class="lbl">Medical History</td><td style="height:48px;">{{ d.medical_history|default:"" }}</td></tr>
+    <tr><td class="lbl">Dental History</td><td style="height:48px;">{{ d.dental_history|default:"" }}</td></tr>
+  </table>
+
+  <div class="sec-head">5. Dental Assessment</div>
+  <table class="ft">
+    <tr><td class="lbl">Assessment</td><td style="height:56px;">{{ d.dental_assessment|default:"" }}</td></tr>
+  </table>
+
+  <div class="sec-head">6. Conclusion &amp; Recommendations</div>
+  <table class="ft">
+    <tr><td class="lbl">Conclusion</td><td colspan="3">{{ d.get_conclusion_display|default:"—" }}</td></tr>
+    <tr><td class="lbl">Assistive Products</td><td style="height:36px;">{{ d.recommended_assistive_products|default:"" }}</td></tr>
+    <tr><td class="lbl">Required Services</td><td style="height:36px;">{{ d.other_services_required|default:"" }}</td></tr>
+  </table>
+
+  {% endwith %}{% elif assessment.disability_type == 'chronic' %}{% with d=detail %}
+
+  <div class="sec-head">4. Medical History (Brief)</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Date of Onset</td><td>{{ d.injury_onset|date:"Y-m-d"|default:"—" }}</td>
+      <td class="lbl2">Last Intervention</td><td>{{ d.last_intervention|date:"Y-m-d"|default:"—" }}</td>
+    </tr>
+    <tr><td class="lbl">Cause of Disability</td><td colspan="3" style="height:36px;">{{ d.cause_of_disability|default:"" }}</td></tr>
+    <tr><td class="lbl">Past &amp; Ongoing Interventions</td><td colspan="3" style="height:36px;">{{ d.past_interventions|default:"" }}</td></tr>
+  </table>
+
+  <div class="sec-head">5. Structural/Clinical Assessment</div>
+  <table class="ft">
+    <tr><th style="width:28%;">System</th><th style="width:20%;">Level</th><th>Findings</th></tr>
+    <tr><td class="lbl">Cardiopulmonary</td><td>{{ d.cardiopulmonary_level|default:"—" }}</td><td>{{ d.cardiopulmonary_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Respiratory</td><td>{{ d.respiratory_level|default:"—" }}</td><td>{{ d.respiratory_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Malignancies/Cancer</td><td>{{ d.malignancies_level|default:"—" }}</td><td>{{ d.malignancies_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Musculoskeletal</td><td>{{ d.musculoskeletal_level|default:"—" }}</td><td>{{ d.musculoskeletal_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Neurological</td><td>{{ d.neurological_level|default:"—" }}</td><td>{{ d.neurological_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Gastrointestinal</td><td>{{ d.gastrointestinal_level|default:"—" }}</td><td>{{ d.gastrointestinal_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Dermatological</td><td>{{ d.dermatological_level|default:"—" }}</td><td>{{ d.dermatological_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Hematologic</td><td>{{ d.hematologic_level|default:"—" }}</td><td>{{ d.hematologic_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Vascular</td><td>{{ d.vascular_level|default:"—" }}</td><td>{{ d.vascular_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Genito-urinary</td><td>{{ d.genitourinary_level|default:"—" }}</td><td>{{ d.genitourinary_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Frailty</td><td>{{ d.frailty_level|default:"—" }}</td><td>{{ d.frailty_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Other</td><td>{{ d.other_clinical_level|default:"—" }}</td><td>{{ d.other_clinical_findings|default:"—" }}</td></tr>
+  </table>
+
+  <div class="sec-head">6. Functional/Participation Restrictions</div>
+  <table class="ft">
+    <tr><th style="width:28%;">Area</th><th style="width:20%;">Level</th><th>Findings</th></tr>
+    <tr><td class="lbl">Mobility</td><td>{{ d.mobility_level|default:"—" }}</td><td>{{ d.mobility_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Self-care</td><td>{{ d.selfcare_level|default:"—" }}</td><td>{{ d.selfcare_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Domestic Life</td><td>{{ d.domestic_life_level|default:"—" }}</td><td>{{ d.domestic_life_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Major Life Areas</td><td>{{ d.major_life_level|default:"—" }}</td><td>{{ d.major_life_findings|default:"—" }}</td></tr>
+    <tr><td class="lbl">Community/Civic Life</td><td>{{ d.community_level|default:"—" }}</td><td>{{ d.community_findings|default:"—" }}</td></tr>
+  </table>
+
+  <div class="sec-head">7. Disability Rating &amp; Conclusion</div>
+  <table class="ft">
+    <tr>
+      <td class="lbl">Total Disability Rating</td><td>{{ d.get_disability_rating_display|default:"—" }}</td>
+      <td class="lbl2">Conclusion</td><td>{{ d.get_conclusion_display|default:"—" }}</td>
+    </tr>
+  </table>
+
+  <div class="sec-head">8. Recommendations</div>
+  <table class="ft">
+    <tr><td class="lbl">Assistive Products</td><td style="height:36px;">{{ d.recommended_assistive_products|default:"" }}</td></tr>
+    <tr><td class="lbl">Required Services</td><td style="height:36px;">{{ d.other_services_required|default:"" }}</td></tr>
+    <tr><td class="lbl">Clinical Recommendations</td><td style="height:36px;">{{ d.recommendations|default:"" }}</td></tr>
+  </table>
+
+  {% endwith %}{% endif %}
+
+  <!-- ── SECTION 9: Approval ── -->
+  <div class="sec-head">9. Approval</div>
+
+  <div style="font-size:9.5pt;font-weight:bold;margin-bottom:4px;">Review By the Medical Assessment Team</div>
+  <table class="ft">
+    <tr>
+      <th style="width:45%;">Name</th>
+      <th style="width:25%;">Reg. No.</th>
+      <th>Assessment Date</th>
+    </tr>
+    {% if assessment.medical_officer %}
+    <tr>
+      <td>{{ assessment.medical_officer.get_full_name }} (Medical Officer)</td>
+      <td>{{ assessment.medical_officer.license_id|default:"—" }}</td>
+      <td>{{ assessment.assessment_date|date:"Y-m-d" }}</td>
+    </tr>
+    {% endif %}
+    {% if assessment.health_officer %}
+    <tr>
+      <td>{{ assessment.health_officer.get_full_name }} (Health Officer)</td>
+      <td>{{ assessment.health_officer.license_id|default:"—" }}</td>
+      <td>{{ assessment.updated_at|date:"Y-m-d" }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <div style="font-size:9.5pt;font-weight:bold;margin:8px 0 4px;">Approval by the County Health Director</div>
+  <table class="ft">
+    <tr>
+      <th style="width:40%;">Name</th>
+      <th style="width:20%;">County</th>
+      <th style="width:20%;">Medical Registration</th>
+      <th>Approval Date</th>
+    </tr>
+    {% if assessment.county_officer %}
+    <tr>
+      <td>{{ assessment.county_officer.get_full_name }} (County Officer)</td>
+      <td>{{ assessment.hospital.county.name }}</td>
+      <td>{{ assessment.county_officer.license_id|default:"—" }}</td>
+      <td>{{ assessment.updated_at|date:"Y-m-d" }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <!-- Signature boxes -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px;">
+    <div>
+      <div class="sig-line"></div>
+      <div style="font-size:9.5pt;font-weight:bold;">{{ assessment.medical_officer.get_full_name|default:"Medical Officer" }}</div>
+      <div style="font-size:9pt;color:#555;">Medical Officer &mdash; {{ assessment.hospital.name }}</div>
+    </div>
+    <div>
+      <div class="sig-line"></div>
+      <div style="font-size:9.5pt;font-weight:bold;">{{ assessment.county_officer.get_full_name|default:"County Health Director" }}</div>
+      <div style="font-size:9pt;color:#555;">County Health Director &mdash; {{ assessment.hospital.county.name }} County</div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="cert-footer">
+    Copyright &copy; {{ assessment.updated_at|date:"Y" }} &nbsp;&bull;&nbsp; <i class="fas fa-wheelchair" style="font-family:'Font Awesome 6 Free';font-weight:900;"></i> Pwd Access
+  </div>
+
+</div><!-- cert-page -->
+</div><!-- bg wrapper -->
 {% endblock %}

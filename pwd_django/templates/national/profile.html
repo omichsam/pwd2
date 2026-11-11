@@ -1,0 +1,50 @@
+{% extends "base/dashboard_layout.html" %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block page_subtitle %}National Admin account details{% endblock %}
+
+{% block sidebar_nav %}
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-2">Analytics</p>
+<a href="{% url 'national_admin:dashboard' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-globe w-5 text-center text-sm"></i><span>National Overview</span></a>
+<a href="{% url 'national_admin:county_breakdown' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-map w-5 text-center text-sm"></i><span>Counties</span></a>
+<a href="{% url 'national_admin:hospital_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span></a>
+<a href="{% url 'national_admin:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-users w-5 text-center text-sm"></i><span>Officials</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
+<a href="{% url 'national_admin:county_officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-user-shield w-5 text-center text-sm"></i><span>County Officers</span></a>
+<a href="{% url 'national_admin:add_county' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-plus-circle w-5 text-center text-sm"></i><span>Add County</span></a>
+<a href="{% url 'national_admin:chatbot_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-robot w-5 text-center text-sm"></i><span>Chatbot Settings</span></a>
+<a href="{% url 'national_admin:doc_checker_settings' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-file-shield w-5 text-center text-sm"></i><span>Document Checker</span></a>
+<p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Account</p>
+<a href="{% url 'national_admin:profile' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1"><i class="fas fa-user w-5 text-center text-sm"></i><span>My Profile</span></a>
+{% endblock %}
+{% block dropdown_links %}<a href="{% url 'national_admin:profile' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fas fa-user w-4 text-gray-400"></i> My Profile</a>{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-gradient-to-r from-teal-900 to-teal-600 px-6 py-8 text-center">
+      <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+      </div>
+      <h2 class="text-xl font-bold text-white">{{ user.get_full_name }}</h2>
+      <p class="text-teal-200 text-sm mt-1">National Admin &mdash; Ministry of Health</p>
+    </div>
+    <div class="p-6 space-y-4 text-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><p class="text-xs text-gray-400 mb-0.5">License ID</p><p class="font-medium text-gray-800">{{ user.license_id|default:"—" }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Mobile</p><p class="font-medium text-gray-800">{{ user.mobile_number|default:"—" }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Email</p><p class="font-medium text-gray-800">{{ user.email|default:"—" }}</p></div>
+        <div><p class="text-xs text-gray-400 mb-0.5">Access Level</p>
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+            <i class="fas fa-globe text-xs"></i> Nationwide
+          </span>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+        <p class="font-semibold mb-0.5"><i class="fas fa-info-circle mr-1"></i> Read-only supervisory account</p>
+        <p class="text-xs">This account has nationwide visibility but cannot approve or reject individual assessments.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

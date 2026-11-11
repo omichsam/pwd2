@@ -1,5 +1,8 @@
 {% extends "base/base.html" %}
 
+{# Dashboards use a distinct launcher icon for the PWD Assistant. #}
+{% block chatbot_icon %}fa-robot{% endblock %}
+
 {% block extra_head %}
 <style>
   /* ── Desktop collapsed sidebar: icon-only mode ── */
@@ -136,7 +139,9 @@
   </aside>
 
   <!-- ── Main area ── -->
-  <div class="flex-1 flex flex-col min-h-screen transition-all duration-300 ml-0 lg:ml-64"
+  <!-- min-w-0 lets this flex child shrink to the viewport so wide tables scroll
+       inside their own wrapper instead of stretching the whole page. -->
+  <div class="flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ml-0 lg:ml-64"
        :style="isDesktop ? (sidebarOpen ? 'margin-left:16rem' : 'margin-left:4rem') : 'margin-left:0'">
 
     <!-- Top Navbar -->
@@ -147,6 +152,7 @@
       <div class="flex items-center gap-3 min-w-0">
         <!-- Mobile: toggle overlay | Desktop: collapse sidebar -->
         <button @click="isDesktop ? sidebarOpen = !sidebarOpen : mobileOpen = !mobileOpen"
+                aria-label="Toggle navigation menu" :aria-expanded="isDesktop ? sidebarOpen : mobileOpen"
                 class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors">
           <i class="fas fa-bars text-base"></i>
         </button>
@@ -159,10 +165,66 @@
       <!-- Right side -->
       <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0" x-data="{ dropOpen: false }">
 
-        <!-- Bell -->
-        <button class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors">
-          <i class="fas fa-bell text-base"></i>
-        </button>
+        <!-- Notification Bell -->
+        <div class="relative" x-data="{ bellOpen: false }">
+          <button @click="bellOpen = !bellOpen" @click.outside="bellOpen = false"
+                  aria-label="Notifications" :aria-expanded="bellOpen"
+                  class="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors">
+            <i class="fas fa-bell text-base"></i>
+            {% if unread_count %}
+            <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">
+              {{ unread_count|default:"" }}
+            </span>
+            {% endif %}
+          </button>
+
+          <!-- Bell dropdown -->
+          <div x-show="bellOpen" x-transition
+               class="absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden"
+               style="display:none">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <h4 class="font-semibold text-gray-800 text-sm">Notifications</h4>
+              {% if unread_count %}
+              <form method="post" action="{% url 'notification_read_all' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-xs text-teal-600 hover:text-teal-700 font-medium">Mark all read</button>
+              </form>
+              {% endif %}
+            </div>
+            <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+              {% for n in recent_notifications %}
+              <form method="post" action="{% url 'notification_read' n.pk %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors {% if not n.is_read %}bg-teal-50/50{% endif %}">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5
+                  {% if n.notification_type == 'success' %}bg-emerald-100 text-emerald-600
+                  {% elif n.notification_type == 'error' %}bg-red-100 text-red-500
+                  {% elif n.notification_type == 'warning' %}bg-amber-100 text-amber-600
+                  {% else %}bg-teal-100 text-teal-600{% endif %}">
+                  <i class="fas
+                    {% if n.notification_type == 'success' %}fa-check-circle
+                    {% elif n.notification_type == 'error' %}fa-times-circle
+                    {% elif n.notification_type == 'warning' %}fa-exclamation-circle
+                    {% else %}fa-info-circle{% endif %} text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">{{ n.title }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ n.message }}</p>
+                  <p class="text-xs text-gray-400 mt-1">{{ n.created_at|timesince }} ago</p>
+                </div>
+                {% if not n.is_read %}<span class="w-2 h-2 bg-teal-500 rounded-full flex-shrink-0 mt-2"></span>{% endif %}
+                </button>
+              </form>
+              {% empty %}
+              <div class="px-4 py-8 text-center text-gray-400">
+                <i class="fas fa-bell-slash text-2xl mb-2 block"></i>
+                <p class="text-sm">No notifications yet</p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
 
         <!-- Avatar + dropdown trigger -->
         <button @click="dropOpen = !dropOpen" @click.outside="dropOpen = false"
@@ -199,7 +261,7 @@
     </header>
 
     <!-- Page content -->
-    <main class="flex-1 pt-16 overflow-y-auto">
+    <main id="main-content" tabindex="-1" class="flex-1 min-w-0 pt-16 overflow-y-auto">
       <div class="p-4 sm:p-6">
         {% block content %}{% endblock %}
       </div>

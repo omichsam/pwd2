@@ -11,12 +11,19 @@
 <a href="{% url 'supervisor:assessment_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-clipboard-check w-5 text-center text-sm"></i><span>Pending Approval</span>
 </a>
+<a href="{% url 'supervisor:certified_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1"><i class="fas fa-history w-5 text-center text-sm"></i><span>Approval Trail</span></a>
 <p class="text-teal-400 text-xs font-semibold uppercase tracking-wider px-3 mb-2 mt-5">Management</p>
 <a href="{% url 'supervisor:hospital_list' %}" class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-white text-sm font-medium mb-1">
   <i class="fas fa-hospital w-5 text-center text-sm"></i><span>Hospitals</span>
 </a>
 <a href="{% url 'supervisor:officer_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-user-md w-5 text-center text-sm"></i><span>Officers</span>
+</a>
+<a href="{% url 'supervisor:hospital_admin_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-user-cog w-5 text-center text-sm"></i><span>Hospital Admins</span>
+</a>
+<a href="{% url 'supervisor:designation_list' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
+  <i class="fas fa-id-badge w-5 text-center text-sm"></i><span>Designations</span>
 </a>
 <a href="{% url 'supervisor:geography' %}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl mx-1 text-teal-100 hover:text-white text-sm mb-1">
   <i class="fas fa-map w-5 text-center text-sm"></i><span>Geography</span>

@@ -9,7 +9,7 @@ class PWDAuthBackend(ModelBackend):
                 user = CustomUser.objects.get(id_number=username, role='pwd')
             else:
                 user = CustomUser.objects.get(license_id=username, is_approved=True)
-                if user.role not in ('medical_officer', 'health_officer', 'county_officer'):
+                if user.role not in ('medical_officer', 'health_officer', 'county_officer', 'hospital_admin', 'national_admin'):
                     return None
         except CustomUser.DoesNotExist:
             CustomUser().set_password(password)

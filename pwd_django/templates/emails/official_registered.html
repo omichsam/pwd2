@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block body %}
+<p class="greeting">Hello, {{ user.first_name }}!</p>
+<p>Your official registration on PWD Access Kenya has been received and is currently <strong>pending activation</strong> by your county officer.</p>
+<div class="info-box">
+  <p><strong>Registration Details</strong><br>
+  Name: <strong>{{ user.get_full_name }}</strong><br>
+  Role: <strong>{{ user.get_role_display }}</strong><br>
+  License ID: <strong>{{ user.license_id }}</strong></p>
+</div>
+<p>You will receive another email once your account has been activated. You will then be able to log in using your License ID and password.</p>
+<div class="divider"></div>
+<p style="font-size:13px;color:#9ca3af;">If you did not register on this platform, please ignore this email.</p>
+{% endblock %}

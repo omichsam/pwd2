@@ -1,0 +1,22 @@
+{# Shows the Document Checker result for `doc`, if one was recorded. #}
+{% with chk=doc.quality_check %}
+{% if chk %}
+  {% if chk.status == 'error' %}
+  <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500" title="{{ chk.error }}">
+    <i class="fas fa-circle-question"></i> Check unavailable
+  </span>
+  {% elif chk.action == 'continue' %}
+  <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700" title="{{ chk.message }}">
+    <i class="fas fa-circle-check"></i> Looks fine
+  </span>
+  {% elif chk.action == 'request_rescan' %}
+  <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700" title="{{ chk.quality_advice|default:chk.message }}">
+    <i class="fas fa-triangle-exclamation"></i> Rescan needed
+  </span>
+  {% elif chk.action == 'manual_review' %}
+  <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700" title="{{ chk.message }}">
+    <i class="fas fa-magnifying-glass"></i> Manual review
+  </span>
+  {% endif %}
+{% endif %}
+{% endwith %}
